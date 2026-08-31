@@ -1,10 +1,17 @@
 // Viewer：未填表跳回 index；填了表展示简报 + 日期/班次切换
 (function () {
+  // 路径迁移或旧缓存若误把 viewer 塞进 iframe，直接回到规范顶层页面，
+  // 避免 viewer → viewer → viewer 的递归套娃。
+  if (window.self !== window.top) {
+    window.top.location.replace('/briefs/viewer.html');
+    return;
+  }
+
   const TOKEN = localStorage.getItem('barry_token');
   const NAME  = localStorage.getItem('barry_name');
 
   if (!TOKEN) {
-    location.href = './';
+    location.href = '/briefs/';
     return;
   }
 
@@ -113,7 +120,7 @@
 
   async function init() {
     try {
-      const resp = await fetch('./briefs/index.json?_=' + Date.now(), { cache: 'no-store' });
+      const resp = await fetch('/briefs/briefs/index.json?_=' + Date.now(), { cache: 'no-store' });
       if (!resp.ok) throw new Error('index.json 缺失');
       briefIndex = await resp.json();
     } catch (e) {
@@ -169,7 +176,7 @@
       return;
     }
     hideEmpty();
-    const path = `./briefs/${date}-${currentPeriod}.html`;
+    const path = `/briefs/briefs/${date}-${currentPeriod}.html`;
     document.getElementById('brief-frame').src = path;
     const label = PERIOD_LABELS[currentPeriod] || currentPeriod;
     document.getElementById('title-date').textContent =

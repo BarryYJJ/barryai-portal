@@ -2,7 +2,7 @@
 (function () {
   // 已填过？直接跳 viewer
   if (localStorage.getItem('barry_token')) {
-    location.href = './viewer.html';
+    location.href = '/briefs/viewer.html';
     return;
   }
 
@@ -56,7 +56,7 @@
       localStorage.setItem('barry_name',  data.name);
 
       // 跳到 viewer
-      location.href = './viewer.html';
+      location.href = '/briefs/viewer.html';
     } catch (err) {
       showErr('提交失败：' + (err.message || err));
       btn.disabled = false;
