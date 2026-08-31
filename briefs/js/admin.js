@@ -42,9 +42,9 @@
     // 统计
     document.getElementById('stat-total').textContent = items.length;
     const now = new Date();
-    const todayStr = now.toISOString().slice(0, 10);
+    const todayStr = localDateKey(now);
     const weekAgo = new Date(now.getTime() - 7 * 24 * 3600 * 1000);
-    const today = items.filter(x => new Date(x.ts).toISOString().slice(0, 10) === todayStr).length;
+    const today = items.filter(x => localDateKey(new Date(x.ts)) === todayStr).length;
     const week  = items.filter(x => new Date(x.ts) > weekAgo).length;
     document.getElementById('stat-today').textContent = today;
     document.getElementById('stat-week').textContent  = week;
@@ -104,11 +104,18 @@
 
   function renderVisits(visits) {
     if (!visits || !visits.length) return '<span class="muted">无</span>';
-    return '<ul class="visit-list">' + visits.map(v => {
+    return '<div class="visit-detail-head">近 7 天访问明细</div><ul class="visit-list">' + visits.map(v => {
       const t = fmtTs(v.ts);
       const ipStr = v.ip ? ` <span class="muted">· ${esc(v.ip)}</span>` : '';
       return `<li><span class="visit-ts">${esc(t)}</span>${ipStr}</li>`;
     }).join('') + '</ul>';
+  }
+
+  function localDateKey(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
   }
 
   function fmtTs(ts) {
