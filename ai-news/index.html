@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI 信号台 · Barry AI 新闻</title>
+<meta name="description" content="每天四档 AI 新闻简报：大佬观点、榜单评测、已验证科技网站新闻。内容与飞书推送完全一致，只做结构化与检索。">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#101A73">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<a class="skip-link" href="#feed">跳到简报内容</a>
+
+<header class="masthead">
+  <div class="shell masthead__inner">
+    <a class="brand" href="./" aria-label="AI 信号台首页">
+      <span class="brand__mark" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </span>
+      <span class="brand__text">
+        <b>AI 信号台</b>
+        <em>AI&nbsp;NEWSROOM&nbsp;/&nbsp;SIGNAL&nbsp;DESK</em>
+      </span>
+    </a>
+
+    <nav class="masthead__nav" aria-label="主导航">
+      <button type="button" class="key-link" data-nav="latest"><kbd>L</kbd> 最新</button>
+      <button type="button" class="key-link" data-nav="voices"><kbd>X</kbd> 大佬观点</button>
+      <button type="button" class="key-link" data-nav="tech-news"><kbd>N</kbd> 科技新闻</button>
+      <button type="button" class="key-link" data-nav="archive"><kbd>H</kbd> 历史</button>
+      <button type="button" class="key-link key-link--ghost" data-nav="shortcuts" aria-haspopup="dialog"><kbd>?</kbd> 快捷键</button>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ── 指挥台 hero ────────────────────────────────────────── -->
+  <section class="deck" aria-labelledby="deck-title">
+    <div class="deck__grid" aria-hidden="true"></div>
+    <div class="shell deck__inner">
+      <p class="deck__eyebrow"><span class="tick" aria-hidden="true"></span>每日四档 · 早间 / 午间 / 收盘 / 晚间</p>
+      <h1 id="deck-title" class="deck__title">
+        AI 新闻的<span class="deck__title-hl">信号台</span><br>
+        不是资讯流，<span class="deck__keep">是当班简报。</span>
+      </h1>
+      <p class="deck__lede">
+        这里的每一条都来自当天真实推送过的简报正文：X 上的大佬与研究员观点、榜单与价格变动、
+        已验证科技网站新闻。原文照录，只做结构化、筛选与检索，不做二次编辑。
+      </p>
+
+      <!-- 终端式状态盘 -->
+      <div class="console" role="region" aria-label="当前简报状态">
+        <div class="console__bar">
+          <span class="console__dot" aria-hidden="true"></span>
+          <span class="console__path">signal-desk // status</span>
+          <span class="console__stamp" id="console-stamp">—</span>
+        </div>
+        <dl class="console__grid" id="console-grid">
+          <div class="console__cell"><dt>当班</dt><dd id="stat-session">—</dd></div>
+          <div class="console__cell"><dt>发布于</dt><dd id="stat-published">—</dd></div>
+          <div class="console__cell"><dt>新鲜度</dt><dd id="stat-fresh">—</dd></div>
+          <div class="console__cell"><dt>本期条目</dt><dd id="stat-items">—</dd></div>
+          <div class="console__cell"><dt>归档</dt><dd id="stat-archive">—</dd></div>
+          <div class="console__cell"><dt>链路</dt><dd id="stat-link">—</dd></div>
+        </dl>
+        <p class="console__warn" id="console-warn" hidden></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 控制条 ─────────────────────────────────────────────── -->
+  <section class="controls" aria-label="筛选与检索">
+    <div class="shell controls__inner">
+
+      <div class="controls__row">
+        <div class="filters" role="group" aria-label="按类型筛选" id="filters"></div>
+
+        <div class="search">
+          <label class="search__label" for="search-input">
+            <span class="visually-hidden">全文检索</span>
+            <kbd aria-hidden="true">/</kbd>
+          </label>
+          <input id="search-input" class="search__input" type="search" autocomplete="off"
+                 spellcheck="false" placeholder="全文检索标题、摘要、来源、@ 账号…"
+                 aria-describedby="search-hint">
+          <button type="button" class="search__clear" id="search-clear" hidden aria-label="清除检索">✕</button>
+        </div>
+      </div>
+
+      <div class="controls__row controls__row--sub">
+        <div class="picker">
+          <label class="picker__label" for="brief-select">历史简报</label>
+          <select id="brief-select" class="picker__select" aria-describedby="search-hint"></select>
+        </div>
+        <p class="hint" id="search-hint">
+          <span id="result-note" role="status" aria-live="polite">—</span>
+        </p>
+        <button type="button" class="copy-btn" id="copy-link">
+          <kbd aria-hidden="true">S</kbd> 复制当前视图链接
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 信号流 ─────────────────────────────────────────────── -->
+  <section class="feed" id="feed" aria-labelledby="feed-title" tabindex="-1">
+    <div class="shell">
+      <div class="feed__head">
+        <h2 id="feed-title" class="feed__title">—</h2>
+        <p class="feed__sub" id="feed-sub"></p>
+      </div>
+
+      <div id="feed-body" class="feed__body">
+        <div class="state state--loading" id="state-loading">
+          <p class="state__mono">LOADING // news.json</p>
+          <p>正在载入简报归档…</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 说明 ───────────────────────────────────────────────── -->
+  <section class="colophon" aria-labelledby="colophon-title">
+    <div class="shell colophon__inner">
+      <h2 id="colophon-title" class="colophon__title">这个站点怎么来的</h2>
+      <ol class="steps">
+        <li class="step">
+          <span class="step__num">01</span>
+          <h3>定时抓取</h3>
+          <p>每天四档定时任务分别跑 X 账号清单与已验证科技站点 RSS，产出一份组合简报。</p>
+        </li>
+        <li class="step">
+          <span class="step__num">02</span>
+          <h3>推送飞书</h3>
+          <p>简报正文原样发到飞书。站点发布失败不会影响推送，推送内容也不会被站点改写。</p>
+        </li>
+        <li class="step">
+          <span class="step__num">03</span>
+          <h3>结构化归档</h3>
+          <p>同一份正文被解析成条目：类型、标题、摘要、来源、原文链接、来源时间，然后静态发布。</p>
+        </li>
+      </ol>
+      <p class="colophon__note">
+        摘要与「为什么值得看」全部取自简报原文，站点不生成新的判断或评分。抓取失败的批次直接跳过，不补写。
+      </p>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="shell foot__inner">
+    <p class="foot__mono">BARRYAI.CN // AI-NEWS</p>
+    <p class="foot__meta" id="foot-meta">—</p>
+  </div>
+</footer>
+
+<!-- 快捷键面板 -->
+<div class="sheet" id="shortcuts" role="dialog" aria-modal="true" aria-labelledby="shortcuts-title" hidden>
+  <div class="sheet__panel">
+    <h2 id="shortcuts-title" class="sheet__title">键盘快捷键</h2>
+    <dl class="sheet__list">
+      <div><dt><kbd>/</kbd></dt><dd>聚焦检索框</dd></div>
+      <div><dt><kbd>A</kbd></dt><dd>全部类型</dd></div>
+      <div><dt><kbd>X</kbd></dt><dd>大佬观点</dd></div>
+      <div><dt><kbd>B</kbd></dt><dd>榜单评测</dd></div>
+      <div><dt><kbd>N</kbd></dt><dd>科技新闻</dd></div>
+      <div><dt><kbd>L</kbd></dt><dd>回到最新一期</dd></div>
+      <div><dt><kbd>H</kbd></dt><dd>历史简报选择器</dd></div>
+      <div><dt><kbd>S</kbd></dt><dd>复制当前视图链接</dd></div>
+      <div><dt><kbd>Esc</kbd></dt><dd>清除检索 / 关闭面板</dd></div>
+    </dl>
+    <button type="button" class="sheet__close" id="shortcuts-close">关闭</button>
+  </div>
+</div>
+
+<script src="assets/app.js" defer></script>
+</body>
+</html>
