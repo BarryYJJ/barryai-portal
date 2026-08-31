@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # scripts/test-portal-links.sh
 #
-# 校验 barryai.cn 门户首页的入口链接：两个产品都要有入口，
+# 校验 barryai.cn 门户首页的入口链接：三个产品都要有入口，
 # 且都指向主站子路径，而不是旧的 briefs 子域。
 #
 # 用法：bash scripts/test-portal-links.sh [portal-index.html]
@@ -28,11 +28,20 @@ check $? "首页 CTA 指向 /briefs/"
 grep -q 'href="/openrouter/"' "$PAGE"
 check $? "项目区有 /openrouter/ 入口"
 
+grep -q 'href="/ai-news/"' "$PAGE"
+check $? "项目区有 /ai-news/ 入口"
+
 grep -q 'href="#openrouter"' "$PAGE"
 check $? "导航有 OpenRouter 锚点"
 
+grep -q 'href="#ai-news"' "$PAGE"
+check $? "导航有 AI 新闻锚点"
+
 grep -q 'id="openrouter"' "$PAGE"
 check $? "存在 id=\"openrouter\" 的项目块"
+
+grep -q 'id="ai-news"' "$PAGE"
+check $? "存在 id=\"ai-news\" 的项目块"
 
 grep -q 'href="#brief"' "$PAGE" && grep -q 'id="brief"' "$PAGE"
 check $? "导航「今天在涨啥」锚点仍然有效"

@@ -7,8 +7,8 @@
 # 用法：
 #   scripts/publish-subsite.sh <site-name> <source-dir>
 #
-#   site-name   只允许 briefs | openrouter
-#   source-dir  源静态目录（例如 today-briefs/website/public）
+#   site-name   只允许 briefs | openrouter | ai-news
+#   source-dir  源静态目录（例如 today-briefs/website/public、AI新闻网站/public）
 #
 # 环境变量：
 #   PORTAL_REPO_DIR         覆盖 portal 仓库路径（默认取脚本自身所在仓库），便于测试
@@ -53,8 +53,8 @@ SITE="$1"
 SOURCE_DIR="$2"
 
 case "$SITE" in
-  briefs|openrouter) ;;
-  *) die "不支持的 site-name: '$SITE'（只允许 briefs | openrouter）" ;;
+  briefs|openrouter|ai-news) ;;
+  *) die "不支持的 site-name: '$SITE'（只允许 briefs | openrouter | ai-news）" ;;
 esac
 
 [ -d "$SOURCE_DIR" ] || die "source-dir 不存在或不是目录: $SOURCE_DIR"

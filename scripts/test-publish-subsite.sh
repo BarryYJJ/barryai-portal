@@ -25,6 +25,7 @@ trap cleanup EXIT
 REMOTE="$TMP/remote.git"
 PORTAL="$TMP/portal"
 SRC="$TMP/src"
+AINEWS_SRC="$TMP/src-ai-news"
 
 setup_repo() {
   rm -rf "$REMOTE" "$PORTAL"
@@ -41,6 +42,14 @@ setup_repo() {
   git -C "$PORTAL" branch -M main
   git -C "$PORTAL" remote add origin "$REMOTE"
   git -C "$PORTAL" push -q -u origin main
+}
+
+setup_ainews_src() {
+  rm -rf "$AINEWS_SRC"
+  mkdir -p "$AINEWS_SRC/assets" "$AINEWS_SRC/data"
+  echo "<html>ai-news</html>"                > "$AINEWS_SRC/index.html"
+  echo "body{}"                              > "$AINEWS_SRC/assets/app.css"
+  echo '{"schema_version":1,"briefs":[]}'    > "$AINEWS_SRC/data/news.json"
 }
 
 setup_src() {
@@ -70,6 +79,17 @@ case "$out" in *"不支持的 site-name"*) ok "非法 site 的报错信息可读
 for bad_site in ".." "../../etc" "briefs/../.." "" "BRIEFS"; do
   PORTAL_REPO_DIR="$PORTAL" bash "$HELPER" "$bad_site" "$SRC" >/dev/null 2>&1
   [ $? -ne 0 ]; check $? "拒绝 site-name '$bad_site'"
+done
+
+for good_site in briefs openrouter ai-news; do
+  PORTAL_REPO_DIR="$PORTAL" PUBLISH_DRY_RUN=1 bash "$HELPER" "$good_site" "$SRC" >/dev/null 2>&1
+  check $? "接受白名单 site-name '$good_site'"
+  git -C "$PORTAL" checkout -- . 2>/dev/null; git -C "$PORTAL" clean -qfd
+done
+
+for near_miss in "ai_news" "ainews" "AI-NEWS" "ai-news/"; do
+  PORTAL_REPO_DIR="$PORTAL" bash "$HELPER" "$near_miss" "$SRC" >/dev/null 2>&1
+  [ $? -ne 0 ]; check $? "拒绝形近 site-name '$near_miss'"
 done
 
 PORTAL_REPO_DIR="$PORTAL" bash "$HELPER" briefs >/dev/null 2>&1
@@ -251,6 +271,44 @@ setup_repo; setup_src
 git -C "$PORTAL" remote remove origin
 PORTAL_REPO_DIR="$PORTAL" bash "$HELPER" briefs "$SRC" >/dev/null 2>&1
 check $? "没有 origin 时仍能本地提交成功"
+
+# ── 12. ai-news 子站 ─────────────────────────────────────────────
+echo ""
+echo "[12] ai-news 子站"
+setup_repo; setup_src; setup_ainews_src
+
+before="$(remote_head)"
+out="$(PORTAL_REPO_DIR="$PORTAL" bash "$HELPER" ai-news "$AINEWS_SRC" 2>/dev/null)"
+check $? "发布 ai-news 成功"
+[ -f "$PORTAL/ai-news/index.html" ]; check $? "内容落到 \$PORTAL/ai-news/"
+[ -f "$PORTAL/ai-news/data/news.json" ]; check $? "生成的 data/news.json 一并镜像"
+[ "$(git -C "$PORTAL" log -1 --pretty=%s)" = "content(ai-news): publish static site" ]
+check $? "commit message 为 content(ai-news): publish static site"
+[ "$(remote_head)" != "$before" ]; check $? "ai-news 已 push 到 remote"
+[ -n "$out" ]; check $? "有变更时 stdout 输出一行提交信息"
+[ -f "$PORTAL/index.html" ] && [ "$(cat "$PORTAL/index.html")" = "<html>portal</html>" ]
+check $? "portal 根 index.html 未被 ai-news 覆盖"
+
+# 与其他子站互不干扰
+PORTAL_REPO_DIR="$PORTAL" bash "$HELPER" briefs "$SRC" >/dev/null 2>&1
+check $? "ai-news 之后再发布 briefs 成功"
+files="$(git -C "$PORTAL" show --name-only --pretty=format: HEAD | grep -v '^$' | grep -c '^ai-news/' || true)"
+[ "$files" = "0" ]; check $? "briefs 的提交里不含 ai-news/ 文件"
+[ -f "$PORTAL/ai-news/index.html" ]; check $? "ai-news 未被 briefs 发布删除"
+
+# 幂等
+head_before="$(local_head)"
+stdout="$(PORTAL_REPO_DIR="$PORTAL" bash "$HELPER" ai-news "$AINEWS_SRC" 2>/dev/null)"
+check $? "重复发布 ai-news 退出码 0"
+[ "$(local_head)" = "$head_before" ]; check $? "ai-news 无变化时不产生新提交"
+[ -z "$stdout" ]; check $? "ai-news 无变化时 stdout 为空"
+
+# 内容更新后能同步（模拟 cron 并入一期新简报）
+echo '{"schema_version":1,"briefs":[{"id":"morning-20260831-deadbeef"}]}' > "$AINEWS_SRC/data/news.json"
+PORTAL_REPO_DIR="$PORTAL" bash "$HELPER" ai-news "$AINEWS_SRC" >/dev/null 2>&1
+check $? "news.json 变更后发布成功"
+grep -q "morning-20260831-deadbeef" "$PORTAL/ai-news/data/news.json"
+check $? "portal 里的 news.json 已更新为新内容"
 
 echo ""
 echo "───────────────────────────────"
