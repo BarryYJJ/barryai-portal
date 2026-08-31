@@ -22,29 +22,21 @@ echo ""
 [ -f "$PAGE" ]; check $? "首页文件存在"
 [ -f "$PAGE" ] || { echo "通过 $PASS，失败 $FAIL"; exit 1; }
 
-grep -q 'class="cta" href="/briefs/"' "$PAGE"
-check $? "首页 CTA 指向 /briefs/"
+grep -q 'class="card" href="/briefs/"' "$PAGE"
+check $? "项目区有 /briefs/ 入口"
 
-grep -q 'href="/openrouter/"' "$PAGE"
+grep -q 'class="card" href="/openrouter/"' "$PAGE"
 check $? "项目区有 /openrouter/ 入口"
 
-grep -q 'href="/ai-news/"' "$PAGE"
+grep -q 'class="card" href="/ai-news/"' "$PAGE"
 check $? "项目区有 /ai-news/ 入口"
 
-grep -q 'href="#openrouter"' "$PAGE"
-check $? "导航有 OpenRouter 锚点"
+grep -q 'href="#projects"' "$PAGE" && grep -q 'id="projects"' "$PAGE"
+check $? "导航「项目」锚点有效"
 
-grep -q 'href="#ai-news"' "$PAGE"
-check $? "导航有 AI 新闻锚点"
-
-grep -q 'id="openrouter"' "$PAGE"
-check $? "存在 id=\"openrouter\" 的项目块"
-
-grep -q 'id="ai-news"' "$PAGE"
-check $? "存在 id=\"ai-news\" 的项目块"
-
-grep -q 'href="#brief"' "$PAGE" && grep -q 'id="brief"' "$PAGE"
-check $? "导航「今天在涨啥」锚点仍然有效"
+card_count="$(grep -c 'class="card" href="/' "$PAGE")"
+[ "$card_count" -eq 3 ]
+check $? "首页恰好展示三个项目卡片"
 
 # CTA 与项目入口都不应再指向 briefs 子域（canonical / og:url 里的 barryai.cn 不算）
 ! grep -q 'href="https://briefs\.barryai\.cn' "$PAGE"
