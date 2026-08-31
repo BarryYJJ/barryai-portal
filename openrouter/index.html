@@ -15,7 +15,10 @@
       <span class="brand-mark">OpenRouter · 真实用量观察</span>
       <span class="brand-name">大模型用量看板</span>
     </div>
-    <div class="header-meta" id="header-meta">数据来源 OpenRouter 全球路由真实用量</div>
+    <div class="header-right">
+      <div class="page-signature">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+      <div class="header-meta" id="header-meta">数据来源 OpenRouter 全球路由真实用量</div>
+    </div>
   </div>
 </header>
 
@@ -121,7 +124,8 @@
       <div class="control-group">
         <span class="control-label" id="label-metric">指标</span>
         <div class="toggle-group" role="group" aria-labelledby="label-metric" id="ctrl-metric">
-          <button type="button" data-metric="p" aria-pressed="true">Prompt Token</button>
+          <button type="button" data-metric="t" aria-pressed="true">总 Token</button>
+          <button type="button" data-metric="p" aria-pressed="false">Prompt Token</button>
           <button type="button" data-metric="c" aria-pressed="false">Completion Token</button>
           <button type="button" data-metric="r" aria-pressed="false">请求数</button>
         </div>
@@ -246,6 +250,76 @@
       </div>
     </div>
 
+    <div class="panel vercel-panel" id="vercel-panel">
+      <div class="panel-head">
+        <h3>Vercel 开放权重渗透率</h3>
+        <p class="panel-sub" id="vercel-meta">
+          Vercel AI Gateway 日度份额（独立口径，与上方 OpenRouter 滚动窗口数据互不相通）
+          <span id="vercel-fresh"></span> ·
+          <a href="https://vercel.com/ai-gateway/leaderboards/models" target="_blank" rel="noopener">官方数据源</a>
+        </p>
+      </div>
+
+      <p class="empty-note" id="vercel-empty" hidden>Vercel 权重份额数据暂不可用（无有效快照），其余看板不受影响。</p>
+
+      <div id="vercel-body" hidden>
+        <div class="kpi-grid vercel-kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label" id="vercel-kpi-open-label">开放权重份额</div>
+            <div class="kpi-value" id="vercel-kpi-open">—</div>
+            <div class="kpi-sub" id="vercel-kpi-open-sub">—</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label" id="vercel-kpi-closed-label">闭源权重份额</div>
+            <div class="kpi-value" id="vercel-kpi-closed">—</div>
+            <div class="kpi-sub" id="vercel-kpi-closed-sub">—</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label" id="vercel-kpi-change-label">开放权重 7 日变化</div>
+            <div class="kpi-value" id="vercel-kpi-change">—</div>
+            <div class="kpi-sub" id="vercel-kpi-change-sub">—</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">量 vs 钱（最新一日）</div>
+            <div class="kpi-value vercel-insight-value" id="vercel-kpi-insight">—</div>
+            <div class="kpi-sub" id="vercel-kpi-insight-sub">—</div>
+          </div>
+        </div>
+
+        <div class="controls vercel-controls" role="group" aria-label="Vercel 份额图控制">
+          <div class="control-group">
+            <span class="control-label" id="vercel-label-metric">份额指标</span>
+            <div class="toggle-group" role="group" aria-labelledby="vercel-label-metric" id="vercel-ctrl-metric">
+              <button type="button" data-vmetric="tokens" aria-pressed="true">Token</button>
+              <button type="button" data-vmetric="requests" aria-pressed="false">请求</button>
+              <button type="button" data-vmetric="cost" aria-pressed="false">支出</button>
+            </div>
+          </div>
+          <div class="control-group">
+            <span class="control-label" id="vercel-label-window">历史窗口</span>
+            <div class="toggle-group" role="group" aria-labelledby="vercel-label-window" id="vercel-ctrl-window">
+              <button type="button" data-vwindow="30d" aria-pressed="false">30D</button>
+              <button type="button" data-vwindow="90d" aria-pressed="false">90D</button>
+              <button type="button" data-vwindow="all" aria-pressed="true">全部</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-wrap">
+          <div id="vercel-chart" class="trend-chart"></div>
+          <div id="vercel-tooltip" class="chart-tooltip" hidden role="status"></div>
+        </div>
+        <div class="legend" id="vercel-legend">
+          <span class="chip vercel-open">开放权重</span>
+          <span class="chip vercel-closed">闭源权重</span>
+        </div>
+        <p class="panel-sub vercel-footnote">
+          「开放权重」按 Vercel 官方定义：公开发布模型权重、可下载部署的模型（开放权重 ≠ 完全开源，许可证仍可能有限制）；
+          其余模型归入「闭源权重」。份额为 Vercel AI Gateway 自身流量的当日占比（%），不是绝对用量，也不是滚动窗口。
+        </p>
+      </div>
+    </div>
+
     <div class="panel">
       <div class="panel-head"><h3>历史周报归档</h3></div>
       <ul class="archive-list" id="report-archive-list"></ul>
@@ -255,6 +329,8 @@
       <summary><h3>口径与局限性说明</h3></summary>
       <ul>
         <li><b>滚动窗口快照</b>：OpenRouter 的 rankings/models 接口本身是滚动窗口统计，每条抓取记录已代表其自身的多日滚动口径；时间窗口切换（7D/30D/全部）只改变趋势图展示的历史点数，不做重复求和。</li>
+        <li><b>总 Token 口径</b>：总 Token = Prompt Token + Completion Token，在模型、厂商、地域与全平台各聚合层均严格等于两者之和，为看板默认指标。</li>
+        <li><b>Vercel 区块独立口径</b>：「Vercel 开放权重渗透率」来自 Vercel AI Gateway 官方公开接口，是其自身流量的<b>日度份额（%）</b>——非绝对量、非滚动窗口，分母与 OpenRouter 数据完全无关，两者不可相互换算或合并。</li>
         <li><b>Tokenizer 差异</b>：各厂商模型使用自家 tokenizer 计 Token，跨模型 Token 数为近似可比，非严格统一单位。</li>
         <li><b>仅 OpenRouter 路由范围</b>：数据只覆盖经 OpenRouter 路由的流量，不含厂商直连、私有部署与其他路由平台，份额反映的是 OpenRouter 客群结构而非全市场格局。</li>
         <li><b>稳定标识聚合</b>：所有数值按 model_permaslug 跨 free / standard / thinking 等 variant 聚合后计算，避免版本迁移被误判为用量暴涨或暴跌。</li>

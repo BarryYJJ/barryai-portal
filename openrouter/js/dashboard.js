@@ -1,11 +1,12 @@
 // 看板渲染逻辑：拉取 dashboard.json（仅在 gate.js 派发 barry:unlocked 之后）
 // 并根据 时间窗口/指标/地域/厂商/搜索 状态渲染 KPI、趋势图、份额图、异动、排行、归档。
 (function () {
-  const METRIC_LABEL = { p: 'Prompt Token', c: 'Completion Token', r: '请求数' };
+  const METRIC_LABEL = { t: '总 Token', p: 'Prompt Token', c: 'Completion Token', r: '请求数' };
   const REGION_LABEL = { all: '全部', cn: '中国', us: '美国', other: '其他' };
   const WINDOW_DAYS = { '7d': 7, '30d': 30, all: Infinity };
 
-  const state = { window: '30d', metric: 'p', region: 'all', provider: 'all', date: null, search: '' };
+  // 默认指标为 总 Token（= Prompt + Completion，制品各聚合层已预计算为 "t"）。
+  const state = { window: '30d', metric: 't', region: 'all', provider: 'all', date: null, search: '' };
   let DATA = null;
   let loaded = false;
 
@@ -27,6 +28,13 @@
   // ---------- 数据访问 ----------
   function dayOf(date) { return DATA.daily[date]; }
 
+  // 兼容尚无预计算 "t" 的旧制品：总 Token 一律等价于 p + c。
+  function bucketValue(bucket, metricKey) {
+    if (!bucket) return 0;
+    if (bucket[metricKey] != null) return bucket[metricKey];
+    return metricKey === 't' ? (bucket.p || 0) + (bucket.c || 0) : 0;
+  }
+
   function modelsFiltered(region, providerId, search) {
     const q = (search || '').trim().toLowerCase();
     return DATA.models.filter((m) => {
@@ -40,8 +48,7 @@
   function metricValue(date, modelId, metricKey) {
     const day = dayOf(date);
     if (!day) return 0;
-    const v = day.models[String(modelId)];
-    return v ? v[metricKey] : 0;
+    return bucketValue(day.models[String(modelId)], metricKey);
   }
 
   // region / provider / search 始终按交集生效，保证 KPI、趋势图与模型排行
@@ -52,13 +59,13 @@
     if (region === 'all' && providerId === 'all' && !q) {
       return dates.map((d) => {
         const day = dayOf(d);
-        return day ? day.totals[metricKey] : 0;
+        return day ? bucketValue(day.totals, metricKey) : 0;
       });
     }
     if (providerId === 'all' && !q) {
       return dates.map((d) => {
         const day = dayOf(d);
-        return day ? day.region_totals[region][metricKey] : 0;
+        return day ? bucketValue(day.region_totals[region], metricKey) : 0;
       });
     }
     const ids = modelsFiltered(region, providerId, search).map((m) => m.id);
@@ -110,9 +117,9 @@
       changeSubEl.textContent = '暂无满足"至少约7天前"的比较日';
     }
 
-    const cn = day.region_totals.cn[metricKey];
-    const usClosed = day.us_closed_totals[metricKey];
-    const grand = day.totals[metricKey];
+    const cn = bucketValue(day.region_totals.cn, metricKey);
+    const usClosed = bucketValue(day.us_closed_totals, metricKey);
+    const grand = bucketValue(day.totals, metricKey);
     $('kpi-cn-share').textContent = grand ? ((cn / grand) * 100).toFixed(1) + '%' : '—';
     $('kpi-usclosed-share').textContent = grand ? ((usClosed / grand) * 100).toFixed(1) + '%' : '—';
   }
@@ -281,14 +288,14 @@
   function renderShare() {
     const day = dayOf(state.date);
     const metricKey = state.metric;
-    const grand = day.totals[metricKey] || 1;
+    const grand = bucketValue(day.totals, metricKey) || 1;
 
     const barEl = $('region-share-bar');
     barEl.innerHTML = '';
     const legendEl = $('region-share-legend');
     legendEl.innerHTML = '';
     ['cn', 'us', 'other'].forEach((region) => {
-      const v = day.region_totals[region][metricKey];
+      const v = bucketValue(day.region_totals[region], metricKey);
       const pct = (v / grand) * 100;
       const seg = document.createElement('span');
       seg.className = 'seg ' + region;
@@ -305,7 +312,7 @@
     const listEl = $('provider-share-list');
     listEl.innerHTML = '';
     const rows = Object.entries(day.provider_totals)
-      .map(([id, v]) => ({ id, v: v[metricKey], name: providerName(id) }))
+      .map(([id, v]) => ({ id, v: bucketValue(v, metricKey), name: providerName(id) }))
       .sort((a, b) => b.v - a.v)
       .slice(0, 8);
     const maxV = rows.length ? rows[0].v : 1;
@@ -341,7 +348,7 @@
     const date = state.date;
     const metricKey = state.metric;
     const cmp = DATA.comparisons[date];
-    const grand = dayOf(date).totals[metricKey] || 1;
+    const grand = bucketValue(dayOf(date).totals, metricKey) || 1;
 
     return models
       .map((m) => {
@@ -395,7 +402,7 @@
   }
 
   function renderMovers(rows) {
-    const grand = dayOf(state.date).totals[state.metric] || 1;
+    const grand = bucketValue(dayOf(state.date).totals, state.metric) || 1;
     const threshold = grand * 0.0005; // 过滤掉噪声：至少占当日全平台约 0.05%
     const withChange = rows.filter((r) => r.change != null && r.current >= threshold);
 
@@ -432,6 +439,251 @@
       chg.textContent = fmtPct(row.change);
       card.append(left, chg);
       el.appendChild(card);
+    });
+  }
+
+  // ---------- Vercel 开放权重渗透率（独立数据源，日度份额口径） ----------
+  // 与 OpenRouter 的滚动窗口绝对量完全分离：这里的数值是 Vercel AI Gateway
+  // 自身流量的"当日占比（%）"，分母不同，绝不与上方任何指标混算。
+  const VERCEL_METRIC_LABEL = { tokens: 'Token', requests: '请求', cost: '支出' };
+  const VERCEL_WINDOW_DAYS = { '30d': 30, '90d': 90, all: Infinity };
+  const vercelState = { metric: 'tokens', window: 'all' };
+
+  function vercelData() {
+    const v = DATA && DATA.vercel_weight_class;
+    if (!v || !Array.isArray(v.dates) || !v.dates.length || !v.series) return null;
+    for (const key of ['tokens', 'requests', 'cost']) {
+      const s = v.series[key];
+      if (!s || !Array.isArray(s.open) || !Array.isArray(s.closed)) return null;
+      if (s.open.length !== v.dates.length || s.closed.length !== v.dates.length) return null;
+    }
+    return v;
+  }
+
+  function vercelShowUnavailable() {
+    const empty = $('vercel-empty');
+    const body = $('vercel-body');
+    if (empty) empty.hidden = false;
+    if (body) body.hidden = true;
+  }
+
+  // 找最新一日往前 ≥7 个自然日的最近数据点（数据连续时即 7 天前）。
+  function vercelCompareIndex(dates) {
+    const lastMs = Date.parse(dates[dates.length - 1] + 'T00:00:00Z');
+    for (let i = dates.length - 2; i >= 0; i--) {
+      if (lastMs - Date.parse(dates[i] + 'T00:00:00Z') >= 7 * 24 * 60 * 60 * 1000) return i;
+    }
+    return -1;
+  }
+
+  function renderVercelKpis(v) {
+    const last = v.dates.length - 1;
+    const metric = vercelState.metric;
+    const label = VERCEL_METRIC_LABEL[metric];
+    const open = v.series[metric].open[last];
+    const closed = v.series[metric].closed[last];
+
+    $('vercel-kpi-open-label').textContent = `开放权重份额 · ${label}`;
+    $('vercel-kpi-open').textContent = open.toFixed(1) + '%';
+    $('vercel-kpi-open-sub').textContent = `${v.latest_date} 单日 · Vercel 网关流量占比`;
+
+    $('vercel-kpi-closed-label').textContent = `闭源权重份额 · ${label}`;
+    $('vercel-kpi-closed').textContent = closed.toFixed(1) + '%';
+    $('vercel-kpi-closed-sub').textContent = `${v.latest_date} 单日 · Vercel 网关流量占比`;
+
+    const changeEl = $('vercel-kpi-change');
+    const changeSubEl = $('vercel-kpi-change-sub');
+    $('vercel-kpi-change-label').textContent = `开放权重 7 日变化 · ${label}`;
+    const cmpIdx = vercelCompareIndex(v.dates);
+    if (cmpIdx >= 0) {
+      const delta = open - v.series[metric].open[cmpIdx];
+      changeEl.textContent = (delta >= 0 ? '+' : '') + delta.toFixed(1) + ' pp';
+      changeEl.className = 'kpi-value ' + (delta > 0 ? 'up' : delta < 0 ? 'down' : '');
+      changeSubEl.textContent = `对比 ${v.dates[cmpIdx]} 的开放权重份额（百分点）`;
+    } else {
+      changeEl.textContent = '—';
+      changeEl.className = 'kpi-value';
+      changeSubEl.textContent = '历史不足 7 天，暂无对比';
+    }
+
+    const tok = v.series.tokens.open[last];
+    const req = v.series.requests.open[last];
+    const cost = v.series.cost.open[last];
+    $('vercel-kpi-insight').textContent = `Token ${tok.toFixed(1)}% ↔ 支出 ${cost.toFixed(1)}%`;
+    $('vercel-kpi-insight-sub').textContent =
+      `${v.latest_date} 开放权重承接 ${tok.toFixed(1)}% 的 Token、${req.toFixed(1)}% 的请求，` +
+      `但仅对应 ${cost.toFixed(1)}% 的支出——用量结构观察，非投资建议`;
+  }
+
+  function vercelWindowIndices(v) {
+    const days = VERCEL_WINDOW_DAYS[vercelState.window];
+    if (!isFinite(days)) return v.dates.map((_, i) => i);
+    const endMs = Date.parse(v.dates[v.dates.length - 1] + 'T00:00:00Z');
+    const startMs = endMs - (days - 1) * 24 * 60 * 60 * 1000;
+    const indices = [];
+    v.dates.forEach((d, i) => {
+      if (Date.parse(d + 'T00:00:00Z') >= startMs) indices.push(i);
+    });
+    return indices;
+  }
+
+  function renderVercelChart(v) {
+    const wrap = $('vercel-chart');
+    wrap.innerHTML = '';
+    // 触屏提示框不会随 pointerleave 收起：切换指标/窗口重绘时先清掉，
+    // 避免旧序列的提示残留在新图上。
+    const tooltip = $('vercel-tooltip');
+    tooltip.hidden = true;
+    tooltip.textContent = '';
+    const idx = vercelWindowIndices(v);
+    const dates = idx.map((i) => v.dates[i]);
+    const metric = vercelState.metric;
+    const openVals = idx.map((i) => v.series[metric].open[i]);
+    const closedVals = idx.map((i) => v.series[metric].closed[i]);
+
+    if (dates.length < 2) {
+      const note = document.createElement('p');
+      note.className = 'empty-note';
+      note.textContent = '当前窗口下数据点不足，无法绘制份额趋势。';
+      wrap.appendChild(note);
+      return;
+    }
+
+    const W = 960, H = 260, PAD_L = 56, PAD_R = 16, PAD_T = 16, PAD_B = 28;
+    const xStep = (W - PAD_L - PAD_R) / (dates.length - 1);
+    const xScale = (i) => PAD_L + i * xStep;
+    // 份额固定 0~100% 纵轴，跨窗口/指标切换保持同一参照系。
+    const yScale = (pct) => PAD_T + (1 - pct / 100) * (H - PAD_T - PAD_B);
+
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', `Vercel 开放权重与闭源权重 ${VERCEL_METRIC_LABEL[metric]} 日度份额趋势图`);
+
+    for (let i = 0; i <= 4; i++) {
+      const pct = 25 * i;
+      const y = yScale(pct);
+      const line = document.createElementNS(svgNS, 'line');
+      line.setAttribute('x1', PAD_L); line.setAttribute('x2', W - PAD_R);
+      line.setAttribute('y1', y); line.setAttribute('y2', y);
+      line.setAttribute('stroke', '#e7e1d3'); line.setAttribute('stroke-width', '1');
+      svg.appendChild(line);
+
+      const label = document.createElementNS(svgNS, 'text');
+      label.setAttribute('x', PAD_L - 8); label.setAttribute('y', y + 4);
+      label.setAttribute('text-anchor', 'end'); label.setAttribute('font-size', '10');
+      label.setAttribute('fill', '#8493a3');
+      label.textContent = pct + '%';
+      svg.appendChild(label);
+    }
+
+    [0, Math.floor((dates.length - 1) / 2), dates.length - 1].forEach((i) => {
+      const label = document.createElementNS(svgNS, 'text');
+      label.setAttribute('x', xScale(i));
+      label.setAttribute('y', H - 8);
+      label.setAttribute('text-anchor', i === 0 ? 'start' : i === dates.length - 1 ? 'end' : 'middle');
+      label.setAttribute('font-size', '10');
+      label.setAttribute('fill', '#8493a3');
+      label.textContent = dates[i];
+      svg.appendChild(label);
+    });
+
+    const SERIES = [
+      { values: openVals, color: '#2f9e44' },   // 开放权重
+      { values: closedVals, color: '#868e96' }, // 闭源权重
+    ];
+    SERIES.forEach((s) => {
+      const path = document.createElementNS(svgNS, 'path');
+      path.setAttribute('d', 'M ' + s.values.map((pct, i) => [xScale(i), yScale(pct)].join(',')).join(' L '));
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke', s.color);
+      path.setAttribute('stroke-width', '2.5');
+      svg.appendChild(path);
+    });
+
+    function showTipAt(i) {
+      tooltip.hidden = false;
+      tooltip.textContent = `${dates[i]} · 开放 ${openVals[i].toFixed(1)}% / 闭源 ${closedVals[i].toFixed(1)}%`;
+      tooltip.style.left = (xScale(i) / W) * 100 + '%';
+      tooltip.style.top = (yScale(Math.max(openVals[i], closedVals[i])) / H) * 100 + '%';
+    }
+    function hideTip() { tooltip.hidden = true; }
+
+    const overlay = document.createElementNS(svgNS, 'rect');
+    overlay.setAttribute('x', PAD_L);
+    overlay.setAttribute('y', 0);
+    overlay.setAttribute('width', Math.max(W - PAD_L - PAD_R, 0));
+    overlay.setAttribute('height', H);
+    overlay.setAttribute('fill', 'transparent');
+    overlay.setAttribute('pointer-events', 'all');
+    overlay.style.cursor = 'pointer';
+
+    function nearestIndexFromClientX(clientX) {
+      const rect = svg.getBoundingClientRect();
+      const relX = rect.width ? ((clientX - rect.left) / rect.width) * W : 0;
+      let best = 0, bestDist = Infinity;
+      for (let i = 0; i < dates.length; i++) {
+        const dist = Math.abs(xScale(i) - relX);
+        if (dist < bestDist) { bestDist = dist; best = i; }
+      }
+      return best;
+    }
+    overlay.addEventListener('pointermove', (e) => showTipAt(nearestIndexFromClientX(e.clientX)));
+    overlay.addEventListener('pointerdown', (e) => showTipAt(nearestIndexFromClientX(e.clientX)));
+    overlay.addEventListener('pointerleave', (e) => {
+      if (e.pointerType === 'touch') return;
+      hideTip();
+    });
+    overlay.addEventListener('touchmove', (e) => {
+      const t = e.touches[0];
+      if (t) showTipAt(nearestIndexFromClientX(t.clientX));
+    }, { passive: true });
+    overlay.addEventListener('touchstart', (e) => {
+      const t = e.touches[0];
+      if (t) showTipAt(nearestIndexFromClientX(t.clientX));
+    }, { passive: true });
+    svg.appendChild(overlay);
+
+    wrap.appendChild(svg);
+  }
+
+  function renderVercel() {
+    try {
+      const v = vercelData();
+      if (!v) { vercelShowUnavailable(); return; }
+      $('vercel-empty').hidden = true;
+      $('vercel-body').hidden = false;
+
+      // 数据新鲜度：官方数据最新完整日 + 快照抓取日；比 OpenRouter 最新数据日
+      // 落后超过 2 天时明确提示滞后（沿用 last-known-good，不冒充最新）。
+      let fresh = ` · 官方数据截至 ${v.latest_date}（${v.captured_on} 抓取快照）`;
+      const lagMs = Date.parse(DATA.latest_date + 'T00:00:00Z') - Date.parse(v.latest_date + 'T00:00:00Z');
+      if (isFinite(lagMs) && lagMs > 2 * 24 * 60 * 60 * 1000) {
+        fresh += ' · ⚠️ 较 OpenRouter 数据滞后，展示的是最近一次有效快照';
+      }
+      $('vercel-fresh').textContent = fresh;
+
+      renderVercelKpis(v);
+      renderVercelChart(v);
+    } catch (e) {
+      // Vercel 区块任何异常都不应拖垮整个看板。
+      vercelShowUnavailable();
+    }
+  }
+
+  function initVercelControls() {
+    [['vercel-ctrl-metric', 'vmetric', 'metric'], ['vercel-ctrl-window', 'vwindow', 'window']].forEach(([groupId, dataKey, stateKey]) => {
+      const group = $(groupId);
+      if (!group) return;
+      group.querySelectorAll('button').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          group.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+          btn.setAttribute('aria-pressed', 'true');
+          vercelState[stateKey] = btn.dataset[dataKey];
+          renderVercel();
+        });
+      });
     });
   }
 
@@ -532,8 +784,10 @@
     state.date = DATA.latest_date;
     loaded = true;
     initControls();
+    initVercelControls();
     renderFooter();
     renderArchive();
+    renderVercel();
     renderAll();
   }
 
