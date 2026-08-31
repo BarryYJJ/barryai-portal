@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenRouter 用量看板 · BarryYJJ</title>
+<meta name="description" content="基于 OpenRouter 全球路由真实用量数据的大模型用量研究看板：厂商份额、模型周榜、异动追踪，而非跑分宣传。">
+<link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand">
+      <span class="brand-mark">OpenRouter · 真实用量观察</span>
+      <span class="brand-name">大模型用量看板</span>
+    </div>
+    <div class="header-meta" id="header-meta">数据来源 OpenRouter 全球路由真实用量</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ============ 公开区：产品介绍 + 示例 teaser ============ -->
+  <section class="intro" id="intro-section" aria-labelledby="intro-title">
+    <div class="intro-inner">
+      <p class="eyebrow">不是跑分，是真实用量</p>
+      <h1 id="intro-title">看清大模型真实的用量结构，而不是厂商的跑分公告</h1>
+      <p class="intro-lead">
+        我们每日抓取 OpenRouter 全网路由的真实 Token 消耗与请求量，按模型稳定标识跨版本聚合，
+        还原一个不受营销叙事影响的用量地图：谁在真正被用、份额如何迁移、哪些模型正在异动。
+      </p>
+
+      <ul class="value-props">
+        <li><b>真实用量</b>：以路由请求与 Token 消耗为准，不采信厂商自报的跑分成绩。</li>
+        <li><b>稳定口径</b>：按 model_permaslug 跨 free / standard / thinking 等变体聚合，避免版本迁移伪装成暴涨。</li>
+        <li><b>周度可追溯</b>：每期用量周报归档可查，异动都能对照到具体的比较日与间隔天数。</li>
+      </ul>
+
+      <div class="teaser" aria-hidden="true">
+        <div class="teaser-card">
+          <div class="teaser-label">示例视图 · 非真实数据</div>
+          <svg class="teaser-svg" viewBox="0 0 320 96" preserveAspectRatio="none" role="presentation">
+            <polyline points="0,70 40,62 80,66 120,48 160,52 200,30 240,38 280,20 320,26"
+                      fill="none" stroke="#c92a2a" stroke-width="2.5" />
+            <polyline points="0,80 40,78 80,74 120,70 160,66 200,60 240,58 280,50 320,46"
+                      fill="none" stroke="#1864ab" stroke-width="2.5" />
+          </svg>
+          <div class="teaser-bar">
+            <span class="teaser-seg cn" style="width:44%"></span>
+            <span class="teaser-seg us" style="width:26%"></span>
+            <span class="teaser-seg other" style="width:30%"></span>
+          </div>
+          <p class="teaser-caption">解锁后查看基于真实数据的厂商份额、模型周榜与异动追踪</p>
+        </div>
+      </div>
+
+      <a class="cta-btn" href="#gate-section" id="cta-unlock">解锁完整看板</a>
+    </div>
+  </section>
+
+  <!-- ============ 准入区：表单 / 验证中 / 错误 ============ -->
+  <section class="gate" id="gate-section" aria-labelledby="gate-title">
+    <div class="gate-card">
+      <h2 id="gate-title">解锁完整看板</h2>
+      <p class="gate-sub">留下联系方式，用于对接研究合作 / 定制数据需求，看板即时解锁。</p>
+
+      <form id="gate-form" class="gate-form" novalidate>
+        <div class="field">
+          <label for="f-name">姓名 <span class="req">*</span></label>
+          <input type="text" id="f-name" name="name" required autocomplete="name">
+        </div>
+        <div class="field">
+          <label for="f-org">机构 / 公司 <span class="req">*</span></label>
+          <input type="text" id="f-org" name="org" required autocomplete="organization">
+        </div>
+        <div class="field">
+          <label for="f-contact">微信号 或 手机号 <span class="req">*</span></label>
+          <input type="text" id="f-contact" name="contact" required>
+        </div>
+        <div class="field">
+          <label for="f-msg">留言（选填）</label>
+          <textarea id="f-msg" name="msg" rows="2" placeholder="例如：想看哪个方向的用量数据"></textarea>
+        </div>
+
+        <button type="submit" id="gate-submit-btn" class="submit-btn">解锁看板</button>
+        <div id="gate-err" class="err-msg" role="alert" hidden></div>
+      </form>
+
+      <p class="footer-note">仅供研究参考 · 不构成投资建议</p>
+    </div>
+
+    <div id="gate-loading" class="gate-loading" hidden aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <p>正在验证访问权限…</p>
+    </div>
+
+    <div id="gate-init-error" class="err-banner" role="alert" hidden></div>
+  </section>
+
+  <!-- ============ 看板区：验证通过后展示 ============ -->
+  <section class="dashboard" id="dashboard-section" hidden aria-labelledby="dashboard-title">
+
+    <div class="dash-topbar">
+      <div>
+        <h2 id="dashboard-title">用量看板</h2>
+        <p class="dash-welcome">欢迎，<span id="viewer-name"></span> · <a href="#" id="reset-access">清除访问授权</a></p>
+      </div>
+    </div>
+
+    <div class="controls" role="group" aria-label="看板筛选控制">
+      <div class="control-group">
+        <span class="control-label" id="label-window">时间窗口</span>
+        <div class="toggle-group" role="group" aria-labelledby="label-window" id="ctrl-window">
+          <button type="button" data-window="7d" aria-pressed="false">7D</button>
+          <button type="button" data-window="30d" aria-pressed="true">30D</button>
+          <button type="button" data-window="all" aria-pressed="false">全部</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <span class="control-label" id="label-metric">指标</span>
+        <div class="toggle-group" role="group" aria-labelledby="label-metric" id="ctrl-metric">
+          <button type="button" data-metric="p" aria-pressed="true">Prompt Token</button>
+          <button type="button" data-metric="c" aria-pressed="false">Completion Token</button>
+          <button type="button" data-metric="r" aria-pressed="false">请求数</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <span class="control-label" id="label-region">地域</span>
+        <div class="toggle-group" role="group" aria-labelledby="label-region" id="ctrl-region">
+          <button type="button" data-region="all" aria-pressed="true">全部</button>
+          <button type="button" data-region="cn" aria-pressed="false">中国</button>
+          <button type="button" data-region="us" aria-pressed="false">美国</button>
+          <button type="button" data-region="other" aria-pressed="false">其他</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label" for="date-select">数据日</label>
+        <select id="date-select"></select>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label" for="provider-select">厂商</label>
+        <select id="provider-select">
+          <option value="all">全部厂商</option>
+        </select>
+      </div>
+
+      <div class="control-group control-search">
+        <label class="control-label" for="model-search">模型搜索</label>
+        <input type="search" id="model-search" placeholder="搜索模型名或厂商…" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label" id="kpi-total-label">滚动总量</div>
+        <div class="kpi-value" id="kpi-total">—</div>
+        <div class="kpi-sub" id="kpi-total-sub">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">环比变化</div>
+        <div class="kpi-value" id="kpi-change">—</div>
+        <div class="kpi-sub" id="kpi-change-sub">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">中国厂商份额</div>
+        <div class="kpi-value" id="kpi-cn-share">—</div>
+        <div class="kpi-sub">全平台口径，不受当前筛选影响</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">美闭源份额</div>
+        <div class="kpi-value" id="kpi-usclosed-share">—</div>
+        <div class="kpi-sub">OpenAI / Anthropic / Google / xAI 闭源模型，不含 gpt-oss / gemma 等开放权重发布</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h3>用量趋势</h3>
+        <p class="panel-sub" id="chart-scope-note">—</p>
+      </div>
+      <div class="chart-wrap">
+        <div id="trend-chart" class="trend-chart"></div>
+        <div id="chart-tooltip" class="chart-tooltip" hidden role="status"></div>
+      </div>
+    </div>
+
+    <div class="panel-row">
+      <div class="panel">
+        <div class="panel-head">
+          <h3>地域格局</h3>
+          <p class="panel-sub">全平台口径，不受当前筛选影响</p>
+        </div>
+        <div class="bar" id="region-share-bar"></div>
+        <div class="legend" id="region-share-legend"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <h3>厂商份额 Top8</h3>
+          <p class="panel-sub">全平台口径，不受当前筛选影响</p>
+        </div>
+        <div class="provider-share-list" id="provider-share-list"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h3>异动追踪</h3>
+        <p class="panel-sub">聚合后的约 7 天变化，不含 free→standard 版本迁移造成的虚增</p>
+      </div>
+      <div class="movers-grid">
+        <div>
+          <h4 class="movers-title up">涨幅 Top3</h4>
+          <div id="movers-gainers" class="mover-cards"></div>
+        </div>
+        <div>
+          <h4 class="movers-title down">跌幅 Top3</h4>
+          <div id="movers-decliners" class="mover-cards"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h3>模型排行</h3>
+        <p class="panel-sub"><span id="model-table-count">—</span> 个模型（跟随筛选与搜索）</p>
+      </div>
+      <div class="table-wrap">
+        <table class="model-table">
+          <thead>
+            <tr>
+              <th scope="col" class="col-rank">#</th>
+              <th scope="col">模型</th>
+              <th scope="col">厂商</th>
+              <th scope="col" class="num">当前值</th>
+              <th scope="col" class="num">份额</th>
+              <th scope="col" class="num">约7天变化</th>
+            </tr>
+          </thead>
+          <tbody id="model-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h3>历史周报归档</h3></div>
+      <ul class="archive-list" id="report-archive-list"></ul>
+    </div>
+
+    <details class="panel methodology" id="methodology">
+      <summary><h3>口径与局限性说明</h3></summary>
+      <ul>
+        <li><b>滚动窗口快照</b>：OpenRouter 的 rankings/models 接口本身是滚动窗口统计，每条抓取记录已代表其自身的多日滚动口径；时间窗口切换（7D/30D/全部）只改变趋势图展示的历史点数，不做重复求和。</li>
+        <li><b>Tokenizer 差异</b>：各厂商模型使用自家 tokenizer 计 Token，跨模型 Token 数为近似可比，非严格统一单位。</li>
+        <li><b>仅 OpenRouter 路由范围</b>：数据只覆盖经 OpenRouter 路由的流量，不含厂商直连、私有部署与其他路由平台，份额反映的是 OpenRouter 客群结构而非全市场格局。</li>
+        <li><b>稳定标识聚合</b>：所有数值按 model_permaslug 跨 free / standard / thinking 等 variant 聚合后计算，避免版本迁移被误判为用量暴涨或暴跌。</li>
+        <li><b>比较日选取</b>：约 7 天变化优先取精确 7 天前的同口径聚合值；缺失时退而求其次取至少 6 天前，绝不用昨天冒充周环比，比较日与间隔天数在表格/异动区可追溯。</li>
+        <li><b>份额口径</b>：模型排行的"份额"为该模型占当日全平台总量的比例，不随筛选变化；筛选仅影响展示范围。</li>
+      </ul>
+    </details>
+
+  </section>
+
+  <div id="fatal-error" class="err-banner" role="alert" hidden></div>
+
+</main>
+
+<footer class="site-footer">
+  <p>数据来源：OpenRouter (openrouter.ai/rankings)。<span id="footer-generated"></span></p>
+  <p>本看板由数据自动生成，仅供研究参考，不构成投资建议 · from BarryYJJ</p>
+</footer>
+
+<script src="./js/cloudbase.js"></script>
+<script src="./js/gate.js"></script>
+<script src="./js/dashboard.js"></script>
+</body>
+</html>
