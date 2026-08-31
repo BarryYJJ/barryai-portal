@@ -212,8 +212,15 @@
     var url = safeUrl(item.url);
     var host = url ? hostOf(url) : null;
     var isPost = !!item.source_handle;
+    // AIHOT 是第三条「发现」链路：条目本身仍然是第三方原文，AIHOT 只是把它
+    // 找出来的地方。所以这里只加一个克制的来源标记 + 一个站内出处链接，
+    // 不新增分类、不改变正文，也不展示 AIHOT 的评分或推荐理由。
+    var isAihot = item.discovery_source === "aihot";
+    var aihotUrl = isAihot ? safeUrl(item.aihot_url) : null;
+    var originalUrl = isAihot ? safeUrl(item.original_url) : null;
 
     var meta = ['<span class="tag tag--cat">' + esc(item.category_label) + "</span>"];
+    if (isAihot) meta.push('<span class="tag tag--aihot">AIHOT 发现</span>');
     if (item.source_time_text) meta.push("<span>" + esc(item.source_time_text) + "</span>");
     // P1_5_… 这类是抓取端的内部分组代号，对读者没有意义，不外显。
     if (item.source_list && !/^P\d/.test(item.source_list)) {
@@ -233,7 +240,17 @@
       : '<p class="signal__body signal__body--none">（本条简报未附摘要，请点原文链接查看）</p>';
 
     var foot = [];
-    if (url) {
+    if (isAihot && (aihotUrl || originalUrl)) {
+      // 两个链接都保留：AIHOT 是署名与出处，原文才是事实来源。
+      if (aihotUrl) {
+        foot.push('<a class="srclink srclink--aihot" href="' + esc(aihotUrl) +
+                  '" target="_blank" rel="noopener noreferrer nofollow">AIHOT</a>');
+      }
+      if (originalUrl) {
+        foot.push('<a class="srclink" href="' + esc(originalUrl) +
+                  '" target="_blank" rel="noopener noreferrer">原文</a>');
+      }
+    } else if (url) {
       foot.push('<a class="srclink" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' +
                 esc(host || "打开原文") + "</a>");
     }
