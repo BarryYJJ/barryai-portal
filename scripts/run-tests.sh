@@ -4,7 +4,7 @@ set -uo pipefail
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd -P )"
 
 rc=0
-for t in test-publish-subsite.sh test-portal-links.sh; do
+for t in test-publish-subsite.sh test-portal-links.sh test-barry-rs-logo.sh; do
   echo "═══ $t ═══"
   bash "$SCRIPT_DIR/$t" || rc=1
   echo ""

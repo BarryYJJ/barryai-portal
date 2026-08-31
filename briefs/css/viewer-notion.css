@@ -1,0 +1,373 @@
+/* ============================================================================
+   viewer-notion.css — 简报阅读页（viewer.html）专用视觉层
+   ----------------------------------------------------------------------------
+   · 必须在 css/main.css 之后加载；所有规则都收敛在 body.briefs-viewer-page 下，
+     不会外溢到 index.html（gate）与 admin.html。
+   · 视觉系统沿用 public/portal/index.html：电力蓝 #1B34E8、淡蓝底、白面、
+     细蓝描边、蓝图网格线、大字标题、等宽感元信息与键帽。
+   · 不引任何远程字体/资源；字型直接复用 main.css 里自托管的 Montserrat。
+   ========================================================================== */
+
+body.briefs-viewer-page {
+  --vw-blue: #1B34E8;
+  --vw-blue-ink: #14205C;
+  --vw-blue-tint: #F2F4FF;
+  --vw-white: #FFFFFF;
+  --vw-on-blue-dim: rgba(255, 255, 255, 0.68);
+  --vw-rule-blue: rgba(255, 255, 255, 0.30);
+  --vw-rule-blue-soft: rgba(255, 255, 255, 0.16);
+  --vw-rule-ink: rgba(27, 52, 232, 0.24);
+  --vw-rule-ink-soft: rgba(27, 52, 232, 0.12);
+  --vw-ink-dim: #4A5486;
+  --vw-pad: clamp(18px, 5vw, 64px);
+  --vw-font: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+             "Segoe UI", "Hiragino Sans GB", "Microsoft YaHei",
+             "Source Han Sans SC", "Noto Sans CJK SC", "Helvetica Neue", Arial, sans-serif;
+  --vw-mono: "Montserrat", "PingFang SC", ui-monospace, SFMono-Regular, "SF Mono",
+             Menlo, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  margin: 0;
+  background: var(--vw-white);
+  color: var(--vw-blue-ink);
+  font-family: var(--vw-font);
+  font-size: clamp(15px, 0.5vw + 13.6px, 16.5px);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* viewer.js 通过 .hidden 属性切换 #brief-wrap / #empty-state，必须始终生效 */
+body.briefs-viewer-page [hidden] { display: none !important; }
+
+body.briefs-viewer-page h1,
+body.briefs-viewer-page h2,
+body.briefs-viewer-page p { margin: 0; }
+body.briefs-viewer-page a { color: inherit; }
+
+body.briefs-viewer-page :focus-visible {
+  outline: 2px solid var(--vw-blue);
+  outline-offset: 3px;
+}
+body.briefs-viewer-page .vw-on-blue :focus-visible { outline-color: #fff; }
+
+.vw-wrap {
+  width: 100%;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding-inline: var(--vw-pad);
+}
+.vw-sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+.vw-skip {
+  position: absolute;
+  left: -9999px; top: 0;
+  z-index: 99;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 14px 20px;
+  background: var(--vw-white);
+  color: var(--vw-blue);
+  border: 1px solid var(--vw-blue);
+  font-weight: 600;
+  text-decoration: none;
+}
+.vw-skip:focus { left: 12px; top: 12px; }
+
+/* ---------- 1. 深蓝顶栏 ---------- */
+.vw-on-blue { background-color: var(--vw-blue); color: var(--vw-white); }
+
+.vw-topbar-in {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  flex-wrap: wrap;
+  padding-block: 8px;
+  border-bottom: 1px solid var(--vw-rule-blue);
+}
+.vw-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding-inline: 8px;
+  margin-left: -8px;
+  font-family: var(--vw-mono);
+  font-size: 0.8125rem;
+  letter-spacing: 0.08em;
+  color: var(--vw-on-blue-dim);
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.vw-mark:hover { color: var(--vw-white); border-color: var(--vw-rule-blue); }
+.vw-mark b { font-weight: 600; letter-spacing: 0.1em; }
+.vw-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 22px; height: 22px;
+  border: 1px solid var(--vw-rule-blue-soft);
+  font-family: var(--vw-mono);
+  font-size: 0.6875rem;
+  line-height: 1;
+}
+.vw-brand {
+  margin-left: auto;
+  text-align: right;
+  font-family: var(--vw-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  color: var(--vw-on-blue-dim);
+}
+
+/* ---------- 2. 蓝图网格 hero ---------- */
+.vw-hero {
+  padding-top: clamp(36px, 6.5vw, 76px);
+  padding-bottom: clamp(40px, 7vw, 88px);
+  background-image:
+    repeating-linear-gradient(to right, var(--vw-rule-blue-soft) 0 1px, transparent 1px 88px),
+    repeating-linear-gradient(to bottom, var(--vw-rule-blue-soft) 0 1px, transparent 1px 88px);
+  background-position: center top;
+}
+.vw-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 14px;
+  font-family: var(--vw-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  color: var(--vw-on-blue-dim);
+}
+.vw-eyebrow::after {
+  content: "";
+  width: clamp(28px, 6vw, 72px);
+  height: 1px;
+  background: var(--vw-rule-blue);
+}
+.vw-hero h1 {
+  font-size: clamp(2.5rem, 9.5vw, 5.75rem);
+  line-height: 0.98;
+  letter-spacing: -0.015em;
+  font-weight: 600;
+  overflow-wrap: break-word;
+}
+.vw-sub {
+  max-width: 54ch;
+  margin-top: clamp(18px, 2.4vw, 28px);
+  font-size: clamp(0.9375rem, 0.4vw + 0.85rem, 1.0625rem);
+  line-height: 1.7;
+  color: var(--vw-on-blue-dim);
+}
+
+/* ---------- 3. 白底技术控制台 ---------- */
+.vw-panel { background: var(--vw-white); border-bottom: 1px solid var(--vw-rule-ink); }
+.vw-panel-in { padding-block: clamp(18px, 2.6vw, 28px); }
+.vw-sec-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px 20px;
+  flex-wrap: wrap;
+  margin-bottom: clamp(16px, 2vw, 22px);
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--vw-rule-ink-soft);
+  font-family: var(--vw-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  font-weight: 400;
+  color: var(--vw-blue);
+}
+.vw-sec-head h2 { font: inherit; }
+.vw-readout { color: var(--vw-ink-dim); overflow-wrap: anywhere; }
+
+body.briefs-viewer-page .brief-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px 24px;
+  flex-wrap: wrap;
+}
+.vw-field { display: flex; align-items: center; gap: 10px; min-width: 0; }
+body.briefs-viewer-page .brief-controls label {
+  margin: 0;
+  flex: none;
+  font-family: var(--vw-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  color: var(--vw-blue);
+}
+body.briefs-viewer-page .ctrl-input {
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 40px;
+  padding: 0 34px 0 12px;
+  font-family: var(--vw-mono);
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+  color: var(--vw-blue-ink);
+  background-color: var(--vw-white);
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2010%206'%3E%3Cpath%20d='M1%201l4%204%204-4'%20fill='none'%20stroke='%231B34E8'%20stroke-width='1.4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 10px 6px;
+  border: 1px solid var(--vw-rule-ink);
+  border-radius: 0;
+}
+body.briefs-viewer-page .ctrl-input:hover { border-color: var(--vw-blue); }
+
+body.briefs-viewer-page .period-toggle {
+  display: flex;
+  gap: 0;
+  margin-left: auto;
+}
+body.briefs-viewer-page .period-btn {
+  min-height: 40px;
+  padding: 0 clamp(12px, 1.6vw, 20px);
+  font-family: var(--vw-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--vw-blue);
+  background: var(--vw-white);
+  border: 1px solid var(--vw-rule-ink);
+  border-radius: 0;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+body.briefs-viewer-page .period-btn + .period-btn { border-left: none; }
+body.briefs-viewer-page .period-btn:hover {
+  background: var(--vw-blue-tint);
+  border-color: var(--vw-blue);
+}
+body.briefs-viewer-page .period-btn.active {
+  background: var(--vw-blue);
+  color: var(--vw-white);
+  border-color: var(--vw-blue);
+}
+/* 相邻段左边框被抹掉，激活态右侧邻居需补回一条蓝线 */
+body.briefs-viewer-page .period-btn.active + .period-btn { border-left: 1px solid var(--vw-blue); }
+
+/* ---------- 4. 内容台面 ---------- */
+.vw-stage {
+  background: var(--vw-blue-tint);
+  padding-block: clamp(20px, 3vw, 40px);
+}
+.vw-stage-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px clamp(12px, 2vw, 18px);
+  background: var(--vw-white);
+  border-bottom: 1px solid var(--vw-rule-ink-soft);
+  font-family: var(--vw-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  color: var(--vw-blue);
+}
+.vw-ticks { display: inline-flex; gap: 5px; }
+.vw-ticks i { width: 6px; height: 6px; border: 1px solid var(--vw-rule-ink); }
+.vw-ticks i:first-child { background: var(--vw-blue); border-color: var(--vw-blue); }
+
+body.briefs-viewer-page .brief-wrap {
+  background: var(--vw-white);
+  border: 1px solid var(--vw-rule-ink);
+  border-radius: 0;
+  box-shadow: none;
+  overflow: hidden;
+}
+/* 只补背景与盒模型，#brief-frame 的高度算法沿用 main.css，保持既有 iframe 尺寸行为 */
+body.briefs-viewer-page #brief-frame {
+  display: block;
+  width: 100%;
+  border: none;
+  background: var(--vw-white);
+}
+
+body.briefs-viewer-page .empty-state {
+  padding: clamp(56px, 9vw, 96px) clamp(20px, 4vw, 40px);
+  text-align: center;
+  background: var(--vw-white);
+  border: 1px dashed var(--vw-rule-ink);
+  border-radius: 0;
+  color: var(--vw-ink-dim);
+  font-family: var(--vw-mono);
+  font-size: 0.8125rem;
+  letter-spacing: 0.08em;
+}
+
+/* ---------- 5. 页脚 ---------- */
+.vw-foot { background: var(--vw-white); border-top: 1px solid var(--vw-rule-ink); }
+.vw-foot-in {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 24px;
+  flex-wrap: wrap;
+  padding-block: clamp(18px, 2.6vw, 30px);
+  font-family: var(--vw-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  color: var(--vw-blue);
+}
+.vw-foot-in .vw-dim { color: var(--vw-ink-dim); }
+
+/* ---------- 6. 移动端 ---------- */
+@media (max-width: 720px) {
+  body.briefs-viewer-page .brief-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+  .vw-field { width: 100%; }
+  body.briefs-viewer-page .ctrl-input { flex: 1 1 auto; width: 100%; min-width: 0; }
+  body.briefs-viewer-page .period-toggle {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    width: 100%;
+    margin-left: 0;
+  }
+  body.briefs-viewer-page .period-btn { padding: 0 4px; font-size: 0.6875rem; letter-spacing: 0.04em; }
+}
+@media (max-width: 480px) {
+  .vw-brand { font-size: 0.625rem; letter-spacing: 0.04em; }
+  .vw-mark { font-size: 0.75rem; }
+}
+
+/* ---------- 7. 动效与打印 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  body.briefs-viewer-page,
+  body.briefs-viewer-page *,
+  body.briefs-viewer-page *::before,
+  body.briefs-viewer-page *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+@media print {
+  body.briefs-viewer-page { background: #fff; color: #000; }
+  body.briefs-viewer-page .vw-on-blue,
+  body.briefs-viewer-page .vw-stage {
+    background: #fff;
+    color: #000;
+    background-image: none;
+  }
+  body.briefs-viewer-page .vw-topbar,
+  body.briefs-viewer-page .vw-panel,
+  body.briefs-viewer-page .vw-foot { display: none; }
+}
+
+/* Barry RS 首页标识在深蓝顶栏里的位置（方块本体样式来自 main.css） */
+.vw-topbar-in .barry-rs-home { margin-block: 4px; flex: none; }
