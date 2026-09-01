@@ -15,6 +15,7 @@
 | `briefs/` | <https://barryai.cn/briefs/> | `BarryYJJ/sellside_notes_brief`（私有） | `website/public/` |
 | `openrouter/` | <https://barryai.cn/openrouter/> | `BarryYJJ/openrouter-data`（私有） | `dashboard/public/` |
 | `ai-news/` | <https://barryai.cn/ai-news/> | AI 新闻网站（私有，本地源仓库） | `public/` |
+| `research/` | <https://barryai.cn/research/> | AI投研 Research OS 网站（私有，本地源仓库） | `dist/research/` |
 
 `ai-news/` 的内容由每天四档（早间 / 午间 / 收盘 / 晚间）AI 新闻定时任务产出：
 任务把简报正文推送到飞书之后，顺带把同一份正文结构化并发布成静态站。
@@ -59,4 +60,4 @@ bash scripts/run-tests.sh
   正常发布、幂等、只提交自身子目录、工作树清洁度、dry-run、额外排除项、`rsync --delete`、
   跨进程锁、无 remote 兜底，以及 `ai-news` 子站的发布 / 隔离 / 幂等 / 内容更新。
   不会碰真实仓库，也不会推送到 GitHub。
-- `scripts/test-portal-links.sh` —— 校验 `index.html` 的入口链接指向 `/briefs/`、`/openrouter/` 与 `/ai-news/`。
+- `scripts/test-portal-links.sh` —— 校验 `index.html` 的入口链接指向 `/briefs/`、`/openrouter/`、`/ai-news/` 与 `/research/`。

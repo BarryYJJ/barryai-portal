@@ -1,0 +1,1 @@
+var e=document.querySelector(`[data-card-filter]`),t=[...document.querySelectorAll(`[data-note-card]`)],n=document.querySelector(`[data-filter-status]`);e?.addEventListener(`input`,()=>{let r=e.value.trim().toLocaleLowerCase(`zh-CN`),i=0;for(let e of t){let t=e.dataset.searchText.toLocaleLowerCase(`zh-CN`).includes(r);e.hidden=!t,t&&(i+=1)}n&&(n.textContent=`${i} 条匹配摘录`)});
