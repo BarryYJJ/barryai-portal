@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>小八 · AI 研究工作台 | Barry RS</title>
+<meta name="description" content="Barry RS 的私人研究工作台。静态外壳公开，能力需口令解锁。">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#1B34E8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20fill='%231B34E8'/%3E%3Crect%20x='16'%20y='16'%20width='32'%20height='32'%20fill='none'%20stroke='%23fff'%20stroke-width='4'/%3E%3Crect%20x='28'%20y='28'%20width='8'%20height='8'%20fill='%23fff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="./app.css?v=202609022">
+</head>
+<body class="is-locked">
+
+<a class="skip" href="#composer-input">跳到指令输入框</a>
+
+<!-- ══════════ 顶栏 ══════════ -->
+<header class="topbar on-blue">
+  <div class="topbar-in">
+    <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+
+    <div class="topbar-title">
+      <p class="eyebrow">/briefs/agent</p>
+      <h1>小八 · AI 研究工作台</h1>
+    </div>
+
+    <div class="topbar-side">
+      <p class="conn" id="conn-chip" role="status" aria-live="polite">
+        <span class="dot" id="conn-dot" aria-hidden="true"></span>
+        <span id="conn-text">未连接</span>
+      </p>
+      <button type="button" class="tbtn" id="btn-new" disabled>
+        <span class="key" aria-hidden="true">N</span><span>新会话</span>
+      </button>
+      <button type="button" class="tbtn" id="btn-history" disabled
+              aria-haspopup="dialog" aria-expanded="false" aria-controls="history-dialog">
+        <span class="key" aria-hidden="true">H</span><span>历史会话</span>
+      </button>
+      <button type="button" class="tbtn tbtn-lock" id="btn-lock" disabled>
+        <span class="key" aria-hidden="true">L</span><span>锁定</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════ 工作区 ══════════ -->
+<div class="workbench" id="workbench">
+
+  <!-- ────── 左栏：快捷任务 + 会话记录 ────── -->
+  <aside class="rail rail-left" aria-label="快捷任务与会话记录">
+    <details class="rail-block" id="rail-actions" open>
+      <summary class="rail-head"><span>快捷任务 · actions</span><span class="rail-toggle" aria-hidden="true"></span></summary>
+      <div class="rail-body">
+        <p class="rail-note">只读调研提示词。点击后填入输入框，需要你自己确认再发送。</p>
+        <ul class="qa-list" id="qa-list"></ul>
+      </div>
+    </details>
+
+    <details class="rail-block" id="rail-history" open>
+      <summary class="rail-head"><span>本次会话 · tasks</span><span class="rail-toggle" aria-hidden="true"></span></summary>
+      <div class="rail-body">
+        <ul class="task-list" id="task-list"></ul>
+        <p class="empty-note" id="task-empty">还没有任务。这里是当前这场会话的轮次；换设备也能从「历史会话」找回来。</p>
+      </div>
+    </details>
+  </aside>
+
+  <!-- ────── 主画布：任务 + 结果 ────── -->
+  <main class="canvas" id="canvas" aria-label="任务与结果">
+    <section class="doc" aria-labelledby="doc-task-title">
+      <h2 class="doc-head" id="doc-task-title"><span>当前任务 · task</span><span class="doc-meta" id="task-meta">—</span></h2>
+      <p class="doc-task" id="doc-task">尚未下达任务。</p>
+    </section>
+
+    <section class="doc doc-output" aria-labelledby="doc-out-title">
+      <h2 class="doc-head" id="doc-out-title">
+        <span>结果 · output</span>
+        <span class="doc-meta" id="out-meta">待命</span>
+      </h2>
+
+      <div class="out-empty" id="out-empty">
+        <p class="out-empty-title">工作台待命</p>
+        <p class="out-empty-body">
+          这是一个私人研究终端。左栏是只读调研模板，右栏实时显示工具调用，
+          底部输入框下达指令。<br>
+          静态外壳对所有人可见 —— 真正的能力由 Hermes 端的口令与网络策略守着。
+        </p>
+      </div>
+
+      <div class="out-body" id="out-body" hidden aria-live="polite" aria-busy="false"></div>
+
+      <p class="out-status" id="out-status" hidden></p>
+    </section>
+  </main>
+
+  <!-- ────── 右栏：事件时间线 ────── -->
+  <aside class="rail rail-right" aria-label="运行事件时间线">
+    <details class="rail-block rail-block-grow" id="rail-activity" open>
+      <summary class="rail-head"><span>运行时间线 · activity</span><span class="rail-toggle" aria-hidden="true"></span></summary>
+      <div class="rail-body">
+        <ol class="timeline" id="timeline" aria-live="polite"></ol>
+        <p class="empty-note" id="timeline-empty">工具调用、审批与运行状态会实时出现在这里。</p>
+      </div>
+    </details>
+  </aside>
+
+</div>
+
+<!-- ══════════ 指令输入区 ══════════ -->
+<div class="composer" id="composer">
+  <form class="composer-in" id="composer-form" autocomplete="off">
+    <label class="sr-only" for="composer-input">给小八的指令</label>
+    <textarea
+      id="composer-input"
+      name="task"
+      rows="2"
+      placeholder="下达调研指令…（Ctrl / ⌘ + Enter 发送）"
+      disabled
+      autocomplete="off"
+      spellcheck="false"></textarea>
+    <div class="composer-side">
+      <p class="composer-hint" id="composer-hint">已锁定</p>
+      <div class="composer-btns">
+        <button type="button" class="btn btn-ghost" id="btn-stop" disabled>停止</button>
+        <button type="submit" class="btn btn-send" id="btn-send" disabled>发送</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- ══════════ 口令闸门 ══════════ -->
+<div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title" aria-describedby="gate-desc">
+  <div class="gate-panel">
+    <p class="eyebrow">/access</p>
+    <h2 id="gate-title">需要口令</h2>
+    <p class="gate-desc" id="gate-desc">
+      这一层静态页面对所有人可见，本身<strong>不构成认证</strong>。
+      真正的门在 Hermes 网关：没有正确口令，下面所有能力都不会有任何响应。
+    </p>
+
+    <form class="gate-form" id="gate-form" autocomplete="off">
+      <label class="gate-label" for="gate-key">Hermes 访问口令</label>
+      <input
+        type="password"
+        id="gate-key"
+        name="hermes-key"
+        autocomplete="off"
+        autocapitalize="off"
+        autocorrect="off"
+        spellcheck="false"
+        required
+        aria-describedby="gate-err gate-note">
+      <button type="submit" class="btn btn-send btn-block" id="gate-submit">解锁工作台</button>
+      <p class="gate-err" id="gate-err" role="alert" hidden></p>
+      <p class="gate-note" id="gate-note">
+        这里输入的是 <strong>主口令</strong>（Hermes 的 API_SERVER_KEY）。它只被 POST 给
+        <code>/v1/console/auth/login</code> 换一枚<strong>设备令牌</strong>，随即丢弃 ——
+        主口令不进任何浏览器存储。存进 <code>localStorage</code> 的只有那枚设备令牌：
+        服务端签发、默认 90 天到期、随时可撤销，所以关标签页、重启浏览器之后工作台
+        仍然是激活的。点「锁定」会尽力向 Hermes 撤销这枚令牌并清空本地状态，
+        <strong>服务端的历史会话不受影响</strong>。
+        输入框已声明 <code>autocomplete=&quot;off&quot;</code>，但这只是给浏览器的提示 ——
+        浏览器与密码管理器仍可能自行记住这里的内容，页面无法保证它们不记。
+      </p>
+    </form>
+
+    <dl class="gate-facts">
+      <div class="row"><dt>端点</dt><dd id="gate-endpoint">—</dd></div>
+      <div class="row"><dt>作用域</dt><dd id="gate-scope">—</dd></div>
+      <div class="row"><dt>状态</dt><dd id="gate-state">等待口令</dd></div>
+    </dl>
+  </div>
+</div>
+
+<!-- ══════════ 历史会话抽屉 ══════════ -->
+<div class="hdlg" id="history-dialog" role="dialog" aria-modal="true"
+     aria-labelledby="history-title" aria-describedby="history-desc" hidden>
+  <div class="hdlg-panel" id="history-panel">
+    <div class="hdlg-head">
+      <div class="hdlg-heading">
+        <p class="eyebrow">/sessions</p>
+        <h2 id="history-title">历史会话</h2>
+      </div>
+      <button type="button" class="hdlg-close" id="history-close" aria-label="关闭历史会话">✕</button>
+    </div>
+    <p class="hdlg-desc" id="history-desc">
+      来自 Hermes 服务端的会话记录（只列这个工作台自己的会话）。
+      选一条即可把它载入画布，之后的指令都会继续写进那一场会话。
+    </p>
+    <p class="hdlg-state" id="history-state" role="status" aria-live="polite" hidden></p>
+    <ul class="hdlg-list" id="history-list"></ul>
+  </div>
+</div>
+
+<script src="./config.js?v=202609021"></script>
+<script src="./app.js?v=202609022"></script>
+</body>
+</html>
