@@ -7,7 +7,7 @@
 # 用法：
 #   scripts/publish-subsite.sh <site-name> <source-dir>
 #
-#   site-name   只允许 briefs | openrouter | ai-news
+#   site-name   只允许 briefs | openrouter | ai-news | research
 #   source-dir  源静态目录（例如 today-briefs/website/public、AI新闻网站/public）
 #
 # 环境变量：
@@ -53,8 +53,8 @@ SITE="$1"
 SOURCE_DIR="$2"
 
 case "$SITE" in
-  briefs|openrouter|ai-news) ;;
-  *) die "不支持的 site-name: '$SITE'（只允许 briefs | openrouter | ai-news）" ;;
+  briefs|openrouter|ai-news|research) ;;
+  *) die "不支持的 site-name: '$SITE'（只允许 briefs | openrouter | ai-news | research）" ;;
 esac
 
 [ -d "$SOURCE_DIR" ] || die "source-dir 不存在或不是目录: $SOURCE_DIR"

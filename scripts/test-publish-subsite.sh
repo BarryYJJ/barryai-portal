@@ -81,7 +81,7 @@ for bad_site in ".." "../../etc" "briefs/../.." "" "BRIEFS"; do
   [ $? -ne 0 ]; check $? "拒绝 site-name '$bad_site'"
 done
 
-for good_site in briefs openrouter ai-news; do
+for good_site in briefs openrouter ai-news research; do
   PORTAL_REPO_DIR="$PORTAL" PUBLISH_DRY_RUN=1 bash "$HELPER" "$good_site" "$SRC" >/dev/null 2>&1
   check $? "接受白名单 site-name '$good_site'"
   git -C "$PORTAL" checkout -- . 2>/dev/null; git -C "$PORTAL" clean -qfd
