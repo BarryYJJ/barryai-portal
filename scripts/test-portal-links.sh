@@ -22,6 +22,11 @@ echo ""
 [ -f "$PAGE" ]; check $? "首页文件存在"
 [ -f "$PAGE" ] || { echo "通过 $PASS，失败 $FAIL"; exit 1; }
 
+grep -q '<title>BARRY RS</title>' "$PAGE" \
+  && grep -q '<h1 id="hero-title" class="rise d2">BARRY RS</h1>' "$PAGE" \
+  && grep -q '<p>BARRY RS</p>' "$PAGE"
+check $? "首页品牌名称统一使用全大写 BARRY RS"
+
 grep -q 'class="card" href="/briefs/"' "$PAGE"
 check $? "项目区有 /briefs/ 入口"
 
