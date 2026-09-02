@@ -511,6 +511,9 @@
 
   var dom = {
     body: document.body,
+    railLeft: $('rail-left'),
+    railLeftCollapse: $('rail-left-collapse'),
+    railLeftEdge: $('rail-left-edge'),
     gate: $('gate'),
     gateForm: $('gate-form'),
     gateKey: $('gate-key'),
@@ -2186,6 +2189,51 @@
     });
   }
 
+  /* ── 左栏抽屉（仅桌面）──────────────────────────────────────────
+     收起的是**整条左栏**，不是左栏里的 details：主画布吃掉让出来的宽度，右栏不动。
+     状态不落盘 —— 刷新回到展开态，和这个工作台「本地只存设备令牌」的取向一致。
+     ───────────────────────────────────────────────────────────── */
+  // 和 app.css 的 860px 堆叠断点互补：那边窄屏堆叠，这边桌面抽屉，两者不重叠也不留缝。
+  var DESKTOP_RAIL_QUERY = '(min-width: 861px)';
+
+  function desktopRailMedia() {
+    return global.matchMedia ? global.matchMedia(DESKTOP_RAIL_QUERY) : null;
+  }
+
+  function setLeftRailCollapsed(collapsed) {
+    var media = desktopRailMedia();
+    // 窄屏一律按展开处理：那边走的是既有的堆叠 + details 折叠，抽屉不该插手。
+    var on = !!collapsed && !!media && media.matches;
+    dom.body.classList.toggle('is-rail-left-collapsed', on);
+    if (dom.railLeftCollapse) dom.railLeftCollapse.setAttribute('aria-expanded', on ? 'false' : 'true');
+    if (dom.railLeftEdge) dom.railLeftEdge.setAttribute('aria-expanded', on ? 'false' : 'true');
+    if (!dom.railLeft) return;
+    // 收起后整条左栏不该还能被 Tab 到。inert 是正解，但要先探测再用；
+    // 不支持的浏览器靠 aria-hidden + CSS 的 visibility: hidden 兜底。
+    if ('inert' in dom.railLeft) dom.railLeft.inert = on;
+    if (on) dom.railLeft.setAttribute('aria-hidden', 'true');
+    else dom.railLeft.removeAttribute('aria-hidden');
+  }
+
+  function watchLeftRailDrawer() {
+    if (!dom.railLeft || !dom.railLeftCollapse || !dom.railLeftEdge) return;
+    dom.railLeftCollapse.addEventListener('click', function () {
+      setLeftRailCollapsed(true);
+      // 刚点的那颗按钮跟着左栏一起被移出焦点顺序了，焦点得交给边缘那颗，不能掉回 body。
+      try { dom.railLeftEdge.focus(); } catch (err) { /* noop */ }
+    });
+    dom.railLeftEdge.addEventListener('click', function () {
+      setLeftRailCollapsed(false);
+      try { dom.railLeftCollapse.focus(); } catch (err) { /* noop */ }
+    });
+    var media = desktopRailMedia();
+    if (!media) return;
+    // 缩到窄屏必须复位：否则堆叠布局里会留下一条既看不见又收不回来的 inert 左栏。
+    var reset = function () { if (!media.matches) setLeftRailCollapsed(false); };
+    if (typeof media.addEventListener === 'function') media.addEventListener('change', reset);
+    else if (typeof media.addListener === 'function') media.addListener(reset);
+  }
+
   function boot() {
     var endpointLabel = CFG.apiBase || '(未配置)';
     dom.gateEndpoint.textContent = endpointLabel;
@@ -2193,6 +2241,7 @@
     renderQuickActions();
     clearCanvas();
     collapseRailsOnNarrowScreens();
+    watchLeftRailDrawer();
     watchComposerHeight();
     showGate('');
 

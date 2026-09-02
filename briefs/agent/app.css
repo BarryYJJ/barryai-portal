@@ -166,7 +166,9 @@ button, input, textarea { font-family: inherit; font-size: inherit; color: inher
 /* ══════════ 工作区栅格 ══════════ */
 .workbench {
   display: grid;
-  grid-template-columns: 244px minmax(0, 1fr) 304px;
+  /* 左栏宽度走变量：桌面抽屉收起时把它压成 0，主画布（1fr）自己吃掉，右栏 304px 不动。 */
+  --rail-left-w: 244px;
+  grid-template-columns: var(--rail-left-w) minmax(0, 1fr) 304px;
   align-items: stretch;
   min-height: calc(100vh - var(--topbar-h) - var(--composer-h));
   min-height: calc(100dvh - var(--topbar-h) - var(--composer-h));
@@ -203,6 +205,18 @@ details[open] > .rail-head .rail-toggle { transform: rotate(-135deg) translate(-
   padding-bottom: 12px;
 }
 .empty-note { padding-bottom: 0; }
+
+/* ── 左栏抽屉的两个控件 ──
+   默认完全不存在：<=860px 走既有的堆叠 + details 折叠，这两颗按钮不该冒出来干扰。
+   真正的形态和显隐都在下面 @media (min-width: 861px) 里打开。 */
+.rail-collapse, .rail-edge { display: none; }
+/* 箭头沿用 .rail-toggle 那套：直角两条边转成 V 形。135° 指左（收起），-45° 指右（展开）。 */
+.rail-arrow {
+  width: 7px; height: 7px; flex: none;
+  border-right: 1px solid currentColor; border-bottom: 1px solid currentColor;
+}
+.rail-collapse .rail-arrow { transform: rotate(135deg) translate(-1px, -1px); }
+.rail-edge .rail-arrow { color: var(--white); transform: rotate(-45deg) translate(-1px, -1px); }
 
 /* ── 快捷任务 ── */
 .qa-list { display: grid; gap: 6px; }
@@ -554,9 +568,60 @@ body:not(.is-locked) .gate { display: none; }
   font-size: 13px; line-height: 1.6; color: var(--blue-ink); overflow-wrap: anywhere;
 }
 
+/* ══════════ 桌面：整条左栏可以收成抽屉 ══════════
+   861px 是下面 860px 堆叠断点的补集：>860px 才有抽屉，<=860px 一切照旧。
+   收起的是整条左栏而不是里面的 details；主画布吃掉让出来的宽度，右栏不动。
+   收起后左屏边缘留一条**静止时完全透明**的窄命中区 —— 屏幕边上不挂常驻蓝条，
+   hover / 键盘聚焦才渐显深蓝半透明渐变和一个右箭头。
+   过渡都写成 transition，正好被文件末尾那条 prefers-reduced-motion 总闸关掉。
+   ═══════════════════════════════════════════════════════════ */
+@media (min-width: 861px) {
+  .workbench { transition: grid-template-columns .24s ease; }
+  .is-rail-left-collapsed .workbench { --rail-left-w: 0px; }
+
+  .rail-left { position: relative; transition: visibility 0s; }
+  /* 收起动画走完再把左栏移出焦点顺序。visibility: hidden 同样会让子节点不可聚焦，
+     是 inert 不被支持时的兜底（app.js 那边还会同时打 inert + aria-hidden）。 */
+  .is-rail-left-collapsed .rail-left {
+    overflow: hidden;
+    visibility: hidden;
+    border-right-color: transparent;
+    transition: visibility 0s linear .24s;
+  }
+
+  /* 贴在左栏右边界上的小把手 */
+  .rail-collapse {
+    position: absolute; top: 50%; right: 0; transform: translateY(-50%);
+    z-index: 2;
+    display: flex; align-items: center; justify-content: center;
+    width: 16px; height: 64px; padding: 0;
+    background: var(--white); color: var(--blue);
+    border: 1px solid var(--rule-ink-soft); border-right: 0;
+    cursor: pointer;
+    transition: background-color .18s ease, border-color .18s ease;
+  }
+  .rail-collapse:hover { background: var(--blue-tint); border-color: var(--rule-ink); }
+  .is-rail-left-collapsed .rail-collapse { display: none; }
+
+  /* 屏幕左缘的窄命中区：只在收起态存在，展开时连 display 都没有，挡不住左栏 */
+  .rail-edge {
+    position: fixed; left: 0; top: var(--topbar-h); bottom: var(--composer-h);
+    z-index: 20;
+    display: none; align-items: center; justify-content: flex-start;
+    width: 26px; padding: 0 0 0 5px; margin: 0;
+    border: 0; cursor: pointer;
+    background: linear-gradient(90deg,
+      rgba(20, 32, 92, .55) 0%, rgba(20, 32, 92, .26) 46%, rgba(20, 32, 92, 0) 100%);
+    opacity: 0;
+    transition: opacity .24s ease;
+  }
+  .is-rail-left-collapsed .rail-edge { display: flex; }
+  .rail-edge:hover, .rail-edge:focus-visible { opacity: 1; }
+}
+
 /* ══════════ 响应式：栏位在窄屏折叠 ══════════ */
 @media (max-width: 1180px) {
-  .workbench { grid-template-columns: 224px minmax(0, 1fr); }
+  .workbench { --rail-left-w: 224px; grid-template-columns: var(--rail-left-w) minmax(0, 1fr); }
   .rail-right {
     grid-column: 1 / -1;
     border-left: 0; border-top: 1px solid var(--rule-ink-soft);
