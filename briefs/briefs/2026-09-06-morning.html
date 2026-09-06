@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-09-06 早间 AI 简报</title>
+<style>
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-09-07 04:01:31</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-09-06 早间 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-09-06 01:30</strong> &nbsp;→&nbsp; <strong>2026-09-06 10:30</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">10</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">5 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">50.0%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">9 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">OpenAI</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">算力</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">Agent</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">GPT</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">大语言模型</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">GPU</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">AI芯片</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-22258844882824881">国产算力继续“扛业绩大旗”：26Q2计算机板块收入同比增14%、净利润增49%，但毛利率仅24%，算力硬件仍是主线，赚钱厚度还得补课。</a></li><li><a class="tldr-jump" href="#t-55521144115154184">AI降本开始“向代码要利润”：据帖文，5.6-sol优化GPU kernel令推理成本降低20%，改进推测解码令Token生成效率提高15%，算力竞争不只拼买卡。</a></li><li><a class="tldr-jump" href="#t-45548822885852888">GPT-6 Astra被卖方押注从“画图”走向“造物”：3D/CAD能力催化扫描与打印需求，思看科技、拓竹产业链成为“眼睛＋双手”的关注方向。</a></li><li><a class="tldr-jump" href="#t-14425511554544552">游戏开发迎来“40美元打样”：天风称GPT-6 Astra用40分钟、约40美元生成《国金对决》，3D建模与游戏制作工具链成为应用端看点。</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-14425511554541182">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-06 08:52 · 👁 1098</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【兴证医药】阿斯利康口服SER...</div>
+  <div class="topic-content">【兴证医药】阿斯利康口服SERD获FDA批准上市，ODAC此前曾投票反对
+
+9月4日，FDA加速批准阿斯利康camizestrant（口服SERD）联合CDK4/6抑制剂上市，用于HR+/HER2-乳腺癌：患者在一线芳香化酶抑制剂+CDK4/6抑制剂治疗期间，通过检测发现新出现的ESR1突变、但尚未发生影像学进展时，即可将<mark>AI</mark>切换为camizestrant并继续原CDK4/6抑制剂。FDA同时批准Guardant360 CDx作为ctDNA伴随诊断。
+
+此前，FDA ODAC在4月30日曾以6票对3票认为该方案没有充分的临床意义获益；但ODAC建议不具有约束力，FDA可独立作出最终监管决定。
+ODAC会议后FDA要求补充分析PFS2及ctDNA数据，并要求阿斯利康开展确证性研究进一步验证。
+
+#ESR1m突变的ER+/HER2-乳腺癌的全球竞争格局：
+获批上市：elacestrant（SERD，Stemline/Menarini）、Imlunestrant （SERD，礼来）、Vepdegestrant（ER PROTAC，辉瑞/Arvinas）、camizestrant（SERD，AZ）；
+NDA：Giredestrant（SERD，罗氏）；
+
+资料来源：FDA、阿斯利康公告、ClinicalTrials.gov；
+注：仅为公开资料整理，不构成投资建议
+联系人：孙宋暄15121161179/杨希成/黄翰漾/孙媛媛</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425511554541182" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521144115154184">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-06 08:51 · 👁 1096</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">一个（爆米花）kernel，原...</div>
+  <div class="topic-content">一个（爆米花）kernel，原本指的是一种特殊品种的玉米籽粒，加热后能够爆开，并由内向外翻卷。
+
+而在计算领域，kernel 也指一段通常只有几百行的 <mark>GPU</mark> 代码，用来执行<mark>大语言模型</mark>中的数学计算和 Attention（注意力）等操作。
+
+<mark>GPU</mark> 只有在 kernel 能够持续不断地给 Tensor Cores（张量核心）提供数据、让计算单元始终保持忙碌的情况下，才能真正发挥出纸面标称的 FLOPS <mark>算力</mark>。
+
+如果内存访问模式设计得不好，数据供给跟不上，就会导致芯片上的计算单元大量处于闲置状态。
+
+在 <mark>OpenAI</mark> 这样的推理服务规模下，哪怕 <mark>GPU</mark> kernel 的效率只提高几个百分点，折算成计算资源和成本，也可能价值数亿美元。
+
+（1/2）
+
+5.6-sol 对生产环境中的 <mark>GPU</mark> kernel 进行了重写和优化，并自行解决了其中的问题，最终实际带来了：
+
+● 通过 <mark>GPU</mark> kernel 优化，推理服务成本降低 20%
+
+● 通过改进 speculative decoding（推测解码），Token 生成效率提高 15%
+
+● 节省下来的成本进一步转化为 Luna/Terra 的降价空间</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">OpenAI</span><span class="kw-tag">大语言模型</span><span class="kw-tag">GPU</span><span class="kw-tag">算力</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521144115154184" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258844882824881">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-06 08:51 · 👁 1093</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【申万计算机周报】26Q2计算...</div>
+  <div class="topic-content">【申万计算机周报】26Q2计算机业绩回顾：国产<mark>算力</mark>继续引领收入增长，利润仍承压！20260905
+
+✨&lt;e type=&quot;hashtag&quot; hid=&quot;28214185448251&quot; title=&quot;%23%E6%94%B6%E5%85%A5%E5%8A%A0%E9%80%9F%E3%80%81%E5%87%80%E5%88%A9%E6%B6%A6%E7%BB%A7%E7%BB%AD%E5%8F%8D%E5%BC%B9%23&quot; /&gt;   
+26Q2，板块整体收入同比+14%，较25Q4-26Q1（6%、5%）增速向上。
+毛利率为24%，自25Q1下降至近3年来底部后，维持在24%-26%区间内；
+26Q2，净利润增速为49%，持续反弹；净利润率5%，为22年以来高点。 
+
+✨&lt;e type=&quot;hashtag&quot; hid=&quot;15481852115452&quot; title=&quot;%23%E7%AE%97%E5%8A%9B%E7%A1%AC%E4%BB%B6%E4%BB%8D%E4%B8%BA%E4%B8%BB%E7%BA%BF%E3%80%81%E7%9F%AD%E6%9C%9F%E6%89%B0%E5%8A%A8%E4%B8%AD%E6%9C%9F%E8%A7%A3%E5%86%B3%23&quot; /&gt;   
+本季度，存储涨价给行业带来的业绩影响分化：部分具备供应链优势的厂商获得额外业绩、<mark>AI芯片</mark>出货成长性承压。
+预计中期内，受影响的厂商财报将呈现中性→高景气的局面，核心是国产产能爬坡有效缓解当前瓶颈。
+26Q3-27年，2个重点：1）国产超节点：26Q3出货→Q4爬产→27年放量；2）中国CSP资本开支景气超预期。&lt;e type=&quot;hashtag&quot; hid=&quot;48512184228588&quot; title=&quot;%23%E5%85%B3%E6%B3%A8AI%E8%8A%AF%E7%89%87%E3%80%81%E6%9C%8D%E5%8A%A1%E5%99%A8%E3%80%82%23&quot; /&gt;   
+
+✨&lt;e type=&quot;hashtag&quot; hid=&quot;88214185448282&quot; title=&quot;%23AI%E5%BA%94%E7%94%A8%EF%BC%9AInfra%E5%8A%A0%E9%80%9F%E9%83%A8%E7%BD%B2%23&quot; /&gt;   
+下游客户整体进入数据治理+<mark>Agent</mark>中台搭建阶段，FDE等概念持续验证行业know-how壁垒。
+在国内，软件厂商负责<mark>大模型</mark>落地的“最后一公里”，产业链将继续呈现分工格局；软件厂商将受益于<mark>AI</mark>化带来的价值增量（而非IT支出的腾挪）。
+
+✨&lt;e type=&quot;hashtag&quot; hid=&quot;51584812441514&quot; title=&quot;%23%E6%99%AF%E6%B0%94%E5%BA%A6%E5%88%86%E6%9E%90%23&quot; /&gt;   
+景气度相对较高的细分领域：<mark>算力</mark>、券商IT；
+收入和利润在底部，后续业绩可能会加速的细分领域：安全可控、政务IT、汽车IT；
+收入增速较快，利润增速稳健的细分领域：智能制造。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Agent</span><span class="kw-tag">AI芯片</span><span class="kw-tag">大模型</span><span class="kw-tag">算力</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258844882824881" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548822885852888">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-06 08:51 · 👁 1063</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">重视3D建模-GPT6最大变化...</div>
+  <div class="topic-content">重视3D建模-GPT6最大变化方向【华福计算机】
+
+前代<mark>GPT</mark>系列大多还在拼“文字推理、代码能力、图片生成、语音交互和基础的 2D 绘图/UI”，直到 <mark>GPT</mark>-6 Astra 发布，<mark>OpenAI</mark> 在官方宣传片和技术报告中才正式把 3D/CAD 空间能力作为核心亮点宣传，效果炸裂
+利好方向1：3D 扫描仪——3D 扫描仪就是GPT6的眼睛，把现实中的复杂实物一键扫成点云发给 <mark>GPT</mark>-6，瞬间可重构成可编辑的矢量 CAD 文件，对3D扫描仪的需求程度提升，此外，后续训练也需要3D扫描仪扫描的物理<mark>AI</mark>数据
+标的：思看科技
+利好方向2：3D 打印机 ——<mark>GPT</mark>-6 官方宣传片里，用拓竹3D打印机示范，从 Prompt 到打印实物
+标的：拓竹产业链相关公司</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">OpenAI</span><span class="kw-tag">GPT</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548822885852888" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425511554544552">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-06 08:51 · 👁 1056</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【天风海外】<mark>GPT</mark> 6 Ast...</div>
+  <div class="topic-content">【天风海外】<mark>GPT</mark> 6 Astra 的能力有多强？在熟悉的陆家嘴，换一种步伐
+
+我们要求以二级市场为主题创作小游戏，在40分钟后，消耗约40美元，<mark>GPT</mark> 6Astra构建出以陆家嘴国金中心为背景的格斗游戏《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E5%9B%BD%E9%87%91%E5%AF%B9%E5%86%B3&quot; title=&quot;%E5%9B%BD%E9%87%91%E5%AF%B9%E5%86%B3&quot; style=&quot;book&quot; /&gt;》——熟悉的地方，全新的交锋。
+
+在游戏中，GPT6 Astra设置了几种对手：风控与研究总监 游资大哥 前台 买方研究员 卖方研究员，各自有不同的招式。且游戏在信息受限下，依然较为准确建模出了<mark>苹果</mark>下沉广场与广场中环，弧形中庭、多层玻璃栏杆、暖色石材、快速扶梯与几何天窗。我们认为<mark>GPT</mark> 6 Astra的三维理解，建模能力，软件操作，游戏创造能力均在爆发，关注对于3DMax AutoCAD Blender+视频 Roblox Unity的<mark>Agent</mark>商业化拉动影响。
+
+游戏地址&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fifc-arena.vercel.app%2F&quot; title=&quot;https%3A%2F%2Fifc-arena.vercel.app%2F&quot; /&gt;  其他游戏灵感/反馈欢迎联系天风海外李泽宇
+
+🌋请多支持天风传媒互联网/海外刘欣团队</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Agent</span><span class="kw-tag">GPT</span><span class="kw-tag">苹果</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425511554544552" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>

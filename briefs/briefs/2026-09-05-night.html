@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-09-05 深夜 AI 简报</title>
+<style>
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-09-07 02:46:47</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-09-05 深夜 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-09-04 20:30</strong> &nbsp;→&nbsp; <strong>2026-09-05 01:30</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">14</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">5 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">35.7%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">5 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">4</span></div><div class="hot-kw-row"><span class="kw-name">华为</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">数据中心</span><div class="bar-track"><div class="bar-fill" style="width:25%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">智能体</span><div class="bar-track"><div class="bar-fill" style="width:25%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">光模块</span><div class="bar-track"><div class="bar-fill" style="width:25%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">PCB</span><div class="bar-track"><div class="bar-fill" style="width:25%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">GPU</span><div class="bar-track"><div class="bar-fill" style="width:25%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">液冷</span><div class="bar-track"><div class="bar-fill" style="width:25%"></div></div><span class="kw-count">1</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-22258844542215281">月之暗面（Kimi）拟赴港上市募资50亿美元，国产大模型融资从一级市场卷到二级市场</a></li><li><a class="tldr-jump" href="#t-82258844542215152">德龙激光TGV玻璃通孔设备卡位玻璃基板封装，硅晶圆隐切设备已拿下国内头部存储厂订单并量产验证</a></li><li><a class="tldr-jump" href="#t-82258844542215152">易点天下是西北最大云采购方、阿里等大厂云分销商，AI时代云之上再叠一层token消耗</a></li><li><a class="tldr-jump" href="#t-22258844542241581">普元信息全面上华为云，&quot;易数&quot;AI原生数据基座入选IDC企业级AI平台报告，签约南京新工集团</a></li><li><a class="tldr-jump" href="#t-22258844542255451">Robinhood美国期权交易量第一、股票前三，AI数字化投顾+高息存款构成&quot;留存资金增多-交易量扩大&quot;正循环</a></li><li><a class="tldr-jump" href="#t-45548822452254248">出版板块估值低位、国有分红有提升空间，中原传媒、南方传媒等靠IP运营与AI布局找增量</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-82258844542215152">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-05 00:02 · 👁 1079</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">20260904今日段子汇总
+...</div>
+  <div class="topic-content">20260904今日段子汇总
+
+1、易点天下：行业称公司与国内外大厂如阿里等合作紧密，是大厂云的分销商（是西北地区最大云采购方）帮助大厂分销云给自有客户，<mark>AI</mark>模型时代在云基础上增加token消耗
+
+2、德龙激光：1、公司为玻璃基板封装提供关键的TGV（玻璃通孔）激光微孔加工设备；2、公司LSD-6130硅晶圆激光隐切设备已获国内存储芯片头部厂商订单并完成量产验证，后续推广有望加速；3、公司重点关注固态电池技术， 将压辊清洗、 激光烘烤等技术引入到固态电池制程应用， 攻克固态电池制程难题， 推出极片制痕绝缘、 干法电极激光预热、 超快激光极片制片等;
+
+3、爱仕达：公司与智元机器人签署战略合作协议
+
+4、新炬网络：公司是一家以提供IT<mark>数据中心</mark>运维服务及运维产品为主的多云全栈智能运维服务商，下属子公司新炬技术AIOPS智慧运维平台软件V4.0与<mark>华为</mark>云GaussDB、<mark>华为</mark>云公有云平台（鲲鹏）完成相互兼容性测试认证
+
+5、百大集团：公司主要从事百货零售、酒店服务、物业管理业务
+
+6、亚盛集团：我国当前最大规模的农艺种植基地；公司主营啤酒花、苜蓿牧草、马铃薯、制种玉米、大麦、食葵、果蔬等作物规模化种植
+
+7、海通发展：公司地处福建福州，主要从事国内沿海以及国际远洋的干散货运输业务，公司运营的航线遍布30余个国家和地区的200余个港口，为客户提供矿石、煤炭、化肥等多种货物的海上运输
+
+8、恒盛能源：公司采用MPCVD技术生产20×20毫米金刚石，导热性能优于陶瓷，目标切入高功率芯片、<mark>GPU</mark>散热市场
+
+9、高争民爆：西藏民爆行业龙头；公司34%股份拟无偿划转，控股股东或变更为地矿集团
+
+10、会稽山：国内龙头黄酒供应商；公司在生产黄酒的同时，也利用黄酒生产过程产生的醪糟作为原料，通过蒸馏生产糟烧白酒，并一直有销售糟烧白酒等副产品的传统
+
+11、源飞宠物：公司主要产品包括宠物牵引用具、宠物注塑玩具等宠物用品
+
+12、中国出版：公司旗下中华书局打造先贤数字人<mark>智能体</mark>及先贤智能阅读空间
+
+13、华天酒店：湖南省旅游酒店支柱企业
+
+14、新五丰：湖南省国资委旗下，国内活大猪主要出口商之一，湖南唯一国有上市猪企
+
+15、华阳国际：1、公司是国家高新技术企业、建筑设计行业“国家住宅产业化基地”、首批“装配式建筑产业基地”、首批“全过程工程咨询试点单位”；2、公司涉及到低空经济的业务主要是关于航空小镇的相关规划设计
+
+16、翠微股份：子公司海科融通已与央行数字货币研究所指定运营银行系统对接，在多商业场景中支持数字人民币支付收款，为商户提供数字人民币收单服务
+
+17、海欣食品：公司位于福建省福州市，为国内鱼丸龙头，主营速冻鱼糜，速冻肉制品
+
+18、实丰文化：公司表示将根据疯狂动物城IP的独特属性、目标受众需求及市场趋势，开发合适的IP潮流产品
+
+19、天沃科技：公司主营压力容器设备制造和电力工程EPC业务，与上海微电子均为上海国资委下属公司
+
+20、罗 牛 山：海南本地股，主营畜禽养殖为主
+
+21、正虹科技：公司生猪养殖业务主要采用自繁自养和育肥猪“公司+农户”代养的运营模式
+
+22、欢瑞世纪：1、公司与阶跃星辰共建“麟跃”<mark>AI</mark>联合实验室，已上线基于IP《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E5%8D%81%E5%B7%9E%E4%B8%89%E5%A2%83&quot; title=&quot;%E5%8D%81%E5%B7%9E%E4%B8%89%E5%A2%83&quot; style=&quot;book&quot; /&gt;》的首支<mark>AI</mark>短剧先导概念片，并持续推进AIGC在短剧、互动剧、漫剧等场景落地；2、公司通过与明略科技、阶跃星辰合作，用 <mark>AI</mark> 算法优化短剧投流渠道 / 素材 / 出价、社媒智能运营与 AIGC 营销素材生成，聚焦影视内容精准推广与降本增效
+
+23、天邦食品：公司养猪采用公司+家庭农场养殖模式，同时也是国内规模最大膨化水产饲料企业之一
+
+24、绿康生化：公司地处福建，专注动物保健品领域，核心产品为兽药原料药、制剂、益生菌以及绿色微生物功能添加剂等
+
+25、湖南天雁：公司间接控股股东将变更为兵器装备集团汽车业务分立的中央企业
+
+26、播恩集团：公司的主要产品为猪用饲料，拟1.25亿元收购3家饲料公司
+
+27、新 希 望：公司拥有全国最大的聚落式生猪繁育体系；同时也是国内第一大父母代鸭苗，第二大商品代鸡苗、鸭苗供应商
+
+28、古越龙山：公司拥有中国最大的黄酒生产基地，有少量的白酒生产和销售
+
+29、楚天龙：国内较早从事数字人民币相关技术研究与产品开发的企业之一
+
+30、敦煌种业：国家育繁推一体化企业；上半年净利润同比预增157.1%左右，因“公司持续优化产品营销策略，依托精准市场定位与多渠道推广举措，自有核心优势品种销量稳步攀升”
+
+31、中水渔业：中国农业发展集团旗下，主营远洋水产品，有金枪饺子、金枪鱼圈等预制食品
+
+32、邦基科技：公司拟收购北溪农牧等公司股权，本次交易的标的公司以生猪养殖及销售为主
+
+33、平潭发展：A股唯一一家注册在平潭岛的上市公司，公司拥有90万亩林地，受益林业碳汇交易发展
+
+34、福建水泥：公司为福建省水泥行业的传统龙头企业，是福建地区产能规模最大的水泥制造企业
+
+35、润贝航科：控股子公司杭州轻云将主要负责航空、航天先进复合材料的研发、生产
+
+36、合富中国：公司为唯一一家海峡两岸市场“双上市”的医疗企业，其母公司合富医疗控股在台湾上市，公司实际控制人为台湾企业家王琼芝，在两岸医疗流通领域有深度合作
+
+37、统一股份：国产润滑油龙头品牌，依托润滑油领域技术积淀切入<mark>液冷</mark>赛道；控股股东及一致行动人拟转让28.09%公司股份
+
+38、通达电气：公司与厦门金龙联手打造自动驾驶物流车
+
+39、安记食品：公司位于福建泉州市，系复合调味品小龙头，主要产品包括复合调味粉、天然提取物调味料、香辛料、酱类、风味清汤等
+
+40、方正科技：公司<mark>PCB</mark>业务产品主要包括高密度互连板、多层板、系统板、大型背板、金手指板和车载板等，在服务存储和<mark>光模块</mark>领域均有应用，<mark>华为</mark>是公司<mark>PCB</mark>业务的主要客户之</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">数据中心</span><span class="kw-tag">智能体</span><span class="kw-tag">光模块</span><span class="kw-tag">PCB</span><span class="kw-tag">GPU</span><span class="kw-tag">华为</span><span class="kw-tag">液冷</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258844542215152" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258844542215281">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-05 00:02 · 👁 1064</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title"><mark>月之暗面</mark>计划在港股上市，筹资5...</div>
+  <div class="topic-content"><mark>月之暗面</mark>计划在港股上市，筹资50亿美元</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">月之暗面</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258844542215281" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258844542241581">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-05 00:01 · 👁 1052</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">✨ 普元信息更新2026090...</div>
+  <div class="topic-content">✨ 普元信息更新20260904
+生态赋能平台重磅升级：
+普元正式将原赋能平台全面升级为“普元生态赋能平台”，不仅打通了商机协同与资源聚合的数字化全链路，更全面升级了普元面向2026年的生态伙伴支持体系。
+
+✨ 联合伙伴签约南京新工集团：
+普元“易数”联合伙伴支持南京新工集团统一数据平台建设，赋能机电、轻纺、化建、医药等业务。
+
+✨ 与<mark>华为</mark>云联合创新：
+普元在2026中国国际大数据产业博览会上，亮相<mark>华为</mark>云“数据要素场景联合创新行动”产业伙伴阵容，将依托“易数”智能数据治理等<mark>AI</mark>原生数字基座产品体系与实践经验，助力各类数据要素在真实场景中释放价值。
+
+✨ 入选IDC与爱分析报告：
+普元入选IDC《新型企业级<mark>AI</mark>平台正在兴起》报告；入选爱分析《Data+<mark>AI</mark>厂商全景报告》全景地图，在四大细分市场被评为具备成熟解决方案与落地能力的代表厂商。
+
+✨ 多项目获评央国企创新实践成果：
+普元联合汉江水利水电（集团）、长沙机场、青岛西海岸公用事业集团的申报案例，分别入选中国信通院“2025年央国企数智化转型创新实践成果”名单。
+
+✨ 参编多个行业文件：
+普元参与共建的中国信通院《企业数智化研发发展调研报告2026》正式发布；参编全国数标委数字化转型技术文件《数字化转型数字化服务与应用能力水平评价规范》。
+
+✨ 普元数智基座城市巡展 · 青岛站&amp;苏州站
+普元数智基座城市巡展相继落地青岛、苏州，青岛站联合山东CIO联盟汇聚来自制造、能源、消费品等领域70余位企业数字化负责人，苏州站汇集中国电科十四所、明基佳世达集团、晶科能源等企业代表，与电子科技大学、CIO时代等机构专家，共同探讨<mark>AI</mark>落地新解法。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">华为</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258844542241581" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258844542255451">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-04 23:54 · 👁 1021</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【中信建投金融】Robinho...</div>
+  <div class="topic-content">【中信建投金融】Robinhood首次覆盖：全球零售经纪平台的创新标杆，美国活跃交易商第一，增长潜力巨大
+
+1. 后起之秀、行业领先：Robinhood是美国散户零佣金交易模式的首创者，打破老牌券商客群垄断，成为美国券商经纪行业的领军公司之一。可提供股票、期权、加密货币、预测市场合约等多元化交易服务，目前期权交易量美国市场第一、股票交易量稳居前三，加密货币和预测市场业务具备显著向上空间。
+
+2. 与客户共成长，打破互联网金融机构只能服务年轻客群的刻板印象：千禧一代和Z世代客户占比高，平均客户年龄36岁、且正在在逐步上涨，说明客户留存率较高。核心获客及留客优势是便宜、好用、有新鲜感、持续不断的产品创新，与客户需求共同成长。
+
+3. 收入与客户总资产规模直接挂钩，收入增长的核心在于提高客户留存和提高客户交易量：除了零佣金模式和多元化产品选择对交易量的刺激外，通过持续的产品创新，以付费会员福利、高息存款产品、IRA养老金、信用卡、<mark>AI</mark>数字化投顾、散户打新等综合服务来提升客户粘性和资金留存，从而形成“留存资金增多-交易量扩大-留存资金更多”的正向循环。
+
+4. 中短期看，估值基础扎实，具备向上期权：股票、期权等传统交易收入稳定增长，预测市场业务快速增长，两者共同构筑了业绩和估值向上的大方向。今年上半年加密货币价格下跌和收入缩水已在估值下行中充分体现，作为唯一一项跟资产价格正相关的主要业务，加密货币价格在当前低位上的任何反弹，都将带来业绩和估值的双重弹性。
+
+5. 预计营收、利润增速保持20%以上，EPS增速30%以上：Robinhood业务模式极具创新性，客群基础庞大、客户粘性高，盈利成长性强，估值向上空间大。综合PEG、企业价值和DCF等多种估值方法，目标价152美元，涨幅空间40%，首次覆盖买入评级，金融板块首推。
+
+本报告基于跟公司数次深入沟通，内容丰富翔实，欢迎查阅报告全文，周末慢慢看，欢迎交流</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258844542255451" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548822452254248">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-04 21:12 · 👁 1102</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">出版行业半年报总结：蓄势聚能，...</div>
+  <div class="topic-content">出版行业半年报总结：蓄势聚能，笃行致远【中泰传媒互联网】
+
+[玫瑰]我们看好出版中长线投资机会。
+⭐我们认为，出版行业短期维度仍受教辅监管、一般图书景气度偏弱等因素影响处于承压状态，但中长期维度伴随后续教辅征订逐渐进入常态化监管阶段，出版市场景气度有望在强化新品研发以及渠道优化、销售模式升级推动下，逐步企稳回暖。
+
+⭐防守维度，出版安全资产标签不变，国有出版教材教辅业务短期虽受政策趋严影响有所波动，但影响程度可控，且我们看好其在中长期凭借国有背书、内容、渠道等优势提升市占率。出版具备安全边际，当前板块估值处于低位，收益空间明确，地方国有出版分红比例具备可观提升空间和能力。
+
+⭐进攻维度，出版公司在手资源优势明显，有望利用充沛资金、丰富内容、渠道控制力优势，突破智慧教育、研学业务、课后服务、老年业务落地，挖掘线下门店空间与权威垂类内容价值，叠加IP运营与<mark>AI</mark>相关布局深化，为业绩增长提供新增量。
+
+🔥建议关注：
+1、区域优势显著，渠道价值有望持续挖掘的国有出版公司：中原传媒、南方传媒、山东出版、中南传媒、浙版传媒等。
+2、媒体资产储备较多，垂类内容优势明显的公司：中国科传、中信出版、南方传媒等。
+3、优质IP内容储备充足、IP运营变现方式成熟的出版公司：荣信文化、中文在线、中信出版、掌阅科技等。
+4、<mark>AI</mark>+教育布局领先的相关标的：南方传媒、世纪天鸿、中原传媒、皖新传媒。
+
+⚡风险提示：文化监管端的政策风险；国有传媒企业优惠政策变动；短视频直播电商图书折扣力度加大；研报使用的信息数据更新不及时的风险。
+
+💐报告链接：出版行业半年报总结：蓄势聚能，笃行致远【中泰传媒互联网】
+
+☎欢迎交流&amp;请鼎力支持中泰传媒互联网康雅雯团队
+康雅雯 18521305887
+李昱喆 18939881981</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548822452254248" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
