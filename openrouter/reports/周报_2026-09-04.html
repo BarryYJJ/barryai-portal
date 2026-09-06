@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<style>
+  /* Montserrat 拉丁可变字重（100–900），自托管，运行时不依赖任何 CDN；
+     unicode-range 只声明拉丁码位，中文自然回落到 PingFang SC。授权见 ../assets/fonts/OFL.txt */
+  @font-face {
+    font-family:"Montserrat"; font-style:normal; font-weight:100 900; font-display:swap;
+    src:url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+  }
+  /* 设计系统「Blueprint」：与看板 style.css 同一套色板 —— 钴蓝制图场 + 1px 方格网 + 近直角面板；
+     红=上涨/中国、蓝=下跌/美国 仅用于数据语义。760px 定宽，适配微信长图。 */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#eef0f7; font-family:"Montserrat","PingFang SC","Hiragino Sans GB","Microsoft YaHei",-apple-system,"Helvetica Neue",sans-serif; -webkit-font-smoothing:antialiased; color:#0f1633; }
+  .page { width:760px; background:#fff; }
+
+  /* 深蓝制图场：平铺纯色 + 24px 网格，无光晕 */
+  .hd, .ft { background-color:#1123a6; color:#fff;
+    background-image:linear-gradient(rgba(255,255,255,.085) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.085) 1px,transparent 1px);
+    background-size:24px 24px; }
+  .hd { position:relative; padding:26px 34px 24px; border-bottom:1px solid rgba(255,255,255,.28); }
+  .hd .barry-rs-home { margin-bottom:18px; }
+  .signature { position:absolute; top:18px; right:22px; font-size:10px; font-weight:700; letter-spacing:.2px; color:#fff; white-space:nowrap; }
+  .hd .tag { font-size:10.5px; font-weight:600; letter-spacing:.16em; color:#b7c2f4; }
+  .hd h1 { font-size:30px; font-weight:800; letter-spacing:-.01em; margin:6px 0 10px; line-height:1.2; }
+  .hd .meta { display:flex; flex-wrap:wrap; gap:6px 0; font-size:11.5px; color:#b7c2f4; font-variant-numeric:tabular-nums; }
+  .hd .meta span { padding-right:12px; margin-right:12px; border-right:1px solid rgba(255,255,255,.28); }
+  .hd .meta span:last-child { border-right:none; margin-right:0; padding-right:0; }
+
+  /* 坐标式标签 */
+  .coord { display:inline-block; margin-right:10px; font-size:10.5px; font-weight:600; letter-spacing:.12em; font-variant-numeric:tabular-nums; color:#1b34e8; vertical-align:1px; }
+
+  /* 大盘温度计：三格共享 1px 边框 */
+  .band { display:grid; grid-template-columns:1.1fr 1fr 1fr; gap:1px; background:#cfd5ee; border-bottom:1px solid #cfd5ee; }
+  .band > div { background:#f4f5fb; padding:16px 34px 14px; }
+  .band > div + div { padding-left:22px; }
+  .band .lab { display:block; font-size:10.5px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#6b7394; margin-bottom:6px; }
+  .band .big { display:block; font-size:38px; font-weight:800; color:#0f1633; line-height:1; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+  .band .wow { display:block; font-size:22px; font-weight:800; color:#0f1633; line-height:1.1; font-variant-numeric:tabular-nums; }
+  .band .wowword { display:block; font-size:22px; font-weight:800; color:#1b34e8; line-height:1.1; }
+
+  .sec { padding:20px 34px 22px; border-bottom:1px solid #cfd5ee; }
+  .sec h2 { font-size:13px; color:#0f1633; font-weight:700; margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid #e6e9f6; display:flex; align-items:baseline; }
+  .lead { border:1px solid #cfd5ee; border-left:3px solid #1b34e8; border-radius:2px; padding:16px 18px; font-size:16px; line-height:1.7; color:#0f1633; font-weight:600; background:#f4f5fb; }
+
+  .mrow { display:flex; gap:1px; background:#cfd5ee; border:1px solid #cfd5ee; border-radius:2px; }
+  .mcard { flex:1 1 0; background:#fff; padding:14px 12px 12px; text-align:center; min-width:0; }
+  .mchg { font-size:24px; font-weight:800; color:#c92a2a; font-variant-numeric:tabular-nums; letter-spacing:-.01em; }
+  .mchg.down { color:#1864ab; }
+  .mname { font-size:13px; font-weight:700; color:#0f1633; margin-top:4px; word-break:break-all; }
+  .mby { font-size:11px; color:#6b7394; margin-top:3px; font-variant-numeric:tabular-nums; }
+
+  table { width:100%; border-collapse:collapse; }
+  td { padding:8px 6px; font-size:14px; border-bottom:1px solid #e6e9f6; }
+  .rk { color:#6b7394; width:28px; font-weight:600; font-size:11px; letter-spacing:.06em; font-variant-numeric:tabular-nums; }
+  .num { text-align:right; font-weight:700; color:#0f1633; font-variant-numeric:tabular-nums; }
+  .chg { text-align:right; width:64px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .chg.up { color:#c92a2a; } .chg.down { color:#1864ab; }
+  .fg { margin-right:7px; } .by { color:#6b7394; font-size:12px; margin-left:8px; }
+
+  .bar { display:flex; height:34px; overflow:hidden; font-size:12px; color:#fff; font-weight:700; border:1px solid #cfd5ee; }
+  .seg { display:flex; align-items:center; justify-content:center; white-space:nowrap; overflow:hidden; }
+  .seg.cn { background:#e03131; } .seg.us { background:#1971c2; } .seg.other { background:#9aa3bd; }
+  .legend { margin-top:12px; display:flex; flex-wrap:wrap; gap:6px; }
+  .chip { font-size:12px; padding:3px 9px; border:1px solid #cfd5ee; border-radius:2px; background:#fff; color:#4f587c; font-variant-numeric:tabular-nums; }
+  .chip.cn { background:#fdeceb; color:#c92a2a; border-color:#f3c4c0; } .chip.us { background:#e7f0fb; color:#1864ab; border-color:#bfd6f2; }
+
+  .take { padding:12px 16px; border:1px solid #cfd5ee; border-left:3px solid #c92a2a; border-radius:2px; background:#fff; margin-bottom:10px; font-size:14px; line-height:1.65; color:#1f2747; }
+  .take b { color:#c92a2a; }
+  .watch { list-style:none; counter-reset:watch; }
+  .watch li { counter-increment:watch; position:relative; font-size:14px; line-height:1.7; color:#1f2747; padding:8px 0 8px 40px; border-bottom:1px solid #e6e9f6; }
+  .watch li:last-child { border-bottom:none; }
+  .watch li::before { content:counter(watch,decimal-leading-zero); position:absolute; left:0; top:11px; font-size:10.5px; font-weight:600; letter-spacing:.12em; color:#1b34e8; font-variant-numeric:tabular-nums; }
+
+  .ft { padding:18px 34px 24px; color:#dbe2ff; font-size:12px; line-height:1.8; border-top:1px solid rgba(255,255,255,.28); }
+  .ft b { color:#fff; }
+
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="hd">
+    <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+    <div class="signature">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+    <div class="tag">OPENROUTER · 真实用量观察</div>
+    <h1>大模型用量周观察</h1>
+    <div class="meta"><span>第 36 周</span><span>数据日 2026-09-04</span><span>数据来源 OpenRouter 全球路由真实用量</span></div>
+  </div>
+
+  <div class="band">
+    <div>
+      <span class="lab">近7日滚动 Prompt Token</span>
+      <span class="big">109.4T</span>
+    </div>
+    <div>
+      <span class="lab">周环比</span>
+      <span class="wow">-3.0%</span>
+    </div>
+    <div>
+      <span class="lab">判读</span>
+      <span class="wowword">环比回落</span>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="coord">01</span>头条判断</h2>
+    <div class="lead">OpenRouter近7日 Prompt Token 为109.4T，周环比回落3.0%；在上周24.8T的匿名模型ox-alpha退出榜单后，大盘仍接近持平。中国厂商总量增33.3%至70.8T、份额升至64.7%，美闭源增19.6%至27.4T、份额升至25.0%。投资上，流量快速迁移继续利好多模型路由与推理算力，但模型API的持续性和定价权仍需折价。</div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="coord">02</span>本周异动 Top3（涨幅）</h2>
+    <div class="mrow"><div class="mcard"><div class="mchg up">+3621%</div><div class="mname">hy4-preview-20260827</div><div class="mby">腾讯 · 13.4T</div></div><div class="mcard"><div class="mchg up">+277%</div><div class="mname">glm-5.3-flash-20260826</div><div class="mby">智谱 · 11.9T</div></div><div class="mcard"><div class="mchg up">+166%</div><div class="mname">minimax-m3-20260531</div><div class="mby">MiniMax · 6.9T</div></div></div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="coord">03</span>模型周榜 Top10（按 Prompt Token）</h2>
+    <table><tr><td class="rk">1</td><td><span class="fg cn">🇨🇳</span>hy4-preview-20260827<span class="by">腾讯</span></td><td class="num">13.4T</td><td class="chg up">+3621%</td></tr><tr><td class="rk">2</td><td><span class="fg cn">🇨🇳</span>glm-5.3-flash-20260826<span class="by">智谱</span></td><td class="num">11.9T</td><td class="chg up">+277%</td></tr><tr><td class="rk">3</td><td><span class="fg cn">🇨🇳</span>deepseek-v4-flash-20260731<span class="by">DeepSeek</span></td><td class="num">11.5T</td><td class="chg down">-3%</td></tr><tr><td class="rk">4</td><td><span class="fg us">🇺🇸</span>gpt-5.6-luna-20260709<span class="by">OpenAI</span></td><td class="num">11.1T</td><td class="chg up">+88%</td></tr><tr><td class="rk">5</td><td><span class="fg cn">🇨🇳</span>minimax-m3-20260531<span class="by">MiniMax</span></td><td class="num">6.9T</td><td class="chg up">+166%</td></tr><tr><td class="rk">6</td><td><span class="fg cn">🇨🇳</span>deepseek-v4-flash-20260423<span class="by">DeepSeek</span></td><td class="num">5.0T</td><td class="chg down">-4%</td></tr><tr><td class="rk">7</td><td><span class="fg cn">🇨🇳</span>hy3-20260706<span class="by">腾讯</span></td><td class="num">4.7T</td><td class="chg down">-28%</td></tr><tr><td class="rk">8</td><td><span class="fg us">🇺🇸</span>nemotron-3-ultra-550b-a55b-20260604<span class="by">NVIDIA</span></td><td class="num">3.9T</td><td class="chg down">-31%</td></tr><tr><td class="rk">9</td><td><span class="fg cn">🇨🇳</span>mimo-v2.5-20260422<span class="by">小米</span></td><td class="num">3.1T</td><td class="chg down">-71%</td></tr><tr><td class="rk">10</td><td><span class="fg cn">🇨🇳</span>glm-5.3-20260816<span class="by">智谱</span></td><td class="num">2.6T</td><td class="chg up">+126%</td></tr></table>
+  </div>
+
+  <div class="sec">
+    <h2><span class="coord">04</span>中美格局（按厂商份额）</h2>
+    <div class="bar">
+      <div class="seg cn" style="width:64.7%">中国 64.7%</div>
+      <div class="seg us" style="width:25.0%">美闭源 25.0%</div>
+      <div class="seg other" style="width:10.3%">其他 10.3%</div>
+    </div>
+    <div class="legend"><span class="chip cn">DeepSeek 18.1%</span><span class="chip cn">腾讯 16.6%</span><span class="chip cn">智谱 15.4%</span><span class="chip us">OpenAI 14.8%</span><span class="chip cn">MiniMax 6.8%</span><span class="chip us">Google 6.4%</span><span class="chip us">NVIDIA 4.9%</span></div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="coord">05</span>读数 → 个股含义</h2>
+    <div class="take"><b>匿名流量退潮而大盘仅降3.0%，新增需求已由多家头部模型接棒。</b>ox-alpha由比较日24.8T降至本期零上榜流量，但腾讯增加11.2T至18.2T、智谱增加9.2T至16.8T、OpenAI增加5.3T至16.2T、MiniMax增加4.6T至7.5T，抵消了大部分缺口。投资上，这种跨模型快速迁移更直接利好多模型路由、推理优化与算力利用率，而不是证明某一家模型API已形成稳定定价权。</div><div class="take"><b>国产份额跃升是总量增长与内部剧烈分化同时发生，不能把板块景气等同于单厂商胜出。</b>中国厂商总量增33.3%至70.8T，份额较比较日提升17.6个百分点至64.7%；其中腾讯增161.9%、智谱增121.6%、MiniMax增160.0%，小米则降69.4%至3.4T。国产推理生态的用量韧性继续增强，但模型榜单换手极快，算力链和兼容多模型的中间层确定性高于单一API收入外推。</div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="coord">06</span>下周观察点</h2>
+    <ul class="watch">
+      <li>HY4 Preview升至13.4T、周增3621%，观察腾讯总量18.2T能否在首周爆发后保持，并确认其增长并非短期测试流量</li><li>GLM 5.3 Flash升至11.9T、周增277%，GLM 5.3升至2.6T、周增126%；观察智谱总量16.8T能否继续增长，同时抵消GLM 5.2的28.7%回落</li><li>MiniMax M3升至6.9T、周增166%，其中free由1.1T升至5.4T、standard由1.5T微降至1.4T；观察免费流量能否转化为标准API需求</li><li>小米MiMo V2.5由10.8T降至3.1T、周降71%，观察其是否企稳，以及中国厂商64.7%的份额提升能否从单周迁移变成持续趋势</li>
+    </ul>
+  </div>
+
+  <div class="ft">
+    <b>数据来源</b>：OpenRouter (openrouter.ai/rankings)，数据日 2026-09-04。<br>
+    口径：近7日滚动窗口内保留全部有效行，按 total_prompt_tokens 统计；token 按各上游供应商自家 tokenizer 计，跨模型为近似值；仅含经 OpenRouter 路由的流量，不含厂商直连与私有部署，份额反映其客群结构而非全市场；“周环比/周涨幅”按 model_permaslug 跨 variant 聚合后，与比较日 2026-08-28（约 7 天前）的同模型聚合值计算，规避 free→standard 迁移导致的单 variant 虚高。<br>
+    本报告由数据自动生成 + 分析师人工判断，仅供研究参考，不构成投资建议。
+  </div>
+</div>
+</body>
+</html>

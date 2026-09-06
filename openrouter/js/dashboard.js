@@ -217,8 +217,14 @@
       const [x, y] = points[i];
       tooltip.hidden = false;
       tooltip.textContent = `${dates[i]} · ${fmtCount(values[i])}`;
-      tooltip.style.left = (x / W) * 100 + '%';
+      const xRatio = x / W;
+      tooltip.style.left = xRatio * 100 + '%';
       tooltip.style.top = (y / H) * 100 + '%';
+      tooltip.style.transform = xRatio < 0.2
+        ? 'translate(0, -120%)'
+        : xRatio > 0.8
+          ? 'translate(-100%, -120%)'
+          : 'translate(-50%, -120%)';
     }
     function hideTip() { tooltip.hidden = true; }
 
@@ -605,8 +611,14 @@
     function showTipAt(i) {
       tooltip.hidden = false;
       tooltip.textContent = `${dates[i]} · 开放 ${openVals[i].toFixed(1)}% / 闭源 ${closedVals[i].toFixed(1)}%`;
-      tooltip.style.left = (xScale(i) / W) * 100 + '%';
+      const xRatio = xScale(i) / W;
+      tooltip.style.left = xRatio * 100 + '%';
       tooltip.style.top = (yScale(Math.max(openVals[i], closedVals[i])) / H) * 100 + '%';
+      tooltip.style.transform = xRatio < 0.2
+        ? 'translate(0, -120%)'
+        : xRatio > 0.8
+          ? 'translate(-100%, -120%)'
+          : 'translate(-50%, -120%)';
     }
     function hideTip() { tooltip.hidden = true; }
 
