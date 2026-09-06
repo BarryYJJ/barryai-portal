@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # scripts/test-portal-links.sh
 #
-# 校验 barryai.cn 门户首页的入口链接：五个产品都要有入口，
+# 校验 barryai.cn 门户首页的入口链接：六个产品都要有入口，
 # 且都指向主站子路径，而不是旧的 briefs 子域。
 #
 # 用法：bash scripts/test-portal-links.sh [portal-index.html]
@@ -33,6 +33,9 @@ check $? "项目区有 /briefs/ 入口"
 grep -q 'class="card" href="/openrouter/"' "$PAGE"
 check $? "项目区有 /openrouter/ 入口"
 
+grep -q 'class="card" href="/token-gpu/"' "$PAGE"
+check $? "项目区有 /token-gpu/ 入口"
+
 grep -q 'class="card" href="/ai-news/"' "$PAGE"
 check $? "项目区有 /ai-news/ 入口"
 
@@ -46,8 +49,8 @@ grep -q 'href="#projects"' "$PAGE" && grep -q 'id="projects"' "$PAGE"
 check $? "导航「项目」锚点有效"
 
 card_count="$(grep -c 'class="card" href="/' "$PAGE")"
-[ "$card_count" -eq 5 ]
-check $? "首页恰好展示五个项目卡片"
+[ "$card_count" -eq 6 ]
+check $? "首页恰好展示六个项目卡片"
 
 # CTA 与项目入口都不应再指向 briefs 子域（canonical / og:url 里的 barryai.cn 不算）
 ! grep -q 'href="https://briefs\.barryai\.cn' "$PAGE"
