@@ -113,7 +113,7 @@
     var padV = (maxV - minV) * 0.08;
     minV -= padV; maxV += padV;
 
-    function xAt(i) { return pad.left + (dates.length === 1 ? innerW / 2 : (i / (dates.length - 1)) * innerW); }
+    function xAt(i) { return pad.left + (dates.length === 1 ? innerW / 2 : ((Date.parse(dates[i]) - Date.parse(dates[0])) / (Date.parse(dates[dates.length - 1]) - Date.parse(dates[0]))) * innerW); }
     function yAt(v) { return pad.top + innerH - ((v - minV) / (maxV - minV)) * innerH; }
 
     var svg = svgEl('svg', {
@@ -280,11 +280,12 @@
         kpiRow.appendChild(el('p', { class: 'error-copy', text: 'Token 历史暂无成功观测。' }));
         return;
       }
-      ['expenditure', 'open_expenditure', 'closed_expenditure'].forEach(function (key) {
-        var meta = block.latest.date + (block.freshness.stale ? '（滞后 ' + block.freshness.lag_days + ' 天）' : '');
+      block.series.forEach(function (s) {
+        var key = s.key;
+        var meta = (s.latest ? s.latest.date : '暂无观测') + (block.freshness.stale ? '（滞后 ' + block.freshness.lag_days + ' 天）' : '');
         var tile = el('div', { class: 'kpi-tile' }, [
           el('p', { class: 'kpi-tile__label', text: TOKEN_LABELS[key] }),
-          el('p', { class: 'kpi-tile__value', text: fmt(block.latest[key], 4) }),
+          el('p', { class: 'kpi-tile__value', text: fmt(s.latest && s.latest.value, 4) }),
           el('p', { class: 'kpi-tile__meta', text: meta }),
         ]);
         kpiRow.appendChild(tile);
@@ -385,8 +386,8 @@
       seriesForGroup(currentGroup).forEach(function (s) {
         var tile = el('div', { class: 'kpi-tile' }, [
           el('p', { class: 'kpi-tile__label', text: s.label_zh }),
-          el('p', { class: 'kpi-tile__value', text: fmt(block.latest[s.key], 2) }),
-          el('p', { class: 'kpi-tile__meta', text: block.latest.date }),
+          el('p', { class: 'kpi-tile__value', text: fmt(s.latest && s.latest.value, 2) }),
+          el('p', { class: 'kpi-tile__meta', text: s.latest ? s.latest.date : '暂无观测' }),
         ]);
         kpiRow.appendChild(tile);
       });
@@ -533,6 +534,50 @@
   }
 
   // ── runtime status (page bottom) ──────────────────────────────────────
+  var ORNN_CHART_W = 240, ORNN_CHART_H = 360;
+  function initOrnn(doc) {
+    var block = doc.ornn;
+    var section = document.getElementById('ornn');
+    var chartEl = document.getElementById('ornn-chart');
+    var caption = document.getElementById('ornn-caption');
+    var kpis = document.getElementById('ornn-kpis');
+    var status = doc.status.ornn.status;
+    var freshness = block.freshness;
+    var statusEl = document.getElementById('ornn-status');
+    statusEl.textContent = statusLabel(status) + (freshness.latest_date ? ' · 最近观测 ' + freshness.latest_date + ' · 滞后 ' + freshness.lag_days + ' 天' : ' · 暂无观测');
+    statusEl.className = 'panel__status ' + statusClass(status === 'failed' ? status : freshness.stale ? 'stale' : status);
+    var rangeGetter = wireRangeControl(qs('.controls', section), render);
+    var visible = buildToggle(document.getElementById('ornn-toggles'), block.series.map(function (s) {
+      return { key: s.key, label: s.label, color: 'var(--series-ornn-' + s.key + ')' };
+    }), render);
+    kpis.textContent = '';
+    block.series.forEach(function (s) {
+      kpis.appendChild(el('div', { class: 'kpi-tile' }, [
+        el('p', { class: 'kpi-tile__label', text: s.label }),
+        el('p', { class: 'kpi-tile__value', text: fmt(s.latest && s.latest.value, 2) }),
+        el('p', { class: 'kpi-tile__meta', text: s.latest ? s.latest.date : '暂无观测' }),
+      ]));
+    });
+    function render() {
+      chartEl.textContent = '';
+      var selected = block.series.filter(function (s) { return visible[s.key]; }).map(function (s) {
+        return { key: s.key, label: s.label, color: 'var(--series-ornn-' + s.key + ')', observations: sliceByRange(s.observations, rangeGetter()) };
+      });
+      selected.forEach(function (series) {
+        var plot = el('div', { class: 'ornn-chart-card__plot' });
+        chartEl.appendChild(el('div', { class: 'ornn-chart-card' }, [el('h3', { class: 'ornn-chart-card__title', text: series.label }), plot]));
+        renderLineChart(plot, [series], {
+          decimals: 2, axisDecimals: 3, width: ORNN_CHART_W, height: ORNN_CHART_H,
+          pad: { top: 12, right: 14, bottom: 32, left: 42 }, yTicks: 5, xTickCount: 2,
+          ariaLabel: 'Ornn ' + series.label + ' 日度结算指数走势图',
+        });
+      });
+      var dates = unionDates(selected);
+      caption.textContent = dates.length ? dates[0] + ' ~ ' + dates[dates.length - 1] + '，' + dates.length + ' 个观测日' : '当前筛选下暂无数据';
+    }
+    render();
+  }
+
   function statusCard(label, value, cls) {
     return el('div', { class: 'status-card' }, [
       el('p', { class: 'status-card__label', text: label }),
@@ -554,6 +599,7 @@
       doc.gpu.freshness.latest_date ? (doc.gpu.freshness.latest_date + ' · 滞后 ' + doc.gpu.freshness.lag_days + ' 天') : '暂无观测',
       doc.gpu.freshness.stale ? 'is-stale' : 'is-ok'
     ));
+    statusEl.appendChild(statusCard('Ornn GPU 新鲜度', doc.ornn.freshness.latest_date ? doc.ornn.freshness.latest_date + ' · 滞后 ' + doc.ornn.freshness.lag_days + ' 天 · ' + statusLabel(doc.status.ornn.status) : '暂无观测', statusClass(doc.status.ornn.status === 'failed' ? 'failed' : doc.ornn.freshness.stale ? 'stale' : doc.status.ornn.status)));
     var pipelineKeys = Object.keys(doc.status.pipeline);
     var pipelineOk = pipelineKeys.length > 0 && pipelineKeys.every(function (k) { return doc.status.pipeline[k].status === 'ok'; });
     statusEl.appendChild(statusCard('Token/GPU 采集管道', pipelineOk ? '正常' : '存在失败，见上方口径说明', pipelineOk ? 'is-ok' : 'is-stale'));
@@ -563,7 +609,7 @@
 
   // ── keyboard section navigation ───────────────────────────────────────
   function initKeyboardNav() {
-    var map = { t: 'token', g: 'gpu', r: 'rates', m: 'method' };
+    var map = { t: 'token', g: 'gpu', o: 'ornn', r: 'rates', m: 'method' };
     document.addEventListener('keydown', function (evt) {
       if (evt.metaKey || evt.ctrlKey || evt.altKey) return;
       var target = evt.target;
@@ -601,6 +647,7 @@
         initRuntimeStatus(doc);
         initToken(doc);
         initGpu(doc);
+        initOrnn(doc);
         initRates(doc);
       })
       .catch(function (err) {
