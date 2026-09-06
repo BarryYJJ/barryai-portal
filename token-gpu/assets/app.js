@@ -216,7 +216,6 @@
     var kpiRow = document.getElementById('token-kpis');
     var chartEl = document.getElementById('token-chart');
     var caption = document.getElementById('token-caption');
-    var tableBody = qs('#token-table tbody');
     var toggleContainer = document.getElementById('token-toggles');
 
     var items = block.series.map(function (s) {
@@ -262,25 +261,7 @@
       });
     }
 
-    function renderTable() {
-      tableBody.textContent = '';
-      var dates = unionDates(block.series);
-      if (!dates.length) {
-        tableBody.appendChild(el('tr', {}, [el('td', { colspan: '4', text: '暂无数据' })]));
-        return;
-      }
-      dates.forEach(function (d) {
-        var row = el('tr', {}, [el('td', { text: d })]);
-        ['expenditure', 'open_expenditure', 'closed_expenditure'].forEach(function (key) {
-          var series = block.series.filter(function (s) { return s.key === key; })[0];
-          row.appendChild(el('td', { text: fmt(valueAt(series, d), 4) }));
-        });
-        tableBody.appendChild(row);
-      });
-    }
-
     renderKpis();
-    renderTable();
     rerenderChart();
   }
 
@@ -487,7 +468,7 @@
     render();
   }
 
-  // ── hero status + footer ─────────────────────────────────────────────
+  // ── runtime status (page bottom) ──────────────────────────────────────
   function statusCard(label, value, cls) {
     return el('div', { class: 'status-card' }, [
       el('p', { class: 'status-card__label', text: label }),
@@ -495,8 +476,8 @@
     ]);
   }
 
-  function initHeroAndFooter(doc) {
-    var statusEl = document.getElementById('hero-status');
+  function initRuntimeStatus(doc) {
+    var statusEl = document.getElementById('runtime-status');
     statusEl.textContent = '';
     statusEl.appendChild(statusCard('数据生成时间 (UTC)', doc.generated_at_utc));
     statusEl.appendChild(statusCard(
@@ -511,11 +492,9 @@
     ));
     var pipelineKeys = Object.keys(doc.status.pipeline);
     var pipelineOk = pipelineKeys.length > 0 && pipelineKeys.every(function (k) { return doc.status.pipeline[k].status === 'ok'; });
-    statusEl.appendChild(statusCard('Token/GPU 采集管道', pipelineOk ? '正常' : '存在失败，见下方口径说明', pipelineOk ? 'is-ok' : 'is-stale'));
+    statusEl.appendChild(statusCard('Token/GPU 采集管道', pipelineOk ? '正常' : '存在失败，见上方口径说明', pipelineOk ? 'is-ok' : 'is-stale'));
     var ratesOverall = doc.status.rates_overall;
     statusEl.appendChild(statusCard('供应商报价状态', statusLabel(ratesOverall), statusClass(ratesOverall)));
-
-    document.getElementById('footer-generated').textContent = '生成时间：' + doc.generated_at_utc + '（UTC）';
   }
 
   // ── keyboard section navigation ───────────────────────────────────────
@@ -542,10 +521,9 @@
       node.textContent = message;
       node.classList.add('error-copy');
     });
-    var statusEl = document.getElementById('hero-status');
+    var statusEl = document.getElementById('runtime-status');
     statusEl.textContent = '';
     statusEl.appendChild(el('p', { class: 'error-copy', text: message }));
-    document.getElementById('footer-generated').textContent = message;
   }
 
   function init() {
@@ -556,7 +534,7 @@
         return res.json();
       })
       .then(function (doc) {
-        initHeroAndFooter(doc);
+        initRuntimeStatus(doc);
         initToken(doc);
         initGpu(doc);
         initRates(doc);
