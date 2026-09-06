@@ -97,8 +97,8 @@
       return;
     }
 
-    var width = 880, height = 320;
-    var pad = { top: 16, right: 20, bottom: 34, left: 58 };
+    var width = options.width || 880, height = options.height || 320;
+    var pad = options.pad || { top: 16, right: 20, bottom: 34, left: 58 };
     var innerW = width - pad.left - pad.right;
     var innerH = height - pad.top - pad.bottom;
 
@@ -121,7 +121,7 @@
       'aria-label': options.ariaLabel || '走势图',
     });
 
-    var ticks = 4;
+    var ticks = options.yTicks || 4;
     for (var t = 0; t <= ticks; t++) {
       var v = minV + ((maxV - minV) * t) / ticks;
       var y = yAt(v);
@@ -133,8 +133,12 @@
     svg.appendChild(svgEl('line', { x1: pad.left, x2: pad.left, y1: pad.top, y2: height - pad.bottom, class: 'chart-axis-line' }));
     svg.appendChild(svgEl('line', { x1: pad.left, x2: width - pad.right, y1: height - pad.bottom, y2: height - pad.bottom, class: 'chart-axis-line' }));
 
-    [0, Math.floor((dates.length - 1) / 2), dates.length - 1].forEach(function (i, idx) {
-      var anchor = idx === 0 ? 'start' : (idx === 2 ? 'end' : 'middle');
+    // Narrow (portrait) charts only have room for the two endpoint dates.
+    var xTicks = options.xTickCount === 2
+      ? (dates.length > 1 ? [0, dates.length - 1] : [0])
+      : [0, Math.floor((dates.length - 1) / 2), dates.length - 1];
+    xTicks.forEach(function (i, idx) {
+      var anchor = idx === 0 ? 'start' : (idx === xTicks.length - 1 ? 'end' : 'middle');
       var label = svgEl('text', { x: xAt(i), y: height - pad.bottom + 18, class: 'chart-axis-label', 'text-anchor': anchor });
       label.textContent = dates[i];
       svg.appendChild(label);
@@ -209,6 +213,9 @@
 
   // ── token section ─────────────────────────────────────────────────────
   var TOKEN_LABELS = { expenditure: '综合', open_expenditure: '开放权重', closed_expenditure: '闭源' };
+  // Portrait 2:3 viewBox keeps the three-card trend view readable without
+  // visually exaggerating small moves as much as the earlier 1:2 layout.
+  var TOKEN_CHART_W = 400, TOKEN_CHART_H = 600;
 
   function initToken(doc) {
     var block = doc.token;
@@ -235,9 +242,29 @@
       });
     }
 
+    // One card per visible series — a hidden series drops its whole card, and
+    // each card scales to its own values instead of a shared y-domain.
     function rerenderChart() {
       var seriesList = visibleSeries();
-      renderLineChart(chartEl, seriesList, { decimals: 4, ariaLabel: 'Token 支出指数走势图' });
+      chartEl.textContent = '';
+      if (!seriesList.length) {
+        chartEl.appendChild(el('p', { class: 'loading-copy', text: '当前筛选下暂无可绘制的数据。' }));
+      }
+      seriesList.forEach(function (series) {
+        var plot = el('div', { class: 'token-chart-card__plot' });
+        chartEl.appendChild(el('div', { class: 'token-chart-card' }, [
+          el('h3', { class: 'token-chart-card__title', text: series.label }),
+          plot,
+        ]));
+        renderLineChart(plot, [series], {
+          decimals: 4,
+          width: TOKEN_CHART_W, height: TOKEN_CHART_H,
+          pad: { top: 14, right: 16, bottom: 34, left: 52 },
+          yTicks: 6,
+          xTickCount: 2,
+          ariaLabel: 'Token ' + series.label + '支出指数走势图',
+        });
+      });
       var dates = unionDates(seriesList);
       caption.textContent = dates.length
         ? (dates[0] + ' ~ ' + dates[dates.length - 1] + '，' + dates.length + ' 个观测日')
