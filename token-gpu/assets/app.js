@@ -89,6 +89,9 @@
   function renderLineChart(container, seriesList, options) {
     options = options || {};
     var decimals = options.decimals === undefined ? 2 : options.decimals;
+    // Small multiples over a tight y-domain need an extra digit on the axis or
+    // consecutive ticks collapse to the same label; tooltips keep `decimals`.
+    var axisDecimals = options.axisDecimals === undefined ? decimals : options.axisDecimals;
     container.textContent = '';
 
     var dates = unionDates(seriesList);
@@ -127,7 +130,7 @@
       var y = yAt(v);
       svg.appendChild(svgEl('line', { x1: pad.left, x2: width - pad.right, y1: y, y2: y, class: 'chart-grid-line' }));
       var label = svgEl('text', { x: pad.left - 8, y: y + 4, class: 'chart-axis-label', 'text-anchor': 'end' });
-      label.textContent = fmt(v, decimals);
+      label.textContent = fmt(v, axisDecimals);
       svg.appendChild(label);
     }
     svg.appendChild(svgEl('line', { x1: pad.left, x2: pad.left, y1: pad.top, y2: height - pad.bottom, class: 'chart-axis-line' }));
@@ -293,6 +296,17 @@
   }
 
   // ── gpu section ───────────────────────────────────────────────────────
+  // Bare accelerator names: the group is already named by the active group
+  // button, so repeating "Neo-cloud" on all five card titles adds no signal.
+  var GPU_MODEL_LABELS = {
+    neo_h100: 'H100', neo_a100: 'A100', neo_h200: 'H200', neo_b200: 'B200', neo_mi300x: 'MI300X',
+    hyper_h100: 'H100', hyper_a100: 'A100',
+  };
+  // Portrait 2:3 small multiples, same ratio as the Token cards. Five fit one
+  // desktop row; each is drawn alone so it owns its y-domain, which the shared
+  // wide chart flattened into near-straight lines.
+  var GPU_CHART_W = 240, GPU_CHART_H = 360;
+
   function initGpu(doc) {
     var block = doc.gpu;
     var section = document.getElementById('gpu');
@@ -324,15 +338,38 @@
         return {
           key: s.key,
           label: s.label_zh,
+          short: GPU_MODEL_LABELS[s.key] || s.label_zh,
           color: 'var(--series-gpu-' + s.key + ')',
           observations: sliceByRange(s.observations, rangeGetter()),
         };
       });
     }
 
+    // One card per visible series — a hidden series drops its whole card, and
+    // each card scales to its own values instead of a shared y-domain.
     function rerenderChart() {
       var seriesList = visibleSeries();
-      renderLineChart(chartEl, seriesList, { decimals: 2, ariaLabel: 'GPU ' + currentGroup + ' 走势图' });
+      chartEl.textContent = '';
+      chartEl.setAttribute('data-group', currentGroup);
+      if (!seriesList.length) {
+        chartEl.appendChild(el('p', { class: 'loading-copy', text: '当前筛选下暂无可绘制的数据。' }));
+      }
+      seriesList.forEach(function (series) {
+        var plot = el('div', { class: 'gpu-chart-card__plot' });
+        chartEl.appendChild(el('div', { class: 'gpu-chart-card' }, [
+          el('h3', { class: 'gpu-chart-card__title', text: series.short }),
+          plot,
+        ]));
+        renderLineChart(plot, [series], {
+          decimals: 2,
+          axisDecimals: 3,
+          width: GPU_CHART_W, height: GPU_CHART_H,
+          pad: { top: 12, right: 14, bottom: 32, left: 42 },
+          yTicks: 5,
+          xTickCount: 2,
+          ariaLabel: series.label + ' 租赁基准指数走势图',
+        });
+      });
       var dates = unionDates(seriesList);
       caption.textContent = dates.length
         ? (dates[0] + ' ~ ' + dates[dates.length - 1] + '，' + dates.length + ' 个观测日')
