@@ -65,9 +65,10 @@
   // Calendar-window filter anchored on this series' own latest observation
   // date (not a fixed observation count), so sparse series degrade gracefully
   // instead of pulling in dates far outside the nominal window.
+  var RANGE_DAYS = { '7d': 7, '30d': 30, '90d': 90 };
   function sliceByRange(observations, range) {
     if (range === 'all' || !observations.length) return observations;
-    var days = range === '7d' ? 7 : 30;
+    var days = RANGE_DAYS[range] || 30;
     var latestDate = observations[observations.length - 1].date;
     var cutoff = addDaysISO(latestDate, -(days - 1));
     return observations.filter(function (o) { return o.date >= cutoff; });
@@ -314,8 +315,6 @@
     var kpiRow = document.getElementById('gpu-kpis');
     var chartEl = document.getElementById('gpu-chart');
     var caption = document.getElementById('gpu-caption');
-    var tableHead = document.getElementById('gpu-table-head');
-    var tableBody = qs('#gpu-table tbody');
     var toggleContainer = document.getElementById('gpu-toggles');
     var groupButtons = qsa('.group-btn', section);
     var currentGroup = 'neo';
@@ -393,23 +392,6 @@
       });
     }
 
-    function renderTable() {
-      var seriesList = seriesForGroup(currentGroup);
-      tableHead.textContent = '';
-      tableHead.appendChild(el('th', { scope: 'col', text: '日期' }));
-      seriesList.forEach(function (s) { tableHead.appendChild(el('th', { scope: 'col', text: s.label_zh })); });
-      tableBody.textContent = '';
-      var dates = unionDates(seriesList);
-      if (!dates.length) {
-        tableBody.appendChild(el('tr', {}, [el('td', { text: '暂无数据' })]));
-        return;
-      }
-      dates.forEach(function (d) {
-        var row = el('tr', {}, [el('td', { text: d })]);
-        seriesList.forEach(function (s) { row.appendChild(el('td', { text: fmt(valueAt(s, d), 2) })); });
-        tableBody.appendChild(row);
-      });
-    }
 
     function setGroup(group) {
       currentGroup = group;
@@ -419,7 +401,6 @@
       });
       buildToggles();
       renderKpis();
-      renderTable();
       rerenderChart();
     }
 
