@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-09-07 午间 AI 简报</title>
+<style>
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-09-07 14:30:44</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-09-07 午间 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-09-07 10:00</strong> &nbsp;→&nbsp; <strong>2026-09-07 14:30</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">83</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">55 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">66.3%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">4 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">18</span></div><div class="hot-kw-row"><span class="kw-name">算力</span><div class="bar-track"><div class="bar-fill" style="width:83%"></div></div><span class="kw-count">15</span></div><div class="hot-kw-row"><span class="kw-name">光模块</span><div class="bar-track"><div class="bar-fill" style="width:83%"></div></div><span class="kw-count">15</span></div><div class="hot-kw-row"><span class="kw-name">PCB</span><div class="bar-track"><div class="bar-fill" style="width:61%"></div></div><span class="kw-count">11</span></div><div class="hot-kw-row"><span class="kw-name">CPO</span><div class="bar-track"><div class="bar-fill" style="width:61%"></div></div><span class="kw-count">11</span></div><div class="hot-kw-row"><span class="kw-name">液冷</span><div class="bar-track"><div class="bar-fill" style="width:56%"></div></div><span class="kw-count">10</span></div><div class="hot-kw-row"><span class="kw-name">GPU</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">9</span></div><div class="hot-kw-row"><span class="kw-name">Rubin</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">9</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-45548822212812558">AI PCB进入“量价齐飞、设备排队”：英伟达Rubin Ultra的PCB单价预计再增50%+，核心设备新订单已排至两年后</a></li><li><a class="tldr-jump" href="#t-55521144485212414">ABF载板“芯片越大、缺口越大”：交期拉长至12—14个月，2028年供需缺口预计达42%—51%，国产材料替代迎窗口</a></li><li><a class="tldr-jump" href="#t-55521144484184124">NPO/CPO路线之争，FAU坐收“过路费”：6.4T NPO光引擎含配套ELS的FAU价值量较1.6T硅光模块提升超10倍</a></li><li><a class="tldr-jump" href="#t-22258844414252521">博通冲高端，盛科通信补空位：25.6T交换芯片已进入客户应用阶段，国产超节点有望再打开Scale-up增量市场</a></li><li><a class="tldr-jump" href="#t-55521144484184484">冰轮环境液冷做“减法”、冷机身价做“加法”：取消板换方案已有2个订单，单台价值量约增40%，目标12月起交付</a></li><li><a class="tldr-jump" href="#t-82258844412554222">Optimus开始拼量产，更要拼数据：V3年底周产预计2500台+，真机训练数据需求千万小时级、全球现有仅数十万小时</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-14425511181428282">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 14:18 · 👁 191</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【天风医药】建议重视乐心医疗，...</div>
+  <div class="topic-content">【天风医药】建议重视乐心医疗，<mark>AI</mark>医疗主业提供业绩底盘；<mark>算力</mark>有望打造第二成长曲线；医疗级智能戒指受益Oura IPO催化
+
+1、<mark>AI</mark>医疗主业。利润改善，RPM+垂直<mark>AI</mark>模型构建闭环
+公司依托可穿戴硬件、＃心血管<mark>AI</mark><mark>大模型</mark>布局远程慢病管理RPM。＃2026中报利润增速显著高于营收，扣非归母净利润同比增长54.88%。海外RPM业务依托FDA、CE资质持续拓展海外客户；血糖等新产品证书持续推进，传统硬件提供稳定现金流。
+
+2、布局<mark>算力</mark>。目前第一步通过合资公司景昭智算切入智算赛道。＃短期优先开展<mark>GPU</mark><mark>算力</mark>基础业务；底层调度平台具备技术基础，远期有望拓展<mark>算力</mark>服务业务。＃公司初步手握银行授信50亿元储备，公司账上有7亿元现金流。
+
+3、医疗级智能戒指，对标Oura Ring，静待9月底IPO催化
+芬兰Oura提交招股书冲刺纳斯达克，目标估值160亿美元，智能戒指作为新一代健康数据入口获得全球资本高度认可。乐心医疗走差异化医疗级路线，硬件开发完成，推进医疗器械注册，同时布局海外B端RPM客户，不同于Oura纯C端订阅模式。Oura预计9月底前后挂牌，有望带来赛道情绪催化。
+
+风险提示：海外订单波动；<mark>算力</mark>业务商业化不及预期；注册证进度慢；Oura上市估值不及预期压制板块情绪。
+
+联系人：天风医药杨松/周海涛</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">大模型</span><span class="kw-tag">GPU</span><span class="kw-tag">算力</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425511181428282" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258844414254542">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 14:18 · 👁 192</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【华福电新】汇通能源：主业托底...</div>
+  <div class="topic-content">【华福电新】汇通能源：主业托底安全边际，<mark>液冷</mark>放量在即
+
+#主业扎实，无负债+充裕现金流，安全边际较高。公司目前无负债，现金流资产超过10亿元，同时持有上海8+万平的优质物业，出租率高达99%。每年利润约2~4kw元。这意味着公司不仅现金流充裕，且无拖累。
+
+#<mark>液冷</mark>业务是短期增长的确定性引擎。公司参股的稳扬科技是Cooler Master的长期核心供应商。26H1仅打样收入就达到1亿元，是25年全年的3倍。说明客户粘性强、后续订单锁定度高。
+产能布局上，东莞老厂已满产，扩租后合计1.6万平方米仍满产运行，第三个5000平模组工厂也已投产，三大工厂打满预计年产值约10亿元。并且为响应Cooler Master的供应链要求，稳扬已在越南租赁1万平厂房（设备已到位），预计2026年底投产，满产后月产能可达3000万元，长期稳定年产值2-3亿元。预计27年<mark>液冷</mark>业务营收可达10亿元，净利率20+%。
+目前公司对稳扬科技持股18.18%，后续预计有较大概率增大收购比例。
+
+#半导体光罩业务具备长期想象空间。公司参股7.43%的兴华芯由张汝京博士创立，拥有行业最顶尖的技术储备与设备，有望生产先进制程产品，构成了极高的资源壁垒。该行业目前主要由美日企业主导，前三甲外资企业的市占率达到80+%，国产化率较低。目前兴华芯已投入近20亿元设备与厂房；投产后有望承接头部代工厂订单，后续国产替代空间巨大。
+
+#投资建议：公司主业现金流极佳，且无拖累。<mark>液冷</mark>将带短期业绩爆发，后续还有光罩的想象空间。建议重点关注！</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">液冷</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258844414254542" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258844414252211">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 14:17 · 👁 194</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">[红包]【申万宏源家电/机械】...</div>
+  <div class="topic-content">[红包]【申万宏源家电/机械】持续推荐民爆光电：<mark>PCB</mark>钻针扩产提升，业务结构持续改善，并表在即贡献利润弹性
+[庆祝]扩产节奏：扩产进度持续超预期，#8月底产能超3000万支，#保持每月600+万支扩产，年底设备月产能将突破5500万支，27年底超1亿支。
+[太阳]产品结构：#预计8月均价约1.75元，当前增量产能大部分用于<mark>AI</mark>需求，#在手订单中<mark>胜宏</mark>占比超30%且单价超2元，后续均价有望持续快速提升。当前35倍长径比以上占比不到5%，#预计Q4有望超过10%。公司已开始小批量发货用于<mark>rubin</mark>架构的钻针，#1拖3方案预计每支均价3+元。#PTFE等方案公司持续与下游头部客户联合测试，客户反馈良好。#公司的新涂层工艺技术进展顺利，小批量测试中，年底有望实现批量。
+[福]钨棒供应：住友仍保持供应，同时国产替代持续推进，#35倍及以下基本可以实现国产替代，后续国产占比及覆盖长径比将持续提升，国产棒材与住友差价超20%，客户反馈良好。
+[烟花]估值低位具备较高性价比。#厦芝剩余49%股权预计最晚11月可完成收购，时间有所提前，公司当前估值处于低位，#对应27年PE仅17倍，具备较高性价比。
+☎详细情况欢迎联系【申万家电/机械】团队刘正/刘嘉玲/程恺雯/沈呈熹15026575335/王珂/苏萌15592030826</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Rubin</span><span class="kw-tag">PCB</span><span class="kw-tag">胜宏</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258844414252211" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425511181424442">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 14:17 · 👁 196</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【天风电子团队】宇晶股份：硬脆...</div>
+  <div class="topic-content">【天风电子团队】宇晶股份：硬脆材料切磨抛设备迎来3D玻璃换代、北<mark>美光</mark>伏扩产与磷化铟国产替代共振，重点推荐
+
+1）消费电子：大客户玻璃机身2.5D切3D，切磨抛设备进入换代周期，公司份额有望领先
+
+大客户下一代机型前后盖玻璃由2.5D升级为3D曲面，研磨、抛光工序链显著拉长，单位产能对应的设备数量随之提升，市场预期本轮切磨抛设备需求达万台量级，明显高于常规年份的迭代与损耗需求。公司半年报表示，凭借多线切割机与研磨抛光机的技术优势，公司是国内知名手机玻璃加工企业的优质供应商；上一轮周期交付的数万台设备至今仍在服役，量产交付能力与客户粘性已被验证。我们认为，这是消费电子切磨抛设备近年来最大的一次结构性增量，份额由产能储备与交付能力决定，公司凭上一轮建立的客户基础本轮份额有望领先；订单节奏较往年有所延后但不改总量，交付预计自年内启动并持续至明年上半年。
+
+2）半导体：磷化铟切割设备取得首台订单，12英寸大硅片设备进入验证
+
+光通信拉动磷化铟衬底扩产，存量切割设备以日本砂线老机为主，公司金刚石线工艺出片更多、投资回收期以月计，半年报披露已完成开发验证并取得首台订单；我们认为随长晶产能释放，明年是磷化铟设备需求集中释放的第一年，公司作为率先取得订单的国产厂商具备先发优势，明后年数百台、约10亿元量级的空间。8英寸碳化硅切割设备已批量销售，12英寸大硅片切割设备处于客户验证阶段，定增募投即为8-12英寸大尺寸硅片及碳化硅切磨抛设备产业化，我们认为这是公司向平台型半导体设备延伸中壁垒最高、空间最大的一步，是中期最值得跟踪的期权。
+
+投资建议：我们认为公司正处于三条增长曲线同时启动的窗口——3D玻璃换代是明年业绩最确定的来源，北<mark>美光</mark>伏扩产和磷化铟、大硅片是中期弹性最大的方向，持续重点推荐
+
+更多详细情况请联系对口销售或许俊峰</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">美光</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425511181424442" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258844414252521">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 14:17 · 👁 199</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【东吴电子陈海进】 继续强ca...</div>
+  <div class="topic-content">【东吴电子陈海进】 继续强call国产超节点产业趋势，重点推荐&lt;e type=&quot;hashtag&quot; hid=&quot;28214445145581&quot; title=&quot;%23%E7%9B%9B%E7%A7%91%E9%80%9A%E4%BF%A1%23&quot; /&gt;  
+
+📍短期看Scale-out：率先落地的增量机会。
+ 博通交换芯片的产品重心逐步向 51.2T、102.4T 等更高速率迁移，同时 <mark>AI</mark> <mark>ASIC</mark> 对先进制程资源的需求持续提升，而国内 25.6T 需求仍较为旺盛，供给格局变化为盛科提供了较好的切入窗口。目前公司 25.6T 产品已进入客户应用阶段，2026H1 公司实现营收 6.71 亿元，同比+32%，高端交换芯片的客户导入和商业化正在加速。后续若在头部互联网客户实现导入，有望带来明显的收入增量。
+
+📍中期看Scale-up：超节点带来的新增市场空间。
+ 国内互联网大厂及 <mark>AI</mark> 芯片厂商正在加快超节点方案落地，<mark>华为</mark>、平头哥等方案进展相对领先。超节点架构下，Scale-up 网络承担节点内部大量 <mark>AI</mark> 芯片之间的高速互联，随着单节点<mark>算力</mark>规模持续扩大，Link 数量、互联带宽以及交换芯片需求均有望明显提升。9月1日，公司披露 2026 年度定增预案，拟募资不超过 48.05 亿元，其中 31.81 亿元用于下一代高性能交换芯片研发及产业化，并明确面向 Scale-up/Scale-out 打造下一代交换芯片系列。随着超节点逐步进入规模部署阶段，Scale-up 有望从产品布局转向实际收入贡献。
+
+📍长期看独立第三方定位：决定市场份额上限。
+盛科作为国内稀缺的独立第三方交换芯片厂商，不绑定单一计算芯片和超节点技术路线，在多种 Scale-up 方案中均具备潜在切入机会。此次9月1日48.05 亿元定增预案中，除 31.81 亿元投入下一代交换芯片外，另有 8.24 亿元用于下一代互联软件、硬件和协议研究，重点布局高性能网络协议栈、光电融合互联及开放互联协议，公司的能力边界正在从交换芯片向更完整的<mark>算力</mark>互联体系延伸。未来若国内形成多种超节点路线并存的格局，公司只需在部分主流方案中取得一定份额，就有望在当前较低基数上形成较大的收入和利润弹性。
+
+⚠️风险提示：下游需求波动、行业竞争加剧、新产品研发和客户导入不及预期等
+🎁欢迎联系东吴电子：陈海进/刘玥娇</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">ASIC</span><span class="kw-tag">算力</span><span class="kw-tag">华为</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258844414252521" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548822212544448">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 14:16 · 👁 205</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">天承科技：股权激励高目标绑定核...</div>
+  <div class="topic-content">天承科技：股权激励高目标绑定核心团队，<mark>AI</mark> <mark>PCB</mark>与先进封装双轮支撑
+
+🌹事件：2026年9月4日晚间，公司披露2026年限制性股票激励计划草案，拟授予66.94万股，占总股本约0.54%；授予价66元/股，为公告前1日均价121.80元的54.19%、前20日均价112.52元的58.65%。
+
+⚡️考核目标积极进取：本计划仅以营业收入为考核指标，2026-2029年目标分别不低于7.00亿、10.50亿、15.75亿、23.63亿元。归属比例与实际完成率挂钩：A/Am≥100%时归属100%，80%≤A/Am&lt;100%时按比例归属，A/Am&lt;80%则归属0%。此前公司2023-2025年营业收入CAGR约18%，而2025-2029年目标CAGR约50%；以2025年收入4.71亿元为基数，2029年目标为2025年的5倍。隐含管理层对<mark>PCB</mark>湿电子化学品行业景气度、客户拓展和高端产品放量的较强信心。
+
+✊激励结构兼顾绑定与弹性：授予总量仅0.54%，叠加2024年计划合计约1.01%，摊薄压力有限。本次计划首次授予覆盖50人，涵盖高管、核心技术人员、中层及骨干员工，占员工总数265人的18.87%，并预留20%用于后续人才引进，兼顾了现有核心团队稳定与未来组织扩张。该“低稀释+强绑定+高目标”的组合，比单纯扩大授予数量更有信号意义。
+
+🔥公司已在<mark>AI</mark> <mark>PCB</mark>和先进封装两大领域取得突破性进展，高端<mark>PCB</mark>放量与先进封装为公司高目标收入考核提供产业底座 。<mark>AI</mark> <mark>PCB</mark>方面，其高端基材处理方案和电镀技术已通过严苛测试，成为国内唯一进入相关供应链的国产化学品企业。先进封装方面，已完成核心工艺布局，并在玻璃基板TGV金属化等环节进入量产导入阶段，与头部客户深化合作。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">PCB</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548822212544448" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258844414814112">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 14:16 · 👁 201</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">🏆【天风轻纺孙海洋】恒林股份：...</div>
+  <div class="topic-content">🏆【天风轻纺孙海洋】恒林股份：低估高潜达链
+——近期北美N客户大幅上修明年订单
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;88214128212852&quot; title=&quot;%23AI%E4%B8%9A%E5%8A%A1%E5%85%A8%E9%9D%A2%E8%B6%85%E9%A2%84%E6%9C%9F%23&quot; /&gt;  
+
+①线束盒：今年上半年表现达标9月提速，原有打样产品将进入量产阶段，全年营收3.5亿+；
+
+2027年北美N客户已给出指引，需求量是2026年3倍；从27年3月起，N客户线束盒月销量或超7万套（已通过安费诺+富士康占据NVL线束盒绝对份额），加上其他客户，总月出货量或8万套+（目前约2-3万套/月，持续环比增长）；2027年营收保守估计9亿+，净利润率目标10%+；
+
+公司在大批量生产方面具有工艺优势，效率和质量优于竞对；此外在AWS份额已从最初50%提至60%+。
+
+目前产能满足4万套/月需求；为应对2027年3月起放量，公司已紧急规划新产地，预计2027年春节后投产。
+
+②<mark>液冷</mark>柜：北美T客户已完成初步验厂，公司已为此新建独立工厂，预计10月初步运营；北美N客户及A客户已通过第三方机构对接，推进顺利。目前对接国内头部<mark>算力</mark>租赁公司，已在批量交付。
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;51584851585124&quot; title=&quot;%23%E4%BC%A0%E7%BB%9F%E4%B8%9A%E5%8A%A1%E4%BB%B7%E5%80%BC%E5%BA%95%E5%B7%B2%E6%98%8E%E7%A1%AE%23&quot; /&gt;  
+
+上半年公司收入同增25%，其中跨境电商同增70%+；26Q2收入环增7%，其中跨境电商环增20%；
+
+26H1归母1.21亿，本期汇兑损失1亿，去年汇兑盈利0.5亿；26Q2原料涨价影响约3KW；汇率与原材料合计对净利率影响约2.2pct；
+
+原料涨价自7月起逐步消除，已与下游客户顺价；汇兑压力三季度环比减轻；
+
+目前跨境电商已实现季度环比盈利改善；26H1若剔除汇兑及原料阶段性影响，调后利润同增60%约3E，此外在手现金及净资产充沛，目前市值具备足够安全边际；建议积极关注！
+
+-------------------
+
+欢迎联系 | 天风轻纺
+
+孙海洋/张彤/徐琳</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">算力</span><span class="kw-tag">液冷</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258844414814112" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521144484184484">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 14:16 · 👁 201</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">🍁冰轮环境“取消板换”方案：一...</div>
+  <div class="topic-content">🍁冰轮环境“取消板换”方案：一次侧价值量再上台阶
+
+方案本质：传统 AIDC <mark>液冷</mark>靠 CDU 板换把一、二次侧物理隔离；新方案让一次侧冷冻水直连二次侧参与柜内，两套水系统并成单一闭环，#取消板翅换热器、部分承接CDU功能。系统链路缩短，中间换热温差与辅机环节减少，有利于压低 PUE、简化机房侧配置。
+
+商业化进度：客户测试已通过、在手订单2个、&lt;e type=&quot;hashtag&quot; hid=&quot;51584851585284&quot; title=&quot;%23%E7%9B%AE%E6%A0%8712%E6%9C%88%E8%B5%B7%E4%BA%A4%E4%BB%98%E3%80%82%23&quot; /&gt;  
+
+单价：单台冷机#价值量约抬升40%，在海外大冷吨离心/磁悬浮订单放量背景下，对 ASP、毛利率与单 GW 收入弹性都是增量变量。
+
+订单：逻辑是本土品牌，认可度告，公司年内订单目标100e+，Q3合同负债置信度高，年底产值支撑明年订单进一步上修，量利双增。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">液冷</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521144484184484" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548822212812558">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 14:16 · 👁 203</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">[烟花]【中信电子】<mark>AI</mark> PC...</div>
+  <div class="topic-content">[烟花]【中信电子】<mark>AI</mark> <mark>PCB</mark>量价双增逻辑持续，载板/msap释放高弹性，持续推荐
+
+1）短期业绩动能强劲：<mark>AI</mark> <mark>PCB</mark>领域，H2以来<mark>Rubin</mark>/Trainium 3已开始大规模拉货（台光H2 <mark>AI</mark> CCL出货预计环增40%、智邦指引Q3收入环比增长32%），<mark>TPU</mark> v8拉货则有望于Q4启动，同时<mark>PCB</mark>端良率和产能稳步推进，业绩增长斜率有望提升；传统<mark>PCB</mark>领域，具备拿料能力的厂商6-8月集中提价20%+，涨价节奏提升，26Q3起盈利能力有望大幅改善。#我们看好26Q3/4头部<mark>PCB</mark>公司的业绩增长动能。
+
+2）中长期供需紧张延续，<mark>PCB</mark>业绩高增能见度提升：需求端持续上修，<mark>英伟达</mark><mark>Rubin</mark> ultra <mark>PCB</mark>方案逐步清晰，ASP预计较<mark>Rubin</mark>继续提升50%+，M9/超高多层设计渗透率将进一步提升，同时PTFE+热固材料混压方案进展顺利，有望率先在SwitchTray落地，后续正交背板存在超预期机会；<mark>谷歌</mark><mark>TPU</mark>、AWS等出货量亦在持续上修，v9/T4 <mark>PCB</mark>升级持续，同时国产<mark>算力</mark>也在迎来加速放量期；供给侧仍偏紧，当前核心钻机、曝光机、电镀等设备交期持续拉长，新接订单已排至2年后，短期产能上修空间有限。#我们认为中期维度供给产能强约束将延续，<mark>PCB</mark>高增能见度持续提升。
+
+3）载板景气周期进一步拉长，全球载板供不应求和涨价趋势明确，日韩台产能均以长协落单，设备扩产周期长，交期已经看到29年，#国产BT载板随产能释放加速释放利润，#ABF载板良率和产能蓄势待发，26H2有望迎来全面起量。
+
+4）高端<mark>光模块</mark>/msap <mark>PCB</mark>紧缺延续，量价双增驱动27年msap <mark>PCB</mark>需求有望激增至300亿+，我们通过梳理各家实际扩产进度及设备交付情况，#判断27年msap行业仍将维持供需紧张状态，相关公司业绩有望高斜率释放。
+
+投资结论：Q3/短期业绩强势+中长期增长能见度提升，<mark>PCB</mark>交易面/基本面有望持续走强，我看好27年行业估值水平向25-30x提升，建议重点关注：H2拉货、<mark>ASIC</mark>、载板、msap、PTFE等受益方向，重点推荐：沪电股份、深南电路、生益科技、兴森科技
+&lt;e type=&quot;hashtag&quot; hid=&quot;28214128212541&quot; title=&quot;%23%E5%85%B6%E4%BB%96%E5%85%AC%E5%8F%B8%E5%8F%98%E5%8C%96%E6%83%85%E5%86%B5%E6%AC%A2%E8%BF%8E%E8%81%94%E7%B3%BB%E4%BA%A4%E6%B5%81%23&quot; /&gt;  
+
+欢迎联系 中信电子</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Rubin</span><span class="kw-tag">ASIC</span><span class="kw-tag">英伟达</span><span class="kw-tag">光模块</span><span class="kw-tag">PCB</span><span class="kw-tag">TPU</span><span class="kw-tag">算力</span><span class="kw-tag">谷歌</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548822212812558" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521144484184124">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 14:16 · 👁 207</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">再次强调三个月前我们对无源光器...</div>
+  <div class="topic-content">再次强调三个月前我们对无源光器件的判断：重视NPO/<mark>CPO</mark>时代无源光器件的价值通胀，最新fau产业报告欢迎探讨
+
+1⃣无源光器件不受<mark>CPO</mark>/NPO的路线选择影响，均需高通道FAU；
+
+2⃣相比1.6T<mark>硅光</mark>模块，6.4T NPO光引擎（含配套ELS）#所用FAU总价值量提升超10倍，系NPO BOM最高比重环节；
+
+3⃣NPO 27年将规模交付，出货厂商预计是旭创、<mark>新易盛</mark>、Coherent，与三家厂商绑定的FAU供应商显著受益，#重点关注已有36通道FAU量产能力的厂商；
+
+4⃣除FAU外，隔离器、光芯片等价值量也有较大膨胀，此外Scale up光互联还产生Shuffle全新增量。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">光模块</span><span class="kw-tag">CPO</span><span class="kw-tag">新易盛</span><span class="kw-tag">硅光</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521144484184124" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258844412185412">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 13:55 · 👁 353</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">各位领导好，今天开始，中信通信...</div>
+  <div class="topic-content">各位领导好，今天开始，中信通信团队将持续更新光博会最新技术进展[呲牙]
+
+【中信通信-光博会系列更新】
+[太阳]博升光电董事长：面向下一代 <mark>AI</mark> Scale-up 光互连的 VCSEL NPO。
+
+[太阳]核心观点：#VCSEL是纵向扩展光互连的最佳方案。4~10倍带宽密度 、20%功耗、 20%成本。
+
+我们判断Vcsel或有望成为下一代柜内互连的重要方案，此前预期是纯<mark>硅光</mark>方案。
+国内VCSEL龙头可关注：&lt;e type=&quot;hashtag&quot; hid=&quot;15481845448442&quot; title=&quot;%23%E9%95%BF%E5%85%89%E5%8D%8E%E8%8A%AF%E3%80%81%E5%8D%9A%E5%8D%87%E5%85%89%E7%94%B5%EF%BC%88%E6%9C%AA%E4%B8%8A%E5%B8%82%EF%BC%89%23&quot; /&gt;</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">硅光</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258844412185412" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258844412588521">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 13:20 · 👁 529</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">强烈推荐 剑桥科技（27年7x...</div>
+  <div class="topic-content">强烈推荐 剑桥科技（27年7xPE）：
+
+超预期：1️⃣目前产能接近100万月，规划27年翻倍；2️⃣上半年<mark>光模块</mark>毛利率约45%；3️⃣思科外，突破另外2家海外CSP大客户
+
+其他：1️⃣光芯片大量锁定，我们判断27年1.6T发货大幅提升、2️⃣DSP锁物料，验证CSP突破</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">光模块</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258844412588521" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425511184255252">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 13:20 · 👁 528</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【苏大维格】协议转让获批，半导...</div>
+  <div class="topic-content">【苏大维格】协议转让获批，半导体设备业务版图进一步完善
+
+近日，苏大维格实控人及5%以上股东合计将公司总股本的5%股份转让给德商学荟基金的股份转让协议已获得交易所确认。
+
+2026年1月，苏大维格与上海语荻光电签署战略合作框架协议，苏大维格已通过参股方式投资了上海语荻，并约定了优先认购权、优先购买权、优先并购权等相关权利。
+
+语荻光电创始股东及核心团队来自于上<mark>海光</mark>机所，主要从事半导体设备精密光学物镜及组件、卫星激光通信光学系统等产品的设计、开发、制造及销售，主要客户包括部分国内半导体设备、商业卫星等领域的头部公司，受益于半导体国产化趋势，以及商业航天和低轨通信卫星行业的发展，近年来订单规模和销售规模实现了较快增长。
+
+光掩模缺陷检测设备实现量产，头部客户覆盖不断深入。控股子公司维普半导体是国内极少数在半导体光掩模缺陷检测设备领域已实现规模化量产的企业。2026 年上半年，维普半导体在国内头部 FAB 出货持续增加，且首次实现了对全球头部企业韩国工厂的出口，同时已拿到台湾头部客户订单，并有望在下半年发货；2026H1实现营收9422万元（+525%），净利润5068万元，净利率高达54%。当前storm3000系列为公司主要收入来源，storm5000系列单价/净利率更高，有望于今年Q4通过国内头部FAB客户验收，进而拓展更多客户并取得更多订单。
+
+在晶圆检测领域，最新暗场晶圆缺陷检测等高端晶圆检测设备相关样机已开发，有望进一步打开成长空间。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">海光</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425511184255252" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548822215484128">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 13:20 · 👁 496</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">乐心医疗：主业利润稳健，新增A...</div>
+  <div class="topic-content">乐心医疗：主业利润稳健，新增<mark>AI算力</mark>业务
+
+公司主业为智能医疗健康设备，海外业务占收入80%，今年股权激励目标为主业净利润1亿元，经营性现金流良好
+
+公司计划新增<mark>AI算力</mark>业务板块，作为新增长曲线，此前已经申请50亿授信额度，后续可增加额度。与合作方成立合资公司推进首个集群落地，建设token分发平台，后续将陆续采购设备，客户端已与多个大厂接触</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI算力</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548822215484128" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521144485212414">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 13:20 · 👁 502</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">ABF载板交期延长至12-14...</div>
+  <div class="topic-content">ABF载板交期延长至12-14个月，关注先进封装基板及上游材料国产替代【东北计算机】
+
+据SemiAnalysis，26年全球六大ABF基板供应商产能已基本售罄，交期由6-8个月延长至12-14个月；高盛等机构相应上修需求缺口预测，预计2028年ABF载板供需缺口为42%-51%。此前市场消息增层膜供应商味之素或削减对中国大陆约30%的供货量。
+
+[太阳]架构升级带动单芯片载板面积与层数提升，材料消耗同步增加
+
+本轮ABF载板紧缺的核心驱动在于单芯片材料消耗量的结构性上升。<mark>Rubin</mark>为例，单颗芯片所需载板面积较<mark>Blackwell</mark>提升约123%，层数提升至20-24L。面积与层数同步增加，直接提高单位芯片的ABF材料用量。
+
+[太阳]味之素减供提升供应链安全优先级，国产材料导入节奏有望加快
+
+全球约90%-95%的ABF增层膜由味之素供应，其新增产能预计2032年前后释放。在现有交期已超过6个月的背景下，若减供消息落地，将进一步放大国内自给率不足5%的结构性短板。对应地，下游客户对国产替代材料的验证与导入优先级将明显提升，导入周期与放量节奏存在超预期可能。
+
+相关公司（未覆盖公司不作为推荐标的）
+先进封装基板及上游材料环节景气度上行确定性较高，建议关注两条主线：
+1）材料端国产替代：【生益科技】【华正新材】【宏和科技】【莲花控股】；
+2）基板端量价齐升：关注具备高端FC-BGA载板量产能力、有望承接海外产能外溢的头部<mark>PCB</mark>/载板企业【深南电路】【兴森科技（未覆盖）】。
+风险提示：下游需求不及预期等。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Blackwell</span><span class="kw-tag">Rubin</span><span class="kw-tag">PCB</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521144485212414" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425511184252252">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 13:19 · 👁 496</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">#出处未知，注意风险 
+#出处...</div>
+  <div class="topic-content">&lt;e type=&quot;hashtag&quot; hid=&quot;28842551244511&quot; title=&quot;%23%E5%87%BA%E5%A4%84%E6%9C%AA%E7%9F%A5%EF%BC%8C%E6%B3%A8%E6%84%8F%E9%A3%8E%E9%99%A9%23&quot; /&gt; 
+&lt;e type=&quot;hashtag&quot; hid=&quot;51585481585524&quot; title=&quot;%23%E5%87%BA%E5%A4%84%E6%9C%AA%E7%9F%A5%EF%BC%8C%E5%BE%88%E5%A4%9A%E7%BE%A4%E5%9C%A8%E5%8F%91%EF%BC%8C%E5%8F%97%E8%BF%AB%E6%80%A7%E8%BD%AC%E5%8F%91%23&quot; /&gt; 
+
+💫【金州管道】交流更新：<mark>液冷</mark>预期差仍然较大0907
+
+🐟1️⃣&lt;e type=&quot;hashtag&quot; hid=&quot;28214128841541&quot; title=&quot;%23%E9%98%B2%E6%B3%84%E6%BC%8F%E3%80%81%E7%84%8A%E6%8E%A5%E7%AE%A1%E9%81%93%E4%B8%93%E6%B3%A840%E5%B9%B4%EF%BC%9A%23&quot; /&gt;   国内焊接管道第一家上市公司，产品种类全覆盖，油气、排水地下管网等，长三角客户认可度极高：1）管网更新改造需求，西北、西南地区需求旺盛；2）氢能管道2027年预计贡献8000w利润；3）海外拓展全新市场，已入局中东中亚项目。主业预计今年业绩2e，明年3～4e。
+
+🐟2️⃣&lt;e type=&quot;hashtag&quot; hid=&quot;15481845518282&quot; title=&quot;%23%E6%B6%B2%E5%86%B7%E6%88%96%E6%9C%89%E5%B8%8C%E6%9C%9B%E6%88%90%E4%B8%BA%E5%9B%BD%E5%86%85CM%E6%9C%80%E5%A4%A7%E5%90%88%E4%BD%9C%E6%96%B9%EF%BC%9A%23&quot; /&gt;   1）<mark>液冷</mark>已覆盖二次侧管路（波纹管、内外manifold），一次侧管路，同时可生产<mark>液冷</mark>板模组，预计在<mark>液冷</mark>价值量占比50%+；2）<mark>液冷</mark>工厂预计一期投资2e（账上现金10e+，资金充足），300台CNC，产值10e，2027年底产能目标20e；3）<mark>液冷</mark>子公司（东莞市骅兴实业有限公司）金州持股51%。
+
+整体看主业+<mark>液冷</mark>合并，明年预计利润在5e，合计第一目标看150e。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">液冷</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425511184252252" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258844412551582">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 13:19 · 👁 494</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【长江证券电力公用张韦华团队】...</div>
+  <div class="topic-content">【长江证券电力公用张韦华团队】瓦特与比特：中美<mark>AI</mark>的另一本账单：美国进入电力再投资周期，中美能源相对比价重塑，看好中国电价与发电资产价值修复！
+
+#电价是可贸易品的“隐性汇率”，相对优势比绝对低价更重要。电力虽难以跨境交易，却广泛嵌入工业品成本，中美电价对比意义在于观察相对成本优势如何变化。  
+
+#<mark>AI</mark>推动美国电力投资重启，高成本资本开支影响可能延续更长周期  
+1）<mark>算力</mark>负荷提升电力需求预期：<mark>AI</mark>用电负荷正在推动美国电源电网增速跨越式增长。  
+2）本轮扩张发生在高通胀高成本环境：电源电网设备、人工及融资成本共同抬升系统投资门槛，中美设备成本已经是数倍差距。  
+3）资本开支沉淀为长寿命资产，成本影响并不限于建设期：燃料价格可能随周期回落，但电源与电网资产将通过折旧、投资回报和网络费用进入长期回收，其对终端电价的影响可能持续数十年。
+
+#复盘中国电价周期，供需与资产回报正在走向新的平衡  
+1）2016—2020年的降成本周期，缓解了实体企业经营压力，但电力行业也承担了部分成本：电网让利、政府性基金调整与发电侧盈利压缩共同推动工商业电价下降。  
+2）2021—2023年的电力紧张说明，价格与供给能力难以长期背离：煤价上涨叠加新增支撑性电源不足，推动电力供需趋紧；随着后续装机集中释放，供需压力才逐步缓解。  
+3）向后看，支撑性电源投产节奏已经显著放缓，存量机组也逐步进入折旧后半程。在美国能源成本中枢抬升的背景下，中国电价修复与工业成本优势并不矛盾。
+
+#长周期电价改善预期强化，发电侧有望迎来新一轮配置机会  
+1）火电：供需边际变化叠加容量及调节价值显性化 推荐关注【国电电力】 【华能国际】【陕西能源】
+2）水电：电价重估将利好低成本电源，推荐关注【长江电力】  【国投电力】【川投能源】
+3）核电：远期成长性极佳，且成本稳定，推荐【中国核电】【中广核电力H】。  
+4）新能源运营商：随着消纳、市场交易及价格机制逐步理顺，逐步低位布局【龙源电力】【新天绿色能源H】
+[玫瑰]详细报告欢迎私信沟通～</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">算力</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258844412551582" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258844412554441">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 13:19 · 👁 486</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">政策加持，底部共振，电源到了最...</div>
+  <div class="topic-content">政策加持，底部共振，电源到了最佳击球点！
+
+#事件：9月4日，中央网信办、国改委、工信部等七部门联合印发《促进数字化绿色化协同转型发展实施方案（2026—2030年）》，首次在国家级政策文件中明确提出探索<mark>算力</mark>设施800V高压直流供电架构，并同步强调算电协同、绿电直连和新型储能等方向。
+
+#国家级文件首提800V高压直流供电架构，2026年就是800V从0到1的元年！
+1）从可选到必选： 过去800V是海外大厂的技术路线探索，如今成为国家绿色<mark>算力</mark>发展的明确方向，后续配套标准、补贴、采购倾斜可期。
+2）从预期到放量： 政策明确支持超百kW单机柜部署，而单机柜功率密度突破上百kW必须依赖800V与<mark>液冷</mark>。
+3）绿色化绑定： 文件同时强调绿电直连、<mark>液冷</mark>散热、余热回收，800V作为绿电接入、源网荷储一体化的最优载体，与政策导向完美契合。
+
+#近期大厂不断向上游电源、电力基建、高压电力电力设备延伸，下场联手解决“缺电”问题
+FLEX收购EPC Power，该公司专注于MW级双向电力变换与电网交付技术，包含“SST、微电网控制系统、储能电力电子、PCS”等技术平台，其目的非常明确“强化其在<mark>AI</mark><mark>数据中心</mark>和下一代800V电力架构中的技术布局！
+而8月份NV连续加持SB Energy、Lancium等具备电源资源的<mark>AI</mark>总包方、电力基建总承包商，也充分说明美国大厂纷纷注意到“缺电”并亲自下场“保电”。
+[玫瑰]电源、<mark>液冷</mark>技术效率将极大解决“缺电”问题[玫瑰]
+除功率密度和可靠性外，电源的转换效率是电源研发进步的核心原动力，电源转换效率持续提升（尤其是SST标准要求98%以上）意味着电力损耗的持续下降；<mark>液冷</mark>散热技术的持续提升将使得单GW计算功率发热可以通过更高效的散热方式来解决，从而实现更高的PUE优化。
+
+#轮动角度，去年8月份、去年12月份、今年5月份<mark>液冷</mark>涨完后电源往往会形成接力。
+
+[玫瑰][玫瑰][玫瑰]八月以来我们持续跟踪产业变化，坚定推荐<mark>液冷</mark>电源为代表的“电链”，当前电源产业链均处于低位，建议逢低布局</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">数据中心</span><span class="kw-tag">算力</span><span class="kw-tag">液冷</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258844412554441" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258844412554241">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 13:19 · 👁 486</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">中石科技大涨更新：<mark>光模块</mark>vc板...</div>
+  <div class="topic-content">中石科技大涨更新：<mark>光模块</mark>vc板+<mark>液冷</mark>tim2材料双buff加持，vc板市场空间彻底打开
+
+<mark>光模块</mark>vc均热板业务：明年收入或在55亿元左右，10%净利率，5.5-6亿元利润。
+
+1、800G开始采用锌合金外壳叠加VC片及导热凝胶，单套价值量约60-70元；一体化VC方案单套价值量约90-100元，较传统方案提升约20%-30%。
+
+2、石墨烯增量：800g石墨烯在<mark>光模块</mark>内部没有用，但是1.6t有可能用，纯tim2材料50-60元，加上壳体大概100多元单价。
+
+2、coherent+旭创：在coherent份额40-50%，旭创入股公司或看重公司的vc均热板实力，我们预期份额70%。今年两家收入或在7-8亿元，明年按照旭创5000-6000万只800+1.6t预期，公司单一旭创收入或在20-30亿元左右，coherent收入或翻倍在5-10亿元左右。
+
+3、其他家：假设其他家份额明年公司拿下20%份额，收入或在15-20亿元左右。
+
+tim材料业务：公司有很大概率成为<mark>液冷</mark>tim2材料龙头，从<mark>光模块</mark>到<mark>gpu</mark>/cpu上都要用，每层价格都是80-150元，后续npo/<mark>cpo</mark>也要用，要用的量价值会更大，市场空间很大。第一步看500e。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">光模块</span><span class="kw-tag">CPO</span><span class="kw-tag">GPU</span><span class="kw-tag">液冷</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258844412554241" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258844412554222">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 13:18 · 👁 482</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">[太阳]【国金具身智能】Opt...</div>
+  <div class="topic-content">[太阳]【国金具身智能】Optimus量产V3供应商再定价，重视V4迭代及数采链
+
+#V3供应链基本锁定，EDI系统排产指引清晰。根据产业调研反馈，V3 已经完成设计冻结，除外观美学及灵巧手细节仍在优化，其余环节供应链基本锁定。实际订单已经开始加速释放，8月正式开启EDI系统下单。近期核心供应商陆续获得大批量订单，经统计9月预计周产1k+，年底预计周产2500+，量产斜率及可见度进一步提升。
+
+#重视V4迭代开启后的格局变化。预计V3年内整体出货约1-2万台，主要用于在机器人学院做真机数据采集。根据产业调研反馈，大客户将根据商用一代、预研一代的规划，在年底前开启V4的迭代，供应链格局迎来重构。新技术、新材料的升级将是重要方向。
+
+#持续关注数据采集产业进展。数据是当前大脑训练最卡脖子环节，对标<mark>gpt</mark> 2.0-3.0阶段所需数据集约千万小时级别，机器人<mark>多模态</mark>模型充分泛化也至少需要上千万小时真机数据。当前全球数据量仅数十万小时，供需缺口极大，目前北美数采设备及视频需求已逐渐外溢至国内，卡位核心设备和强仿真能力的公司将率先受益。
+
+[庆祝]投资建议：目前市场预期已明显落后于产业进展，考虑到潜在催化（订单+发布）以及业绩真空期综合因素，看好板块迎来表现。建议重点布局：
+
+(1) V3确定性：边际角度重点关注nbhx、hsgf，持续看好拓普、三花、绿的、长盈、荣泰、恒立、五洲、金沃、日盈、科达利等。
+
+(2) V4潜在迭代：轻量化【nbhx】，灵巧手【兆威机电】，视觉【奥比中光】等。
+
+(3) 数采链： 建议关注&lt;e type=&quot;hashtag&quot; hid=&quot;48512158821448&quot; title=&quot;%23%E6%95%B0%E9%87%87%E8%AE%BE%E5%A4%87%23&quot; /&gt;   【奥比中光】（相机）、【芯动联科】【华依科技】（IMU），&lt;e type=&quot;hashtag&quot; hid=&quot;88214128841552&quot; title=&quot;%23%E6%95%B0%E9%87%87%E6%9C%8D%E5%8A%A1%23&quot; /&gt;   【凡拓数创】【阿尔特】【尚品宅配】【海天瑞声】等。
+
+[炸弹]风险提示：机器人量产不及预期风险，技术路线变更风险，主业业绩不及预期风险。
+
+[咖啡]联系人：国金具身 陈传红/宋源峰</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">多模态</span><span class="kw-tag">GPT</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258844412554222" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521144485224114">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 13:18 · 👁 481</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">🍁粗算了下 tim材料以前没什...</div>
+  <div class="topic-content">🍁粗算了下 tim材料以前没什么需求 未来几年可能会有7-8处场景要用，每处都是100-200元，3.2t之后会更多，下游涉及<mark>光模块</mark>/<mark>gpu</mark>/cpu/npo/<mark>cpo</mark>等，越用越多，通胀明显，可以看到大几百亿到千亿市场。现在龙头公司市值并不匹配。中石科技/阿莱德/思泉新材可以关注。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">光模块</span><span class="kw-tag">CPO</span><span class="kw-tag">GPU</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521144485224114" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521144485224224">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 13:18 · 👁 480</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">炬光科技NPO/<mark>CPO</mark> 光电产...</div>
+  <div class="topic-content">炬光科技NPO/<mark>CPO</mark> 光电产业论坛发言（午间播报）
+
+炬光科技首席科学家Wilfried Noell发表了《Co-Design Optics and Components for the ELSFP &amp; NPO/<mark>CPO</mark> Ecosystem》的主题报告。
+
+<mark>CPO</mark>和光学引擎（OE）将很快推动<mark>人工智能</mark>基础设施和<mark>数据中心</mark>的超高数据速率。
+
+炬光科技开发和制造支撑这些光学接口的光学和精密组件。Wilfried Noell介绍了整个价值链的端到端光学解决方案-涉及超高功率激光器（ELSFP）的#耦合透镜，#微棱镜透镜等产品。
+
+炬光科技的定制解决方案提供与&lt;e type=&quot;hashtag&quot; hid=&quot;88214128844142&quot; title=&quot;%23pic%EF%BC%8C%23&quot; /&gt;  #FAU和elsfp的精确接口，而高精度v型槽阵列确保FAU组件的高光耦合效率。并采购#罗博特科（ficonTEC）设备
+以支持高精度自动化需求。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">人工智能</span><span class="kw-tag">数据中心</span><span class="kw-tag">CPO</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521144485224224" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425511118885222">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 13:03 · 👁 553</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">🍁🍁🍁中石科技大涨更新：<mark>光模块</mark>...</div>
+  <div class="topic-content">🍁🍁🍁中石科技大涨更新：<mark>光模块</mark>vc板+<mark>液冷</mark>tim2材料双buff加持，vc板市场空间彻底打开
+
+🍁<mark>光模块</mark>vc均热板业务：明年收入或在55亿元左右，10%净利率，5.5-6亿元利润。
+1、800G开始采用锌合金外壳叠加VC片及导热凝胶，单套价值量约60-70元；一体化VC方案单套价值量约90-100元，较传统方案提升约20%-30%。
+2、石墨烯增量：800g石墨烯在<mark>光模块</mark>内部没有用，但是1.6t有可能用，纯tim2材料50-60元，加上壳体大概100多元单价。
+2、coherent+旭创：在coherent份额40-50%，旭创入股公司或看重公司的vc均热板实力，我们预期份额70%。今年两家收入或在7-8亿元，明年按照旭创5000-6000万只800+1.6t预期，公司单一旭创收入或在20-30亿元左右，coherent收入或翻倍在5-10亿元左右。
+3、其他家：假设其他家份额明年公司拿下20%份额，收入或在15-20亿元左右。
+
+🍁tim材料业务：公司有很大概率成为<mark>液冷</mark>tim2材料龙头，从<mark>光模块</mark>到<mark>gpu</mark>/cpu上都要用，每层价格都是80-150元，后续npo/<mark>cpo</mark>也要用，要用的量价值会更大，市场空间很大。第一步看500e。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">光模块</span><span class="kw-tag">CPO</span><span class="kw-tag">GPU</span><span class="kw-tag">液冷</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425511118885222" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548822221128158">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 13:01 · 👁 552</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">[拳头]【招商电子】再call...</div>
+  <div class="topic-content">[拳头]【招商电子】再call具强劲基本面、H2业绩超预期释放的<mark>PCB</mark>产业链！
+
+#行业基本面强劲，短期季度存在超预期潜力，且新的架构变化给远期业绩带来上修的空间。
+经过8月的反弹，目前<mark>PCB</mark>核心标的估值上修至对应明年19-21xPE，CCL上修至对应明年23-24xPE。展望后续，#我们整体看好此轮反弹的持续性，理由如下：
+1️⃣短期基本面存在超预期潜力：进入9🈷️交易业绩阶段，结合目前行业下游的景气来看，<mark>算力</mark>领域，北美<mark>AI服务器</mark>（NV的<mark>Rubin</mark>、<mark>谷歌</mark>和AWS等<mark>ASIC</mark>新架构）处于新品拉货旺季，新增高端产能稼动率逐步满载，给Q3-Q4季度带来弹性利润空间；此外，#要重视Q3非<mark>AI</mark>领域<mark>PCB</mark>的通胀逻辑持续演绎亦将带来毛利率的向好、利润弹性释放的向上空间。9月科技公司交流会的展望以及后续的产业链调研都会让市场得到一个明确的结论：#<mark>PCB</mark>产业链Q3-Q4业绩存在较大的上修空间。所以反弹过程中的回调幅度不会很大，且即使较大也会被快速修复。
+
+2️⃣新技术新架构有望推动<mark>PCB</mark>板块远期成长空间上修。当下据我们跟踪产业链的信息来看：
+1）<mark>Rubin</mark> Ultra 架构新变化：VRU NVL576 的Oberon Rack布局从“10+9+8”调整为“9+18+9”，中间的 <mark>NVLink</mark> Switch托盘数量从 9 个翻倍到 18 个，单个交换托盘高度从 1.5U 压缩到 0.75U；可扩展版本(NPO)Switch Tray的<mark>NVLink</mark> Switch <mark>ASIC</mark> 从 2 颗增加到 4 颗。集成度和设计的复杂度大幅提升，#相关CCL材料有望进一步升级至PTFE方案，<mark>PCB</mark>板的层数亦有望进一步增加。
+
+2）mSAP应用场景有望拓宽：今年随着1.6T<mark>光模块</mark>的规模化量产，其<mark>PCB</mark>采用6阶mSAP-SLP的设计方案，<mark>PCB</mark>行业中的mSAP产能供给变得极度紧张。往27年看，HW的计算板UHDI、<mark>Rubin</mark>的SOCAMM内存卡、三次电源垂直供电板亦将采用mSAP工艺制作，且更远期的CoWoP封装技术亦将大量采用mSAP工艺。这显示<mark>AI</mark>领域的<mark>PCB</mark>正从Tenting向mSAP升级的趋势，泛半导体化的升级有望提升<mark>PCB</mark>整体在<mark>AI</mark>系统设备中的价值量。
+
+3）其他的新技术：a）陶瓷基板技术：考虑到单<mark>GPU</mark>功耗的大幅提升，<mark>PCB</mark>板的散热需求亦在增加，相应的在计算板中加入陶瓷基板的技术方案的必要性和可行性被产业和市场关注，产业链的开发进度已较为顺利，有望成为明天的可选方案版本；2）内埋<mark>PCB</mark>技术：集成度的持续提升，被动元件及功率器件有望被内埋进<mark>PCB</mark>中，工艺难度和价值量均有望大幅提升。
+
+故我们认为<mark>PCB</mark>产业链未来仍存在较多可预见的技术迭代升级的催化，板块亦有望迎来“戴维斯双击”。
+
+建议关注及排序：
+<mark>PCB</mark>：#【景旺电子、深南电路、生益电子、鹏鼎控股、方正科技】；沪电股份、广合科技、<mark>胜宏</mark>科技； 此外，#关注科翔股份、兴森科技、中富电路、奥士康、世运电路、博敏电子、中京电子、红板科技、超颖电子等弹性标的。
+CCL：&lt;e type=&quot;hashtag&quot; hid=&quot;15481845558812&quot; title=&quot;%23%E3%80%90%E7%94%9F%E7%9B%8A%E7%A7%91%E6%8A%80%E3%80%91%E3%80%81%E5%8D%97%E4%BA%9A%E6%96%B0%E6%9D%90%E3%80%81%E5%8D%8E%E6%AD%A3%E6%96%B0%E6%9D%90%E7%AD%89%EF%BC%9B%23&quot; /&gt;   
+硅微粉：&lt;e type=&quot;hashtag&quot; hid=&quot;48512158881128&quot; title=&quot;%23%E8%81%94%E7%91%9E%E6%96%B0%E6%9D%90%E3%80%81%E5%87%8C%E7%8E%AE%E7%A7%91%E6%8A%80%E7%AD%89%EF%BC%9B%23&quot; /&gt;   
+铜箔：#【宝鼎科技】、德福科技、方邦股份、铜冠铜箔等；
+玻布：#国际复材、中材科技、菲利华、宏和科技、中国巨石等；
+设备：#大族数控、芯碁微装、东威科技、泰金新能、鼎泰高科、合锻智能、三孚新科等。
+
+重视9🈷️做多业绩爆发板块的窗口期！</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">NVLink</span><span class="kw-tag">AI服务器</span><span class="kw-tag">Rubin</span><span class="kw-tag">ASIC</span><span class="kw-tag">光模块</span><span class="kw-tag">PCB</span><span class="kw-tag">GPU</span><span class="kw-tag">算力</span><span class="kw-tag">谷歌</span><span class="kw-tag">胜宏</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548822221128158" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425511118815182">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 13:01 · 👁 512</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">亨通光电 <mark>光模块</mark>更新 0907...</div>
+  <div class="topic-content">亨通光电 <mark>光模块</mark>更新 0907：
+
+1、1.6T<mark>光模块</mark>这边新进展，近日完成<mark>meta</mark>、亚马逊认证，预计三季度在苏州老产线小批量出货2.5-4万只，2027在新基地大批量出货
+
+2、泰国罗勇基地800G<mark>光模块</mark>产能年规划240万只上修到360万只，新增的产能全部被<mark>微软</mark>和<mark>meta</mark>定走大部分，剩余被亚马逊拿走，管理层还在和当地合作再提升泰国产能
+
+3、苏州新基地提速，预计投产早于预期，2027年一期产能800G上修至600万只（原400万只），1.6T上修至180万只，二期产能原定2027年年底投产，最新口径是争取2027下半年完工</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Meta</span><span class="kw-tag">光模块</span><span class="kw-tag">微软</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425511118815182" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548822221128458">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 13:00 · 👁 431</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">‼️【航天电器点评：<mark>昇腾</mark>950...</div>
+  <div class="topic-content">‼️【航天电器点评：<mark>昇腾</mark>950高功耗时代，国产<mark>算力</mark><mark>液冷</mark>或打开第二成长曲线】
+
+我们认为，2026年国产<mark>算力</mark>最大的预期差之一，可能并不只在芯片本身，而在高功耗芯片放量之后被迫升级的散热体系。<mark>昇腾</mark>950如果进入规模化部署阶段，由于单芯片及整机功耗进一步提升，<mark>液冷</mark>有望从机房级配套继续下沉至冷板、管路、接头等组件级环节，国产<mark>算力</mark><mark>液冷</mark>价值量随之提升。
+
+这一背景下，&lt;e type=&quot;hashtag&quot; hid=&quot;48512158882258&quot; title=&quot;%23%E8%88%AA%E5%A4%A9%E7%94%B5%E5%99%A8%23&quot; /&gt;   的核心看点开始发生变化。公司长期深耕航空航天高可靠连接器、流体连接及精密制造，在高压、高可靠、极端工况下积累了较深技术基础，与<mark>AI服务器</mark><mark>液冷</mark>所要求的高可靠密封、快速接头、精密流体控制存在较强技术迁移空间。
+
+市场目前最大的预期差，在于其#切入<mark>华为</mark><mark>昇腾</mark>950<mark>液冷</mark>供应链后，并取得较高份额。按照1.6万台整机、单台<mark>液冷</mark>核心部件价值量约1.8万元测算，对应年市场空间约2.9亿元；若未来取得50%左右份额，潜在新增收入约1.4亿元。假设净利率达到20%，理论利润增量接近3000万元。
+
+过去市场更多按照“军工连接器”给航天电器定价；一旦国产<mark>算力</mark><mark>液冷</mark>形成稳定批量订单，公司就可能从传统军工制造进一步获得“<mark>华为</mark><mark>算力</mark>+<mark>液冷</mark>核心部件+国产替代”三重标签。随着<mark>昇腾</mark>950后续放量，<mark>液冷</mark>业务有望从几亿元的小业务，逐渐成长为公司新的利润弹性来源。
+
+所以航天电器真正的预期差是：#市场现在交易的是军工复苏，未来可能重新定价的是国产<mark>AI算力</mark>基础设施。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI服务器</span><span class="kw-tag">AI算力</span><span class="kw-tag">华为</span><span class="kw-tag">昇腾</span><span class="kw-tag">液冷</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548822221128458" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425511118812852">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 13:00 · 👁 428</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【东吴电子陈海进】杰华特：Dr...</div>
+  <div class="topic-content">【东吴电子陈海进】杰华特：Drmos产能/格局/产品全面领先，强call&lt;e type=&quot;hashtag&quot; hid=&quot;51584851114414&quot; title=&quot;%23%E6%A8%A1%E6%8B%9F%E6%B6%A8%E4%BB%B7%E9%94%90%E5%BA%A6%E5%93%81%E7%A7%8D%EF%BC%81%23&quot; /&gt;  
+
+📮模拟涨价周期启动，重视锐度品种Drmos
+德州仪器9月发布了新涨价函，其它模拟厂商亦步入涨价周期。供需格局形成剪刀差，杰华特自身已完成部分料号的调价，乐观看待Drmos涨价趋势。
+
+📮观点重申：需求/份额齐升，杰华特全面发力
+杰华特25年Drmos已在大<mark>算力</mark>客户率先放量。在其加单的强力催化下，杰华特多项电源和DrMOS产品加速放量，国产化份额有望持续提升。国产化需求+客户放量带动公司26H2及27年营收强势增长。
+持续强call#Drmos国产化大趋势，看好公司卡位优势加速转化为业绩！
+
+风险提示：行业竞争加剧、宏观经济波动导致需求不及预期
+🎁东吴电子：陈海进/谢文嘉</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">算力</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425511118812852" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425511118848822">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 13:00 · 👁 429</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【天风机械】#中石科技——全栈...</div>
+  <div class="topic-content">【天风机械】#中石科技——全栈热管理受益<mark>AI算力</mark>+<mark>光模块</mark>双主线 
+🌹<mark>光模块</mark>散热放量在即：#VC均热板渗透率从10-20%向20-30%提升，旭创战略入股联合研发下一代<mark>CPO</mark>/NPO方案
+
+💥石墨烯TIM打开<mark>算力</mark>增量：#单颗<mark>GPU</mark>价值量20美金，<mark>英伟达</mark><mark>Rubin</mark>平台启用，公司为鸿富诚潜在二供，净利率可达50%，市场空间约50亿元
+
+#纪要ppt等资料包及#路演欢迎私戳~
+天风机械：朱晔/文毓 18916600404</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Rubin</span><span class="kw-tag">AI算力</span><span class="kw-tag">英伟达</span><span class="kw-tag">光模块</span><span class="kw-tag">CPO</span><span class="kw-tag">GPU</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425511118848822" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548822221151858">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 12:59 · 👁 431</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">早上开盘前强call的#上海电...</div>
+  <div class="topic-content">早上开盘前强call的&lt;e type=&quot;hashtag&quot; hid=&quot;28214128884451&quot; title=&quot;%23%E4%B8%8A%E6%B5%B7%E7%94%B5%E5%BD%B1%23&quot; /&gt;   涨停[玫瑰] 综合各种信息，我们认为<mark>AI</mark>短剧漫剧之后，<mark>AI</mark>长剧/<mark>AI</mark>电影/<mark>AI</mark>游戏等平权更慢且利好机构化生产模式的长内容拐点正在到来！板块催化剂正在多起来！#建议进化的眼光/发展的眼光看待<mark>AI</mark>长内容的突破！ 持续call的&lt;e type=&quot;hashtag&quot; hid=&quot;51584451858844&quot; title=&quot;%23%E4%B8%96%E7%BA%AA%E5%8D%8E%E9%80%9A%23&quot; /&gt;   股价也不断走强 [玫瑰] 国海传媒</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548822221151858" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521144448858214">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 12:59 · 👁 431</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【IFA2026柏林消费电子展...</div>
+  <div class="topic-content">【IFA2026柏林消费电子展看点一览】
+
+# 详细Excel梳理私
+
+# 清洁电器：场景延伸，sku完善
+
+石头今年重点在扩张品类——泳池首发（RockAqua P1）、庭院迭代（RockNeo Q2 LiDAR）、三维空间（G-Rover爬楼梯），从室内地面往全场景外延。追觅延伸扫地机蒸汽功能（Aqua20 180°C），ECHO具身系列试水衣物收纳。科沃斯推全能旗舰洗地机、提升基站运维效率的窗宝产品，在割草机新品上提升复杂庭院覆盖能力，泳池扩展完整 ULTRAMARINE 家族。云鲸Freo 20主推场景理解——看到不同污渍自动切模式，从产品公司往<mark>AI</mark>公司靠。九号割草机主推贴边，Navimow H5 Pro用EdgeMaestro机械臂推刀盘7.7cm贴边。
+
+# 智能家居：开始主推本地<mark>AI</mark>中枢
+
+安克五品牌合一后推MindBase，26TOPS<mark>算力</mark>+48TB可拓展存储+无月费，对标Amazon/Google语音助手但走本地路线，搭载多宽<mark>Agent</mark>、可链接多款安克设备。绿联从NAS切入，HomeAgent售价三档$899-$20,000，旗舰MA100本质是NAS+<mark>AI</mark>一体机+监控录像设备。
+
+# <mark>AI</mark>眼镜：继续优化不可能三角，垂类领域持续延伸
+
+IDC预测今年全球智能眼镜出货2368万台。雷鸟连续5季度全球第一（约1/4份额），雷鸟iO主打全天智记+长期记忆+主动<mark>AI</mark>，Rokid $349第一款原生<mark>Gemini</mark>眼镜，BleeqUp $459切骑行垂直场景。
+
+# 智能影像：仍有持续创新迭代的产品力
+
+Osmo 360 II（1英寸/8K60fps/可换镜头）保持引领。Pocket 4P双镜头是口袋相机首次光学变焦。Hohem Eyepic可拆卸+原生竖屏4K。极米4K120Hz超短焦切游戏大屏。
+
+# 大电：<mark>AI</mark>底层做基建，重做产品
+
+海尔<mark>AI</mark>细胞级解冻、海信116寸RGB-Mini LED、TCL联手B&amp;O做音质提升。LG ThinQ Claw从&quot;听指令&quot;到&quot;理解上下文主动执行&quot;，<mark>三星</mark>冰箱用<mark>Gemini</mark>识别3000+食材。Miele百年纪念G8洗碗机内置摄像头看脏污选程序。
+
+# 人形机器人：出货保持高增、格局依然集中
+
+上半年全球人形出货超22000台，同比+300%。智元9700台（43%）、宇树7000台（31%），两家占全球3/4。但真实买家仍是工厂，小米CyberOne螺母上件成功率98%。此外，外骨骼也首次集中亮相。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Gemini</span><span class="kw-tag">Agent</span><span class="kw-tag">算力</span><span class="kw-tag">三星</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521144448858214" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258844441124411">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 12:59 · 👁 413</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">[福]鸿仕达
+
+1. 纬创发货...</div>
+  <div class="topic-content">[福]鸿仕达
+
+1. 纬创发货7条线，后续还有3条今年交付，极力争取7条今年全验收，3个多亿收入，明年预计15-20条线；2. 海思链上的先进封装植散热机，今年5000万收入以上，上半年1500万，明年预计60台，后年预期100台，单价400-500万元；3. 晶圆前道测量设备：两款（X-Ray膜厚检测、X-Ray缺陷检测）今年出demo，明年验证，后年出货，单台1000万以上；4. 新产品预期：台达电源散热 、Finisa的<mark>光模块</mark>中的DSP芯片散热机器是新的需求，预计量很大，但还没有具体指引。按指引预期明年能到4亿利润。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">光模块</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258844441124411" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258844444542182">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 11:29 · 👁 720</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【东吴通信张良卫/欧子兴】本周...</div>
+  <div class="topic-content">【东吴通信张良卫/欧子兴】本周光博会叠加模型侧催化，光通信板块预期进一步修复@260907
+
+🌹事件：光博会召开、<mark>GPT</mark>-6 Astra发布
+
+1）本周CIOE中国光博会召开，光通信产业催化密集。9月9日至11日，第27届中国国际光电博览会将在深圳举行，<mark>AI算力</mark>光互联是本届展会核心方向之一，1.6T高速<mark>光模块</mark>、<mark>CPO</mark>/NPO/XPO、<mark>硅光</mark>、OCS以及单波400G等新技术、新产品有望集中展示。随着产业链新品发布及客户验证进展持续释放，市场对于下一代高速光互联技术产业化节奏的预期有望进一步升温。
+
+2）<mark>GPT</mark>-6 Astra发布，前沿模型竞争提速。<mark>OpenAI</mark>近期发布<mark>GPT</mark>-6 Astra，在复杂推理、编程、Computer Use及<mark>Agent</mark>任务等方向能力进一步提升，模型侧再次出现明显能力跃迁。前沿模型能力提升叠加<mark>OpenAI</mark>、<mark>Anthropic</mark>、Google等厂商竞争持续加剧，有望推动训练规模继续扩大，同时加速<mark>Agent</mark>和推理侧Token需求增长，进一步强化云厂商对于<mark>GPU</mark>集群及网络基础设施的投入意愿。
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;48521424841458&quot; title=&quot;%23%E8%A7%82%E7%82%B9%E9%87%8D%E7%94%B3%23&quot; /&gt; 
+
+# 筹码结构有所改善，FCC预期逐步纠偏。 前期拥挤交易和高位筹码已有所消化，筹码因素对板块的压制减弱。前期市场对FCC影响定价偏悲观，目前看对主要<mark>光模块</mark>公司整体订单影响有限。
+
+# <mark>英伟达</mark>接近历史新高，提振海外<mark>AI</mark>链风险偏好。 市场对<mark>AI</mark>资本开支和<mark>GPU</mark>需求预期仍强，对海外收入占比较高的<mark>光模块</mark>公司形成估值和情绪支撑。
+
+# <mark>CPO</mark>产业化进程正加速推进。<mark>英伟达</mark><mark>CPO</mark>交换机已进入全面量产。Lumentum披露其领先<mark>CPO</mark>客户的生产计划持续推进；COHR规划<mark>CPO</mark>营收在2027财年下半年开始量产爬坡。
+
+# NPO复用成熟供应链，落地基础坚实。Lumentum预计NPO将于2027年底至2028年入市；Coherent首批收入将于12月季度落地。
+
+[红包]相关受益标的：
+
+1）大光：重点推荐<mark>中际旭创</mark>，建议关注<mark>新易盛</mark>；
+
+2）小光：建议关注光迅科技、联特科技、汇绿生态、剑桥科技、东山精密、长芯博创、华工科技、COHR、FN、AAOI等；
+
+3）新光：<mark>CPO</mark>产业链，重点推荐<mark>天孚通信</mark>、炬光科技，建议关注长盈通、罗博特科、致尚科技、蘅东光、LITE、COHR等；OCS产业链，重点推荐炬光科技，建议关注德科立、腾景科技、光库科技、LITE、COHR等；DCI产业链，建议关注光迅科技、德科立、CIEN、MRVL、LITE、COHR等；
+
+4）物料：光芯片光器件，建议关注<mark>源杰</mark>科技、仕佳光子、永鼎股份、长光华芯、AXT、LITE、COHR等。
+
+[玫瑰]风险提示：<mark>AI</mark>建设不及预期、光互联技术发生重大变化、系统性风险</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Anthropic</span><span class="kw-tag">OpenAI</span><span class="kw-tag">Agent</span><span class="kw-tag">AI算力</span><span class="kw-tag">中际旭创</span><span class="kw-tag">天孚通信</span><span class="kw-tag">英伟达</span><span class="kw-tag">光模块</span><span class="kw-tag">CPO</span><span class="kw-tag">新易盛</span><span class="kw-tag">GPT</span><span class="kw-tag">GPU</span><span class="kw-tag">硅光</span><span class="kw-tag">源杰</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258844444542182" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548822222425228">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 11:28 · 👁 713</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title"># 【弘信电子】大涨： <mark>算力</mark>订...</div>
+  <div class="topic-content"># 【弘信电子】大涨： <mark>算力</mark>订单累计签约近100亿，Token出海星辰大海【浙商化工&amp;<mark>算力</mark> 杨占魁】
+
+⭕️<mark>算力</mark>租赁：2026年上半年公司新增<mark>算力</mark>资源综合服务订单46亿元，# 累计签约<mark>算力</mark>资源综合服务订单97亿元。
+
+⭕️Token出海：2026年5月，公司首座Token工厂于无锡落地，# 首批计划部署4台<mark>华为</mark><mark>昇腾</mark>384卡超节点<mark>服务器</mark>。
+
+2026年7月，公司第2座Token工厂于厦门落地，部署<mark>华为</mark>384超节点及异构<mark>算力</mark>，&lt;e type=&quot;hashtag&quot; hid=&quot;51584852884124&quot; title=&quot;%23%E5%85%B7%E5%A4%87Token%E8%A7%84%E6%A8%A1%E5%8C%96%E5%87%BA%E6%B5%B7%E4%BA%A4%E4%BB%98%E8%83%BD%E5%8A%9B%E3%80%82%23&quot; /&gt; 
+
+⭕️卡源：公司旗下安联通是#NVIDIA双Elite精英级合作伙伴，子公司燧弘华创是#<mark>华为</mark>计算APN钻石级部件伙伴。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">服务器</span><span class="kw-tag">算力</span><span class="kw-tag">华为</span><span class="kw-tag">昇腾</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548822222425228" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258844444548452">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 11:28 · 👁 707</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">[太阳]【申万宏源】消费级3D...</div>
+  <div class="topic-content">[太阳]【申万宏源】消费级3D打印持续高增，关注创想三维今日入通
+
+[强]受益于 <mark>AI</mark> 赋能、国产供应链降本及生态完善，消费级3D打印从专业工具转向大众消费品。个性化消费、创客文化兴起打开市场空间，供给侧硬件成本下探拉动销量提升，耗材领域随设备放量迎来持续复购需求。#1-7月3D打印机出口数量421万台，yoy约90%
+
+[强]&lt;e type=&quot;hashtag&quot; hid=&quot;28214125114511&quot; title=&quot;%23%E3%80%90%E5%88%9B%E6%83%B3%E4%B8%89%E7%BB%B4%E3%80%91%23&quot; /&gt;  9.7今日入通
+[玫瑰]#下半年新品催化，K3系列预计9月上市、I8系列圣诞节前上市，新品预计释放较大业绩贡献；北美线下渠道加速铺开，线下门店从年初百余家预计到26年底落地1200家；RFID耗材占比提升，预计耗材持续快速放量。伴随新品催化及渠道拓展、耗材放量，预计27-28年收入大幅增长、利润率显著修复
+
+[强]&lt;e type=&quot;hashtag&quot; hid=&quot;15481842881522&quot; title=&quot;%23%E3%80%90%E5%AE%B6%E8%81%94%E7%A7%91%E6%8A%80%E3%80%91%23&quot; /&gt;  耗材快速放量
+[玫瑰]3D打印耗材绑定头部大客户TZ，26H1耗材收入3.2亿元，其中Q1/Q2分别1/1.2亿，环比翻倍多增长，#26全年预计耗材收入8-10亿元。Q2利润成功扭亏，传统主业收入稳健增长，利润率逐步修复。看好3D打印产业趋势，绑定头部大客户TZ，先发优势明显
+
+☎策略会及中报详细交流内容欢迎联系【申万宏源3D打印团队】</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258844444548452" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548822222428588">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 11:28 · 👁 709</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">说服领导现价买入mlcc的三个...</div>
+  <div class="topic-content">说服领导现价买入mlcc的三个理由
+
+🍬#1）硬件里最便宜，股价幅度跌的比现货价格多，硬件里之前涨的顺序：存储，<mark>pcb</mark>，<mark>pcb</mark>上游，mlcc；现在反弹也是一样的；位置筹码又是硬件里的低位
+
+🍬#2）之前大家担心的库存逐步消化，目前部分料号企稳而且涨了，q3q4消费电子旺季拉货只会越来越快
+
+🍬#3）国巨已涨停，#村田太诱向上，#海外大概率三季度财报也非常不错，国内也不会差、库存消耗殆尽，9月现货价格上行概率大大增加，期待mlcc三季度表现
+
+by ty</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">PCB</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548822222428588" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425511111215512">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 11:28 · 👁 676</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">周更新：延续出海成长主线，关注...</div>
+  <div class="topic-content">周更新：延续出海成长主线，关注<mark>液冷</mark>和中烟产业机遇；再述高分红配置
+
+[烟花]观点：1）本周梳理出海专题，新兴市场强势、欧美K型分化（高端消费vs电商渠道景气/品类中摩托车vs潮玩有超额）；展望H2欧美出口库存低位、汇兑压力环比缓解，关注低位拐点品种。2）<mark>液冷</mark>产业链调研高景气，持续推荐优质标的。
+
+[玫瑰]出海：1）&lt;e type=&quot;hashtag&quot; hid=&quot;48512154118128&quot; title=&quot;%23%E8%A5%BF%E9%94%90%23&quot; /&gt;    &lt;e type=&quot;hashtag&quot; hid=&quot;88214125118142&quot; title=&quot;%23%E4%B9%90%E8%88%92%E9%80%82%23&quot; /&gt;    产品/渠道/供应链/组织多维度领先，同时新兴市场和欧美高端消费有景气，成长确定性强；2）新消费出海0-1重视&lt;e type=&quot;hashtag&quot; hid=&quot;51584852881844&quot; title=&quot;%23%E5%B8%83%E9%B2%81%E5%8F%AF%EF%BC%9B%23&quot; /&gt;    3）电商&lt;e type=&quot;hashtag&quot; hid=&quot;28214125118141&quot; title=&quot;%23%E5%AE%89%E5%85%8B%23&quot; /&gt;    新兴品类放量、&lt;e type=&quot;hashtag&quot; hid=&quot;15481842885882&quot; title=&quot;%23%E8%87%B4%E6%AC%A7%23&quot; /&gt;    策略调改成长提速；4）制造推荐底部利润夯实的&lt;e type=&quot;hashtag&quot; hid=&quot;88214125112552&quot; title=&quot;%23%E8%8B%B1%E7%A7%91%E5%8C%BB%E7%96%97%23&quot; /&gt;    &lt;e type=&quot;hashtag&quot; hid=&quot;51584852885224&quot; title=&quot;%23%E4%BC%97%E9%91%AB%EF%BC%9B%23&quot; /&gt;    5）出口推荐&lt;e type=&quot;hashtag&quot; hid=&quot;28214125112551&quot; title=&quot;%23%E8%8B%B1%E7%A7%91%E5%86%8D%E7%94%9F%23&quot; /&gt;    成品框&amp;墙板延续高增，关注稳成长低估值高股息&lt;e type=&quot;hashtag&quot; hid=&quot;15481842884252&quot; title=&quot;%23%E5%BB%BA%E9%9C%96%23&quot; /&gt;    #永艺。本周调研#春风 U10P、Z10-4延续放量，RUV X10即将推出，极核保持高目标。
+[玫瑰]造纸：箱板纸9月下游消化库存、10月旺季预期反弹。26H2维持推荐浆纸一体化龙头&lt;e type=&quot;hashtag&quot; hid=&quot;48512154115488&quot; title=&quot;%23%E5%A4%AA%E9%98%B3%23&quot; /&gt;    &lt;e type=&quot;hashtag&quot; hid=&quot;88214125112582&quot; title=&quot;%23%E7%8E%96%E9%BE%99%EF%BC%8C%23&quot; /&gt;    关注&lt;e type=&quot;hashtag&quot; hid=&quot;51584852885214&quot; title=&quot;%23%E7%90%86%E6%96%87%23&quot; /&gt;    &lt;e type=&quot;hashtag&quot; hid=&quot;28214125112581&quot; title=&quot;%23%E4%BB%99%E9%B9%A4%23&quot; /&gt;    &lt;e type=&quot;hashtag&quot; hid=&quot;15481842884242&quot; title=&quot;%23%E4%BA%94%E6%B4%B2%23&quot; /&gt;    &lt;e type=&quot;hashtag&quot; hid=&quot;48512154115458&quot; title=&quot;%23%E6%9E%97%E5%B9%B3%E3%80%82%23&quot; /&gt;   [玫瑰]包装：高分红塑包提价落地+油价企稳后Q3预期利润率修复&lt;e type=&quot;hashtag&quot; hid=&quot;28214125112121&quot; title=&quot;%23%E6%B0%B8%E6%96%B0%23&quot; /&gt;    &lt;e type=&quot;hashtag&quot; hid=&quot;15481842884812&quot; title=&quot;%23%E7%B4%AB%E6%B1%9F%23&quot; /&gt;    ；金属罐供需改善下本轮年底价格谈判或稳中有进。
+[玫瑰]潮玩：&lt;e type=&quot;hashtag&quot; hid=&quot;48512154115128&quot; title=&quot;%23%E6%B3%A1%E6%B3%A1%23&quot; /&gt;    POP LAND快闪在上海东方明珠和南京路开展；&lt;e type=&quot;hashtag&quot; hid=&quot;88214125112142&quot; title=&quot;%23%E6%99%A8%E5%85%89%23&quot; /&gt;    情绪文具+渠道赋能方法论逐步清晰，传统业务稳步修复。
+[玫瑰]个护：&lt;e type=&quot;hashtag&quot; hid=&quot;51584852885844&quot; title=&quot;%23%E6%B6%A6%E6%9C%AC%23&quot; /&gt;    秋冬季主推蛋黄油系列，新增乳木果润唇膏；&lt;e type=&quot;hashtag&quot; hid=&quot;28214125112141&quot; title=&quot;%23%E7%99%BB%E5%BA%B7%23&quot; /&gt;    大单品仍在成长期，营销投入重转化&amp;ROI盈利提升；&lt;e type=&quot;hashtag&quot; hid=&quot;15481842884882&quot; title=&quot;%23%E7%99%BE%E4%BA%9A%23&quot; /&gt;    全国份额仍在上升期，关注拐点。
+[玫瑰]家居：行业仍在出清期，关注经营有超额、利润端韧性强的&lt;e type=&quot;hashtag&quot; hid=&quot;48512154115118&quot; title=&quot;%23%E6%82%8D%E9%AB%98%23&quot; /&gt;    &lt;e type=&quot;hashtag&quot; hid=&quot;88214125112112&quot; title=&quot;%23%E5%A5%BD%E5%A4%AA%E5%A4%AA%23&quot; /&gt;    &lt;e type=&quot;hashtag&quot; hid=&quot;51584852885884&quot; title=&quot;%23%E9%A1%BE%E5%AE%B6%EF%BC%8C%23&quot; /&gt;    &lt;e type=&quot;hashtag&quot; hid=&quot;15481842881252&quot; title=&quot;%23%E6%BA%90%E6%B0%8F%23&quot; /&gt;    新零售范式优秀、飞轮效应显著。
+[玫瑰]烟草：1）&lt;e type=&quot;hashtag&quot; hid=&quot;48512154112488&quot; title=&quot;%23%E6%80%9D%E6%91%A9%E5%B0%94%23&quot; /&gt;    韩烟新发布高端lil系列，本次新品主打3秒启动加热、烟弹未涨价，关注9.15在韩推广表现；2）云南中烟、湖北中烟加速尼古丁袋专利申请，关注&lt;e type=&quot;hashtag&quot; hid=&quot;88214125114582&quot; title=&quot;%23%E4%B8%AD%E7%83%9F%E9%A6%99%E6%B8%AF%23&quot; /&gt;    体系内管理层变更进展。
+[玫瑰]<mark>AI</mark>+：1）<mark>液冷</mark>：&lt;e type=&quot;hashtag&quot; hid=&quot;51584852884214&quot; title=&quot;%23%E8%A3%95%E5%90%8C%23&quot; /&gt;     &lt;e type=&quot;hashtag&quot; hid=&quot;28214125114581&quot; title=&quot;%23%E9%87%91%E5%AF%8C%23&quot; /&gt;    &lt;e type=&quot;hashtag&quot; hid=&quot;15481842881242&quot; title=&quot;%23%E7%BE%8E%E7%9B%88%E6%A3%AE%23&quot; /&gt;    伴随<mark>Rubin</mark>进入量产阶段行业高景气持续验证，客户卡位优势突出、进入业绩兑现周期。2）&lt;e type=&quot;hashtag&quot; hid=&quot;48512154112458&quot; title=&quot;%23AI%E7%9C%BC%E9%95%9C%EF%BC%9A%23&quot; /&gt;    雷鸟iO销量较好，小米开启二代<mark>AI</mark>眼镜内测、新增支付宝看一下支付/录音总结/随手记录/智能影像优化等功能；3）&lt;e type=&quot;hashtag&quot; hid=&quot;88214125114522&quot; title=&quot;%233D%E6%89%93%E5%8D%B0%EF%BC%9A%23&quot; /&gt;    创想三维后续计划发布I8、儿童机、UV全彩、K3新品，产品竞争力有望提升。
+
+风险提示：下游需求不及预期，竞争格局恶化等</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Rubin</span><span class="kw-tag">液冷</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425511111215512" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548822222428428">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 11:28 · 👁 675</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【国泰海通通信】剑桥科技: 进...</div>
+  <div class="topic-content">【国泰海通通信】剑桥科技: 进入客户拓展1-N新阶段0907
+
+[玫瑰]事件点评: 近期我们通过产业链调研，我们认为公司正在发生较大变化，客户已完成1-3的突破，当前正推进3-6的阶段，产能和物料准备也在超预期爬升，产业链布局也趋于完善，点评如下:
+
+[玫瑰]重看中报，光电子盈利超预期。上半年，我们预测光电子收入超过一半，其中毛利率有望达到45%以上，超越市场预期。我们认为与去年同期约34.5%相比有大幅度，主要源于400g占比下降。行业比较看，盈利能力与龙头旭创<mark>新易盛</mark>处于同一阵营。我们认为随着q3q4逐步出货1.6t，盈利能力至少将保持很长一段时间。
+
+[玫瑰]新产品认证顺利，多客户进展较好。我们认为公司当前1.6t已经通过至少3家客户认证，同时正在推进新的3家客户认证。此外，公司积极布局NPO/elsfp产品，预计q4进入样品阶段，明年q2q3有望随着行业需求开始出货。
+
+[玫瑰]产能扩展超预期，多地域面向更多客户需求。从产业链反馈看，当前公司产能100w/月，年底有望达到150w/月，明年有望进一步扩产，主要由国内和马来构成。后续我们认为公司在墨西哥越南等产能有望成为下一个桥头堡。此外，我们认为公司锁定的物料dsp，光芯片等在近期也在持续提升，以更好支持产能需求。
+
+[玫瑰]设立产业基金，全方面布局上下游。据了解，公司通过多个产业基金布局了涉及无源 AWG，fau，隔离器旋光片，有源cw，tfln等领域，并形成较好的供应链关系。
+
+[太阳]投资观点: 我们认为公司盈利能力超预期，产能物料持续上修，相应可以将原来盈利预测上修30%-70%，当前乐观/客观看公司明年仅5/7.5x pe，且并未考虑dcom产品，NPO等潜在的上量，性价比较高。当前中性给予明年15x，看1200亿目标市值。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">新易盛</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548822222428428" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548822224552418">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 10:50 · 👁 780</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">海外链叙事有所好转：（1）海外...</div>
+  <div class="topic-content">海外链叙事有所好转：（1）海外模型进化超预期；（2）调整两个月后筹码结构有所好转；（3）FCC预期在逐渐纠偏；（4）27、28年高成长、低估值堵住了继续下行的空间；（5）<mark>英伟达</mark>即将创历史新高给海外链提振信心。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">英伟达</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548822224552418" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425511112444812">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 10:50 · 👁 778</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【天风海外】月度观点 2609...</div>
+  <div class="topic-content">【天风海外】月度观点 2609
+
+当前阶段属于多空极度博弈的过渡阶段，我们依旧维持长期多头立场。
+
+多空双方都无法说服彼此，核心矛盾在于多头认为当下的投入是为了两年之后兑现收入，而空头希望马上看到收入兑现，两种逻辑均具备自身合理性。
+
+短期维度，我们并不悲观。
+
+去杠杆过程已经完成，产业链找不到明显恶化的数据，GPT6 实现模型范式层面的重大变革，解锁全新应用场景，大幅提升 computer use 与 one shot 任务的表现。
+
+7 月下跌过后，市场对于产业中期叙事不确定性的容忍度有所下降，交易层面的担忧充分释放之后，我们认为市场后续会回归现实基本面。
+
+<mark>大模型</mark>板块：Fable 5.1 核心逻辑是降价带动公司用量提升，代表当前最高智能水平的商业化扩张；
+
+Astra 多 <mark>Agent</mark> 编排属于重要范式革新，强化市场对于长期技术突破的信心，但短期尚未抬升能力上限。
+
+近期模型整体表现符合预期，有望加速现有场景渗透，缓解 Coding 红利释放之后的 ARR 增速回落压力；<mark>OpenAI</mark> 以及 <mark>Anthropic</mark> 的 8 月末 ARR 数据，也有机会修正市场阶段性的过度悲观情绪。
+
+拉长时间维度看，模型行业能否打开新增需求、支撑后续<mark>算力</mark>资本开支，依旧取决于下一代模型能否实现超预期的能力突破。
+
+海外<mark>光模块</mark>：FCC 扰动带来的影响有限，业绩端清晰维持超预期上调的格局。
+
+NPO 落地节奏早于 <mark>CPO</mark>，NVL576 光进 Scale Up 域，Google 6D Torus 光配比提升 4 倍，光的需求函数正在从线性增长切换为乘法式增长。
+
+<mark>AI</mark> 架构走向 “光密集”，整体潜在市场规模持续上调，依次经历横向扩展、纵向扩展、跨域扩展、深度集成阶段。
+
+海外存储：行业来到健康增长的第二阶段，以时间换取空间。
+
+在行业景气度不再持续上行的环境下，股东回报会成为超额收益的来源。
+
+同时市场对于价格的持续性依旧存在较大分歧，也会成为后续预期差的来源，还需要重点关注模型迭代对存储板块带来的影响。
+
+MLCC 板块：依旧处在涨价链弹性靠前的位置，核心观察 10 月村田的大客户议价以及经销商涨价动作，有望给行业传递积极信号。
+
+海外半导体制造：海外设备板块估值吸引力正在提升。
+
+从弹性角度来看，受设备零部件供给约束，设备交付周期拉长，设备涨价幅度 3%‑5%，探针卡这类耗材涨价逻辑更加清晰。
+
+封测厂将受益于 CPU <mark>CoWoS</mark> 外溢带来的业务增量。
+
+国产<mark>算力</mark>：市场核心关注点集中在 <mark>HBM</mark> 供给缺口与涨价压力传导。
+
+静待<mark>华为</mark>、<mark>寒武纪</mark>第四季度量产出货带来催化。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Anthropic</span><span class="kw-tag">OpenAI</span><span class="kw-tag">CoWoS</span><span class="kw-tag">Agent</span><span class="kw-tag">大模型</span><span class="kw-tag">寒武纪</span><span class="kw-tag">光模块</span><span class="kw-tag">CPO</span><span class="kw-tag">HBM</span><span class="kw-tag">算力</span><span class="kw-tag">华为</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425511112444812" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521144442555444">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 10:49 · 👁 766</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">🔥【GX军工】新雷能：#<mark>AI</mark>电...</div>
+  <div class="topic-content">🔥【GX军工】新雷能：#<mark>AI</mark>电源全球核心卡位玩家已成，市值空间打开！
+
+1️⃣ <mark>谷歌</mark>800V&lt;e type=&quot;hashtag&quot; hid=&quot;28214152545421&quot; title=&quot;%23%E5%85%A8%E7%90%83%E5%94%AF%E4%BA%8C%E6%A0%B8%E5%BF%83%E4%BE%9B%E5%BA%94%E5%95%86%EF%BC%8C%E4%BB%BD%E9%A2%9D%E9%94%81%E5%AE%9A%E5%8F%AF%E6%9C%9F%23&quot; /&gt; 
+
+#<mark>谷歌</mark>审厂通过：公司PDB产品（800V/±400V转50V）已通过<mark>谷歌</mark>审厂。前期6家竞标剩3家，#公司和台达一二供份额基本锁定。
+
+2️⃣ 客户拓展：&lt;e type=&quot;hashtag&quot; hid=&quot;15481824212112&quot; title=&quot;%23AWS%E5%92%8CAMD%E5%B7%B2%E7%BB%8F%E8%BF%9B%E5%85%A5%E6%89%B9%E4%BA%A7%E9%98%B6%E6%AE%B5%23&quot; /&gt; 
+
+#二次电源方向：IBC和UBC均已向AWS批量供货。<mark>AMD</mark>近期也已下达批量订单，二次电源再添重量级客户。
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;48512145424228&quot; title=&quot;%23%E4%B8%89%E6%AC%A1%E7%94%B5%E6%BA%90%E6%96%B9%E5%90%91%EF%BC%9A%E5%85%AC%E5%8F%B8%E5%B7%B2%E7%AA%81%E7%A0%B4POWER%23&quot; /&gt;  BLOCK和VPD核心技术，是国内少数具备该方向核心技术的企业。
+
+3️⃣ 产能：扩产进度大超预期，&lt;e type=&quot;hashtag&quot; hid=&quot;88214152545442&quot; title=&quot;%232000%E4%B8%87%E6%94%AF%E6%AF%8F%E5%B9%B4%E5%8F%AF%E6%9C%9F%23&quot; /&gt; 
+
+#产能规划：国内月产能预计年底达30万只，另外拟募资17.87亿元，模块电源产能将额外增加1400万片/年，并新增10万台套OCP电源和系统，#产能大幅提升。
+
+4️⃣&lt;e type=&quot;hashtag&quot; hid=&quot;51584825242444&quot; title=&quot;%23%E5%B8%82%E5%80%BC%E7%A9%BA%E9%97%B4%E6%B5%8B%E7%AE%97%EF%BC%9A%23&quot; /&gt;  考虑<mark>谷歌</mark>/AWS/<mark>AMD</mark>等海外大厂持续放量，预计2027年收入30+亿元、2028年50+亿元，#远期看100亿级收入，按15%-20%净利率测算，远期利润15-20亿元，不考虑新增研发业务，目标市值600亿+。
+
+☎️详情电联</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AMD</span><span class="kw-tag">谷歌</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521144442555444" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425511112445112">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 10:49 · 👁 735</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【儒意电影002739|<mark>AI</mark>时...</div>
+  <div class="topic-content">【儒意电影002739|<mark>AI</mark>时代渠道有望重估🆚<mark>AI</mark>内容新供给】
+
+1、26H1公司直营影城票房25.5亿元（同比-39.4%）由于固定成本致Q2利润阶段性亏损，但公司影院市场份额增长2.1%，出品的《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E8%BD%AC%E5%BF%B5%E8%8A%B1%E5%BC%80&quot; title=&quot;%E8%BD%AC%E5%BF%B5%E8%8A%B1%E5%BC%80&quot; style=&quot;book&quot; /&gt;》《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E8%9B%AE%E8%8D%92%E7%A6%81%E5%9C%B0&quot; title=&quot;%E8%9B%AE%E8%8D%92%E7%A6%81%E5%9C%B0&quot; style=&quot;book&quot; /&gt;》《旺铺开业指南》《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E5%AF%92%E6%88%981995&quot; title=&quot;%E5%AF%92%E6%88%981995&quot; style=&quot;book&quot; /&gt;》等影片也将陆续上映。
+
+2、6月26日回购总额1.49亿元（按计划实时完成）；6月26日发布第二期回购方案，拟回购1.5~3亿元（回购上限13.19元/股）。<mark>AI</mark>端，向内成立<mark>AI</mark>实验室探索AIGC内容作品（<mark>AI</mark>剧集《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E5%90%88%E7%A7%9F501&quot; title=&quot;%E5%90%88%E7%A7%9F501&quot; style=&quot;book&quot; /&gt;》；向外，与<mark>腾讯</mark>云战略合作共同搭建全链路<mark>AI</mark>影视运营体系，从万达电影更名为儒意电影，从“地产系院线”向“内容驱动型娱乐集团”的战略转型与新启，主要影片拟登暑假档，2026-2028年儒意电影归母净利润拟12.22、15.36、18.08亿元（对应170亿市值的PE分别为14、11、9倍）。
+
+2026年市场首篇深度|《儒意电影（002739）深度|传承与新启》
+
+————————————— 
+
+☎ 欢迎联系华鑫传媒交流</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">腾讯</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425511112445112" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425511112445552">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 10:49 · 👁 733</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【国联民生计算机】🚀现价强推【...</div>
+  <div class="topic-content">【国联民生计算机】🚀现价强推【浪潮信息】：超节点空前大机遇高度确定，无需过分关注超短期预期错配博弈‼️
+
+🚀周五公司股价调整幅度较大主要因为<mark>AI服务器</mark>需求正全面转向超节点，市场担心Q3作为供应链和客户产品大规模切换的过渡期业绩。
+
+实际上我们认为经过调整无疑创造“黄金坑”：
+
+[太阳]短期季度预期波动核心本质是为空前超大规模需求供应链“蓄势”，实质进一步验证业绩后续高增确定性，Q4直至明年增速或持续更超预期。
+
+[太阳]Q3为超节点产品切换并非基本面波动，经过今日调整市场整体对Q3预期降低，相较于当前低市场预期、公司后续确定高增低估值基本面，当前股价更具安全边际与配置价值。
+
+风险提示：<mark>算力</mark>需求释放节奏具有不确定性；行业竞争加剧。
+
+联系人：国联民生计算机吕伟/郭新宇</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI服务器</span><span class="kw-tag">算力</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425511112445552" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258844445228552">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 10:49 · 👁 729</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">长江周机汇：持续推荐明年订单、...</div>
+  <div class="topic-content">长江周机汇：持续推荐明年订单、业绩加速的资产
+[烟花]<mark>ai</mark>装备：
+
+tgv：帝尔激光（非光伏业务订单预期加速）
+
+半导体：华峰测控、长川科技（国产<mark>算力</mark>发展加速）
+
+<mark>光模块</mark>检测：华兴源创、联讯仪器（微观订单加速，产能瓶颈逐步释放）
+
+<mark>PCB</mark>：芯碁微装（大幅上修明年msap订单预期）、劲拓股份（海外客户订单即将落地，明年业绩展望有巨大弹性）、英诺激光
+
+燃机：杰瑞股份
+
+[烟花]传统装备：
+
+轨交：中国中车（下游客户需求量价齐升+20年更新大周期+海外收入加速+车辆升级提速+通车交付大年）
+
+矿机：三一国际（矿车出口持续高增，光伏出清）
+
+通用：汇川技术、雷赛智能、创世纪、乔锋智能
+
+集装箱海工：中集集团（集装箱、海工、<mark>数据中心</mark>业务共振向上，Q3业绩向上修复加速）
+
+工程机械：三一重工、徐工机械、中联（Q3汇兑影响减弱，海外需求持续）</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">数据中心</span><span class="kw-tag">光模块</span><span class="kw-tag">PCB</span><span class="kw-tag">算力</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258844445228552" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258844445225442">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 10:49 · 👁 712</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">⭐⭐【国金金属】小金属双周谈：...</div>
+  <div class="topic-content">⭐⭐【国金金属】小金属双周谈：钽价有望启动上行，关注锑价止跌回升 0907
+
+[烟花]稀土：氧化镨钕本期价格环比+1.34%至73.65万元/吨。氧化镝或受益MLCC拉动，价格底部回升趋势显著。年初至今价格中枢不断上抬，行业供改持续推进。2026年初至今出口增加显著，海外补库需求仍高，板块有望继续估值业绩双升。2026年亦为重点标的同业竞争解决的关键一年。
+
+[烟花]锡：锡锭本期价格环比-2.36%至41.91万元/吨，库存环比+7.99%至6499吨。本期锡价先受宏观因素压制明显下探，随后反弹。我们认为锡锭隐性库存逐步干涸，宏观流动性回补或科技行情外溢的情况下锡价有望走强，锡供需格局将长期向好。
+
+[烟花]钨：钨精矿本期价格环比-1.24%至41.34万元/吨。美国商务部实施为期一年的钨废料出口禁令，日本钨原料或进一步紧缺，利好国内钨材产业链及钨价；行业供应缩紧预期仍存，结合海外加大战略备库的背景下，钨的优先级或较高；钨供需基本面有望迎来强共振。
+
+[烟花]钼：钼精矿环比-0.55%至5440元/吨度；钼铁环比-1.17%至33.70万元/吨。据百川盈孚，近期主流钢厂持续进场采购，预计下周钢招发布将进一步提速。进口矿去化及钢招量景气推动顺价逻辑逐步兑现，叠加钢材合金化趋势及钼军工属性，海外国防开支增加或进一步拉涨钼价。
+
+[烟花]钽：钽矿本期价格环比+1.09%至232.5美元/磅。据百川盈孚，国内钽矿进口到货量不足，近期持货商报价普遍偏强。<mark>AI服务器</mark>、先进半导体制造发展有望持续拉动钽电容、钽靶材等领域需求增长。钽市场有望由供给驱动转向供需共振，推动钽价中枢进一步上移。
+
+[烟花]锆：本期锆英砂价格环比持平至1.19万元/吨。两用物项对日出口管制加强，氧化钇对日供应不确定性上升，海外高端氧化锆供给存在收缩预期。SOFC、MLCC及航空发动机热障涂层等新兴应用增长，海外供给扰动、需求增长与国内替代加速有望形成共振。
+
+[烟花]铀：本期现货价格环比+0.85%至89.50美元/磅U3O8。全球核电扩张抬升中长期铀需求预期，矿山供给释放节奏偏后，铀稀缺性与供给安全溢价有望强化。
+
+[烟花]锑：本期锑锭价格环比+3.01%至10.20万元/吨。近期内外锑价均企稳回升。长期看，锑资源紧缺，海外大矿减产带来全球供应显著下滑，需求稳步上行，全球锑价上行趋势不改。
+
+风险提示：价格波动超预期；需求不及预期。
+
+[玫瑰]小金属双周谈，持续跟踪小金属最新动态，欢迎各位领导关注[抱拳]
+
+国金金属王钦扬/吴晋恺/宁柯</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI服务器</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258844445225442" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548822224581248">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 10:48 · 👁 710</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【中航策略】逢低布局，静待修复...</div>
+  <div class="topic-content">【中航策略】逢低布局，静待修复
+美债信用和美国通胀担忧仍是当前市场焦点，部分投资者担忧科技硬件M顶的二波反弹是否结束。
+
+我们认为，科技硬件抱团行情的由业绩驱动的二波反弹或尚未开始，当前仍处于一波顶部回落的尾声。
+
+1、美国基本面或不具备持续加息的基础，即使加息也仅为预防式加息，9月中旬美联储议息会议后市场风偏有望改善，且不排除提前改善。
+
+2、复盘来看，M顶反弹二波见顶的决定因素仍然是业绩见顶，而非美联储加息周期的开启。同时，M顶时间也尚不充分。
+
+3、根据彭博一致预期，科创50、沪深300业绩增速以及二者增速差均有望于四季度再创新高。
+
+往后看，即使悲观情景下9月美联储预防式加息，对于市场影响或体现为利空落地。短期，A股或仍为震荡，建议逢低布局，静待修复。结构上，近期资金配置再平衡有望延续，金融、消费、<mark>AI</mark>科技等可均衡配置。中期看，年内A股科技硬件二波修复行情依旧可期待，但风格分化或不再如6月份极致，下半年或为多板块、风格轮动式上涨。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548822224581248" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258844445281582">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 10:48 · 👁 637</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【招商通信】周观点
+Broad...</div>
+  <div class="topic-content">【招商通信】周观点
+Broadcom FY26Q3与Marvell FY27Q2业绩会都已结束，本周对比一下双方在Switching、Interconnect (Scale In/Up/Out/Across)、光芯片、电芯片、XPU等方面的表述。
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;88214125418822&quot; title=&quot;%23%E4%BA%A4%E6%8D%A2%23&quot; /&gt;  [太阳]Broadcom：
+
+①Tomahawk 6（100T）已大规模部署；Tomahawk 7（200T）已流片。
+
+②用于Scale-up的Tomahawk Ultra，已于本季度开始部署。
+
+[太阳]Marvell：
+
+①51.2T交换机推动Scale-Out交换机在FY27（CY26）实现翻倍以上增长；
+
+②Scale-up交换机同时支持UALink、ESUN、<mark>NVLink</mark> Fusion三种协议。
+
+【注：UALink是最初由<mark>AMD</mark>、Broadcom、思科、<mark>谷歌</mark>、HPE、Intel、<mark>Meta</mark>、<mark>微软</mark>等八家公司在2024年5月发起的开放协议，以此挑战<mark>英伟达</mark>的<mark>NVLink</mark>。】
+
+【注：<mark>NVLink</mark> Fusion是<mark>英伟达</mark>于2025年3月GTC推出的支持第三方厂商使用其<mark>NVLink</mark>高速互联技术的IP，用以抗衡UALink联盟。Marvell是第一批合作伙伴，随后2025年9月<mark>英伟达</mark>投资Marvell后进一步加强了在<mark>NVLink</mark> Fusion领域的合作关系。】
+
+【注：ESUN是最初由<mark>AMD</mark>、Arista、Broadcom、思科、HPE、Intel、Marvell、<mark>Meta</mark>、<mark>微软</mark>、<mark>英伟达</mark>、<mark>OpenAI</mark>、甲骨文等12家公司在2025年10月组建的支持Scale-Up以太网的开放协议。】
+
+③强调光学与交换的强耦合为Marvell的差异化优势；公司正与多个一线客户深度讨论，每个讨论都代表着一个数十亿美元级别的生命周期收入机会。
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;51584852481154&quot; title=&quot;%23Scale-In%23&quot; /&gt;  [太阳]Broadcom：博通是“leader in every generation of <mark>PCIe</mark> switching”。
+
+[太阳]Marvell：未直接提及“scale-in”。但管理层称CXL为“home run”（巨大成功），受当前内存周期和推理需求驱动，正被多个超大规模客户以极高容量部署，且在过去几个季度获得了额外design wins（公司将在10月6日的投资者日上进一步详细说明）。
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;28214125418821&quot; title=&quot;%23Scale-Up%EF%BC%88CPO%2FNPO%EF%BC%89%23&quot; /&gt;  [太阳]Broadcom：重申Tomahawk Ultra首次将以太网引入Scale-up的领先性。
+
+[太阳]Marvell：
+
+①铜开始向光过渡，<mark>CPO</mark>与NPO并行推进，业绩会期间两次强调“this is not an or, it&#x27;s an and”。“Our customers have varying architectures that they&#x27;re pursuing. They have a number of different solutions that they&#x27;re going to implement simultaneously.”
+
+②<mark>CPO</mark>持续成功之余，看到了“a strong adoption of our NPO solutions at multiple customers”，Marvell将成为NPO最大的使能者之一，也因此显著提升了FY28（CY27）的scale-up optics预期。上个季度业绩会上，公司把CY27的scale-up optics的预期收入从1.5亿美元上调至3亿美元。公司在本次业绩会再次强调这3亿美元预期收入包含了<mark>CPO</mark>和NPO；公司强调scale-up optics还在加速，CY27收入会比上个季度给的3亿美元指引来得更高。
+
+③在NPO领域，公司有一部分合作主要是提供TIAs/Drivers，也有一部分合作主要是提供公司自主研发多年的NPO解决方案（即光引擎light engine）。
+
+④在<mark>CPO</mark>/NPO领域，客户会根据成本、功耗、技术程度等因素自行选择MZM、EAM、MRM三种<mark>硅光</mark>调制器技术。
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;15481842185512&quot; title=&quot;%23Scale-Out%23&quot; /&gt;  [太阳]Broadcom：Tomahawk 6已部署在几乎所有<mark>AI</mark>超大规模客户。
+
+[太阳]Marvell：重申以可插拔模块为主，“On the interconnect side, pluggable modules remain the primary form factor for scale-out networks, and we do not expect that to change”！
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;48512154218828&quot; title=&quot;%23Scale-Across%23&quot; /&gt;  [太阳]Broadcom：无。
+
+[太阳]Marvell：重申Back-end Scale-Across网络的带宽需求将是Front-end DCI网络的带宽需求的10倍以上。公司的1.6T ZR/ZR+相干<mark>光模块</mark>将有很大机会。
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;88214125418842&quot; title=&quot;%23%E5%85%89%E8%8A%AF%E7%89%87CW%2FEML%2FVCSEL%23&quot; /&gt;  [太阳]Broadcom：强调“demand for lasers, whether it&#x27;s EML lasers, CW lasers, is far surpassing supply”！公司的EML、CW和VCSEL工厂、磷化铟（InP）工厂，今年产能同比翻三倍以上，并且未来两年还会大幅增加。
+
+[太阳]Marvell：无。
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;51584852481144&quot; title=&quot;%23%E7%94%B5%E8%8A%AF%E7%89%87TIA%2FDriver%23&quot; /&gt;  [太阳]Broadcom：无。
+
+[太阳]Marvell：broadband analog（TIAs/Drivers）的需求持续超预期增长。
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;28214125418841&quot; title=&quot;%23ASIC%2FXPU%E5%AE%9A%E5%88%B6%E8%8A%AF%E7%89%87%23&quot; /&gt;  [太阳]Broadcom：以<mark>OpenAI</mark>的Jalapeno为例，强调XPU性能超越<mark>GPU</mark>且成本只有<mark>GPU</mark>的一半；技术壁垒包括SerDes IP、芯片互联IP、<mark>HBM</mark>/SRAM集成、先进封装及快速量产能力。6个XPU客户的部分情况如下：
+
+①Google：长期协议每年数百亿美元<mark>TPU</mark>；已批量交付Ironwood <mark>TPU</mark> v7，并开始生产下一代<mark>TPU</mark> v8i；
+
+②<mark>Anthropic</mark>：2026年部署1GW Ironwood，2027年部署5GW <mark>TPU</mark> v8i，2028年增量10GW，预计2027年起成为最大XPU客户；
+
+③<mark>OpenAI</mark>：2027年部署1.3GW Jalapeno，2028年超5GW Jalapeno及其后继代际，将成为第二大XPU客户；
+
+④<mark>Meta</mark>：到2027年底交付三代MTIA，2028年累计部署3GW。
+
+（此外，公司补充解释，每GW对应芯片数量下降、但每颗芯片价值提升，因此未来几年每GW对应的XPU收入大约稳定为200-300亿美元。）
+
+[太阳]Marvell：重申定制业务在FY28（CY27）翻倍以上增长，FY29（CY28）有望达到100亿美元以上；公司表示大型XPU项目进展顺利，设计执行和供应商务均好于预期。
+
+Broadcom的<mark>AI</mark>叙事主要在强化其XPU和Switching的龙头地位难以撼动； Marvell体量较小，希望在全维度连接上构建差异化，<mark>CPO</mark>/NPO、多协议Scale-up交换机、oDSP、TIAs/Drivers多点布局，同时以XPU attach（包括推理芯片、CXL、定制NICs、存储控制器、内存接口控制器、近内存计算等）切入<mark>TPU</mark>生态，形成端到端光互连方案能力。
+
+[咖啡]风险提示：<mark>AI</mark>发展不及预期、海内外下游资本开支不及预期、宏观环境扰动、海外地缘政策波动加剧、上游供应链波动风险
+
+PS：我们制作的《光博会CIOE2026参会攻略》挺好用的，欢迎参会的朋友索取~</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Anthropic</span><span class="kw-tag">NVLink</span><span class="kw-tag">OpenAI</span><span class="kw-tag">Meta</span><span class="kw-tag">ASIC</span><span class="kw-tag">PCIe</span><span class="kw-tag">英伟达</span><span class="kw-tag">光模块</span><span class="kw-tag">CPO</span><span class="kw-tag">GPU</span><span class="kw-tag">TPU</span><span class="kw-tag">HBM</span><span class="kw-tag">AMD</span><span class="kw-tag">谷歌</span><span class="kw-tag">微软</span><span class="kw-tag">硅光</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258844445281582" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548822224582148">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 10:48 · 👁 637</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">中国科传深度推荐【中泰传媒互联...</div>
+  <div class="topic-content">中国科传深度推荐【中泰传媒互联网】
+[玫瑰]核心看点1：公司基于科学出版社品牌夯实内容优势，形成独家学术资源壁垒，有望受益于政策支持，参考Elsevier发展路径，看好向“中国Elsevier”定位进军。
+
+[玫瑰]核心看点2：图书业务平稳，期刊业务出版与合作期刊数量、单刊发文量稳步提升，看好规模扩张。
+
+[玫瑰]核心看点3：<mark>AI</mark>赋能效果显著，构建四大知识服务板块，医学领域“远至”<mark>大模型</mark>及配套产品矩阵商业化进展顺利，看好打造<mark>AI</mark>知识服务场景。
+
+我们预计26-28年营收分别为29.1/30.2/31.2亿元，归母净利润分别为4.9/5.2/5.6亿元。
+
+⚡风险提示：文化监管端的政策风险；短视频直播电商图书折扣力度加大；研报使用的信息数据更新不及时的风险；第三方数据失真的风险。
+
+☎欢迎交流&amp;请鼎力支持中泰传媒互联网康雅雯团队</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">大模型</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548822224582148" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258844445282152">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 10:48 · 👁 634</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【平安策略】A股策略周报：轮动...</div>
+  <div class="topic-content">【平安策略】A股策略周报：轮动整固，攻守均衡
+[咖啡]海外方面，①美国8月ISM制造业PMI下降1pct至54.6%，ISM服务业PMI环比提升1.3pct至55.4%。②美国8月非农就业人口新增16.2万人，创3月以来新高，失业率维持在4.1%的低位，9月加息预期升温。③美国考虑对进口半导体加征新一轮关税，以吸引更多芯片制造企业落户美国本土建厂。
+
+[咖啡]国内方面，①8月制造业PMI环比回升0.6pct至49.8%景气改善，新动能支撑明显。②政策方面，一是推进商品消费扩容升级，二是推进中小企业培育支持，三是私募基金募集业务监管迎来强化。
+
+[咖啡] 往后看，考虑到海外地缘与流动性扰动、以及<mark>AI</mark>前景担忧仍存，短期权益市场大概率维持震荡，结构性轮动修复格局或延续，结构上建议攻守均衡，关注三条线索：一是<mark>AI</mark>科技中期主线逻辑未变，但短期产业缺乏大级别正向催化，修复过程和细分方向的研究颗粒度需更加细致。海外链（<mark>CPO</mark>/<mark>PCB</mark>等）、存储板块目前基本面相对坚实，国产链（<mark>算力</mark>芯片/半导体材料设备/<mark>电子布</mark>/MLCC等）则更具增长想象空间，云厂商等则有望受益于中期商业化兑现逐步推进的逻辑（中资互联网）。二是部分绩优、筹码相对出清的非科技方向可能成为资金再均衡的重要承接方向，包括医药、涨价资源品（有色/能化）、非银等。三是长线资金稳步入市格局下红利资产仍具备较好底仓价值（银行、煤炭等）。
+
+☎：平安证券策略配置研究团队 陈骁 /靳旭媛</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">电子布</span><span class="kw-tag">CPO</span><span class="kw-tag">PCB</span><span class="kw-tag">算力</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258844445282152" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425511112454152">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 10:48 · 👁 634</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">关于【<mark>Gpt</mark>-6 astra】...</div>
+  <div class="topic-content">关于【<mark>Gpt</mark>-6 astra】的深度思考0907：
+
+周末大家看到很多很炫酷的astra演示，确实很帅，但是直观上感觉不到跟过往的区别。
+
+❗️但深入体验，我们发现astra开始通向<mark>agi</mark>并不是吹牛，是真的，我们异常兴奋。
+
+➠以机器人作为类比，我想更加贴切：
+
+coding是针对程序员的，相当于工业机器人，只在特定场景使用。
+
+更多人，并不是程序员，大家生活中面对的是各种gui的软件。我们需要的是computer use，就是有个人帮我们操作电脑，点各种各样的界面，相当于适配人类场景的人形机器人。
+
+astra的computer use可用性非常强，且学习成本很低。因此，&lt;e type=&quot;hashtag&quot; hid=&quot;88214125415282&quot; title=&quot;%23astra%E5%B0%B1%E6%98%AFai%E7%9A%84%E4%BA%BA%E5%BD%A2%E6%9C%BA%E5%99%A8%E6%97%B6%E5%88%BB%E3%80%82%23&quot; /&gt; 
+
+很巧的是，<mark>OpenAI</mark>采购数万台macmini训练computer use，就跟人形机器人训练要用真机数据一样。
+
+虚拟意义上的<mark>agi</mark>可能正在实现了…
+
+By Txy</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">OpenAI</span><span class="kw-tag">AGI</span><span class="kw-tag">GPT</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425511112454152" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258844445282221">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 10:47 · 👁 630</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">🔥【世运电路】底部反转！强ca...</div>
+  <div class="topic-content">🔥【世运电路】底部反转！强call中：VPD埋嵌<mark>PCB</mark>具备重大预期差，卡位稀缺，内资唯一<mark>英伟达</mark>LPU‑VPD埋嵌认证供应商，已进入<mark>英伟达</mark><mark>Rubin</mark>、特斯拉智驾两大核心供应链！</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Rubin</span><span class="kw-tag">英伟达</span><span class="kw-tag">PCB</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258844445282221" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258844445282882">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 10:47 · 👁 532</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【近期观点更新】普通<mark>pcb</mark>产品...</div>
+  <div class="topic-content">【近期观点更新】普通<mark>pcb</mark>产品涨价/载板极其缺货
+
+1、开始有老师关注三季度业绩，一个非常强的方向是普通<mark>pcb</mark>产品涨价，背后逻辑是：织布机缺-&gt;ccl缺 -&gt; 能拿到ccl的都是业内排的上号的公司-&gt; <mark>pcb</mark>全面涨价。ccl厂反馈下半年依然非常景气。
+
+典型代表：世运电路/奥士康/中京电子等
+
+世运的公告已经给出下半年的超高指引，这也是行业普遍的情况。
+
+2、载板方面，cpu的量持续增长，载板缺货愈演愈烈（q1路演就研判过趋势），国产芯片放量/海外大厂缺货。载板厂还有一个逻辑是，做SAP工艺的公司，从技术上去做mSAP还是有优势的。
+
+典型代表：深南电路/兴森科技/方邦股份/华正新材等。
+
+风险提示：需求不及预期；市场竞争加剧；地缘政治风险。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">PCB</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258844445282882" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258844421428242">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 10:24 · 👁 649</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">北美科技观点更新：曙光初现，不...</div>
+  <div class="topic-content">北美科技观点更新：曙光初现，不再悲观！
+
+Astra已经给了一点曙光，<mark>大模型</mark>能力仍在提升，通胀继续加速！
+
+🚀东山精密：<mark>光模块</mark>新一线玩家，同步布局<mark>CPO</mark>/NPO等产品，凭借着物料的绝对优势，几乎拿下全系北美客户！
+
+🚀景旺电子：<mark>PCB</mark>新一线玩家，凭借着产能优势，顺利切入<mark>英伟达</mark>/<mark>光模块</mark>msap供应链，Q3业绩迎来大爆发！
+
+🚀大族数控/大族激光：<mark>PCB</mark>设备第一股，不论是高阶HDI/msap还是背板等超高多层项目，结构性变化推动<mark>PCB</mark>钻孔设备需求仍在加速释放！
+
+🚀生益科技：<mark>Rubin</mark>系列CCL份额占比继续提升，PTFE方案测试顺利，一旦使用即拿下最大份额，凭借着产能和物料保供优势，高端CCL份额有望继续提升！</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Rubin</span><span class="kw-tag">大模型</span><span class="kw-tag">英伟达</span><span class="kw-tag">光模块</span><span class="kw-tag">CPO</span><span class="kw-tag">PCB</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258844421428242" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521144458541214">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 10:21 · 👁 642</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【周观点】看好半导体测试机AT...</div>
+  <div class="topic-content">【周观点】看好半导体测试机ATE设备订单高景气开启；推荐具备安全边际的油服设备和工程机械
+【半导体设备】<mark>AI</mark>驱动测试需求高景气，国产存储ATE迎规模放量拐点
+国产存储测试设备接连斩获大额订单，产业进入规模化放量。9.3精智达公告签订15.76亿元测试设备采购协议、2年内交付；8.20悦芯科技获国内龙头存储厂超15亿元ATE订单，核心产品TM8000支持LPDDR、DDR、<mark>HBM</mark>测试。两笔合计超30亿元，国产存储ATE由小批量验证跨越至批量采购+规模替代。据爱德万统计，全球SoC+存储测试机市场规模由2023年44亿美元增至2025年90亿美元，预计2026年SoC/存储分别达91/24.5亿美元。<mark>AI芯片</mark>复杂度提升带来测试时长延长、价值量提升，HBM3D堆叠后测试道数由传统DRAM约3-4道升至15道以上，用量约为其5-6倍。2025年国内存储测试机国产化率仅8%-10%，海外龙头交期拉长，国产设备商有望快速替代。推荐：长川科技、联讯仪器，关注精智达、联动科技、悦芯科技（未上市）。
+【工程机械】中报收入同比+15%创近5年板块新高，龙头公司表现更为优异
+A股17家工程机械企业2026H1收入2218亿元同比+15%，为近5年增速新高，受益国内外周期共振上行，上半年国内外挖机销量同比+21%/+34%。龙头三一重工、恒立液压收入同比+19%/+32%，好于板块。归母净利润182亿元同比-4%，主系人民币升值汇兑损失较多；扣除汇兑损失，三一重工、徐工机械、中联重科等经营性利润增速均达30%-40%。展望Q3，国内外上行趋势持续叠加汇兑压力减小，板块利润增速有望迎明显拐点。推荐：三一重工、徐工机械、中联重科、柳工、山推股份、恒立液压。
+【油服设备】中东冲突短空长多，看好全球油服龙头中长期成长
+2026年2月末美伊冲突爆发，霍尔木兹海峡封锁至今未通航。中东冲突对油服设备影响短空长多，关注全球化领先的国产龙头。短期看：一、油气价格中枢上涨；二、船只绕行好望角致运费增加、提货意愿下降；三、部分施工项目暂停后延1-2季度，2026H1国内龙头订单积压、确认节奏后移。中长期看：一、地缘冲突强化全球能源安全诉求，推动油气资本开支中枢上移，复盘2022年俄乌冲突，油价高位后上游资本开支回升并向LNG、深海及非常规能源倾斜，北美、南美、非洲投资有望加速；二、战后油气设施修复形成新增设备需求。中东项目短期延迟仅影响节奏而非需求消失，行业中长期景气有望强化。关注：杰瑞股份、纽威股份。
+【东吴机械】周尔双/李文意/韦译捷/黄瑞/谈沂鑫/陶泽/柴悦茹/刘捷宇/闻嘉怡</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI芯片</span><span class="kw-tag">HBM</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521144458541214" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425511148412542">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 10:21 · 👁 610</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">中信电器智造【关注<mark>液冷</mark>低位标的...</div>
+  <div class="topic-content">中信电器智造【关注<mark>液冷</mark>低位标的】#飞亚达-<mark>液冷</mark>产能规划大幅上修、国内外客户同步推进。
+ 
+⭕#深南老将挂帅飞亚达切入国内头部<mark>算力</mark>链的客户资源优势值得重视。公司董事长周进群此前在深南电路工作二十余年，从生产工艺一线一路做到董事、总经理，并曾负责无锡、南通两大生产基地，兼具技术、制造和大客户经营经验。 深南电路长期处于国内高端电子制造核心供应链，我们认为周总履新后，有望将其在通信、<mark>服务器</mark>及高端制造领域积累的客户资源和供应链经验向飞亚达导入，<mark>液冷</mark>业务订单确定性高，对接<mark>华为</mark>、<mark>海光</mark>等国内头部<mark>算力</mark>客户。
+
+⭕#产能规划由10万套上修至20万套、满产对应20亿元+产值空间。公司此前规划约10万套<mark>液冷</mark>模组产能，目前实际规划已提升至约20万套，预计10-11月开始逐步生产。单套<mark>液冷</mark>模组价值量约1万多，产品覆盖<mark>液冷</mark>板+Manifold+快接头+管路等二次侧核心部件，20万套满产对应20亿元+产值。公司<mark>液冷</mark>业务已经由单一精密加工切入进一步向二次侧<mark>液冷</mark>模组集成延伸，单客户价值量和业务天花板明显提升。 
+
+⭕&lt;e type=&quot;hashtag&quot; hid=&quot;51584852454554&quot; title=&quot;%23%E9%A3%9E%E4%BA%9A%E8%BE%BE%E6%A0%B8%E5%BF%83%E5%8D%A1%E4%BD%8D%E4%B8%8B%E4%B8%80%E4%BB%A3%E5%BE%AE%E9%80%9A%E9%81%93%E5%86%B7%E6%9D%BF%E3%80%82%23&quot; /&gt;  <mark>Rubin</mark>已经将<mark>GPU</mark>冷板升级为0.1μm级Micro-channel Cold Plate，而Feynman平台要求提示至0.06mm，当前公司目前已具备0.05mm级微细流道加工能力，并直接面向后续更高热流密度平台进行技术储备。微通道越细，对精密加工、流道一致性、压降、钎焊密封和量产良率要求越高，公司多年积累的高精密加工能力与<mark>液冷</mark>技术升级方向高度契合。
+
+⭕#国内客户进入集中认证窗口、H客户、<mark>海光</mark>、<mark>寒武纪</mark>等头部客户均在推进。 公司当前同时对接芯片厂、<mark>服务器</mark>厂商及CSP客户，包括H客户、<mark>海光</mark>、<mark>寒武纪</mark>、曙光等，预计今年10-11月产线和产品体系逐步完善后进入审核认证阶段，明年初开始陆续推进客户认证及订单导入。
+
+⭕#海外链条样品已送台湾并在<mark>英伟达</mark>相关平台完成测试。 后续有望承接部分台系<mark>液冷</mark>订单外溢。我们认为，公司海外路径与金富科技、五洋自控等代工链存在一定相似性，即依托国内精密制造和成本优势承接台系<mark>液冷</mark>厂商外溢产能；若后续进入批量订单阶段，将进一步打开海外客户空间。 
+
+⭕&lt;e type=&quot;hashtag&quot; hid=&quot;48512211541118&quot; title=&quot;%23%E5%85%AC%E5%8F%B8%E6%B6%B2%E5%86%B7%E9%80%BB%E8%BE%91%E6%AD%A3%E5%90%91%E8%AE%A2%E5%8D%95%E5%85%91%E7%8E%B0%E3%80%82%23&quot; /&gt;  目前公司已形成Cold Plate、Manifold、QDC、管路及模组集成的完整产品框架，20万套产能对应20亿元+产值，国内头部<mark>算力</mark>客户及海外台系链条均在推进。待<mark>华为</mark>等国产<mark>算力</mark>客户认证及台系外溢订单进一步落地，<mark>液冷</mark>有望成为公司重要新增量。叠加钟表基本盘和长空齿轮机器人业务，现阶段建议重点关注飞亚达后续产线、认证及订单兑现节奏</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Rubin</span><span class="kw-tag">英伟达</span><span class="kw-tag">寒武纪</span><span class="kw-tag">服务器</span><span class="kw-tag">GPU</span><span class="kw-tag">算力</span><span class="kw-tag">华为</span><span class="kw-tag">海光</span><span class="kw-tag">液冷</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425511148412542" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425511148211522">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-07 10:04 · 👁 657</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">‼️近期持续CALL
+福立旺：...</div>
+  <div class="topic-content">‼️近期持续CALL
+福立旺：RubinUltra确定性落实，2027年有望带来3-5亿元增量利润。2027年依靠<mark>apple</mark>新品+<mark>openai</mark>系列<mark>ai</mark>硬件，有望实现8-10亿元利润弹性。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">OpenAI</span><span class="kw-tag">Apple</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425511148211522" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
