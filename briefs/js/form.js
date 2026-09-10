@@ -1,7 +1,11 @@
-// Form 提交：写入 submissions 表，存 token + name，跳 viewer
+// Form 提交：通过共享适配器 BarryAccess 写入 submissions 表（product=briefs），
+// 存 barry_token + barry_name，跳 viewer。三个看板共用同一 token，填过一次即通行。
 (function () {
-  // 已填过？直接跳 viewer
-  if (localStorage.getItem('barry_token')) {
+  const A = window.BarryAccess;
+  const PRODUCT = 'briefs';
+
+  // 已填过（在任一看板填过都算）？直接跳 viewer，由 viewer 校验 token
+  if (A.getToken()) {
     location.href = '/briefs/viewer.html';
     return;
   }
@@ -22,19 +26,16 @@
     e.preventDefault();
     hideErr();
 
-    const data = {
-      name:    document.getElementById('f-name').value.trim(),
-      org:     document.getElementById('f-org').value.trim(),
-      contact: document.getElementById('f-contact').value.trim(),
-      msg:     document.getElementById('f-msg').value.trim(),
+    const fields = {
+      name:    document.getElementById('f-name').value,
+      org:     document.getElementById('f-org').value,
+      contact: document.getElementById('f-contact').value,
+      msg:     document.getElementById('f-msg').value,
     };
 
-    if (!data.name || !data.org || !data.contact) {
-      showErr('请把姓名、机构、联系方式填完');
-      return;
-    }
-    if (data.contact.length < 5) {
-      showErr('联系方式看起来不太对，再确认一下');
+    const check = A.validateForm(fields);
+    if (!check.ok) {
+      showErr(check.error);
       return;
     }
 
@@ -43,19 +44,8 @@
 
     try {
       const cb = await window.cbReady;
-      const res = await cb.callFunction({
-        name: 'submit_form',
-        data,
-      });
-
-      const r = res.result || {};
-      if (r.error) throw new Error(r.error);
-      if (!r.token) throw new Error('未收到 token，请重试');
-
-      localStorage.setItem('barry_token', r.token);
-      localStorage.setItem('barry_name',  data.name);
-
-      // 跳到 viewer
+      await A.submit(cb, fields, PRODUCT);   // 成功即写入 localStorage barry_token / barry_name
+      // 刚提交完立刻进入，算作一次访问（viewer 会带 product=briefs 记录）
       location.href = '/briefs/viewer.html';
     } catch (err) {
       showErr('提交失败：' + (err.message || err));

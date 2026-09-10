@@ -7,20 +7,27 @@
     return;
   }
 
-  const TOKEN = localStorage.getItem('barry_token');
-  const NAME  = localStorage.getItem('barry_name');
+  const A = window.BarryAccess;
+  const PRODUCT = 'briefs';
+  const TOKEN = A.getToken();
 
   if (!TOKEN) {
     location.href = '/briefs/';
     return;
   }
 
-  // 静默记录这次访问（失败不阻塞阅读）
+  // 校验 token 并静默记录这次访问（product=briefs，同产品 30 分钟内只记一次）。
+  // 只有后端明确说 token 无效才清身份回闸门；网络失败不阻塞阅读。
   if (window.cbReady) {
-    window.cbReady.then(cb => cb.callFunction({
-      name: 'log_visit',
-      data: { token: TOKEN, page: location.pathname, ua: navigator.userAgent },
-    })).catch(() => {});
+    window.cbReady.then(async cb => {
+      const v = await A.verify(cb, TOKEN);
+      if (!v.valid) {
+        A.clearIdentity();
+        location.href = '/briefs/';
+        return;
+      }
+      A.logVisit(cb, PRODUCT);
+    }).catch(() => {});
   }
 
   const PERIOD_LABELS = {
