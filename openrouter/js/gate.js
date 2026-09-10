@@ -1,8 +1,9 @@
 // 准入门槛：提交表单 -> submit_form 拿 token -> verify_token 校验 -> 展示看板
-// 与 briefs 站点用同一套 submissions/token 体系，但把 gate 与 viewer 合并在同一页里。
+// 与 briefs / token-gpu 共用同一套 submissions/token 体系（同源 localStorage barry_token），
+// 存取与云函数调用统一走共享适配器 BarryAccess（js/barry-access.js），本页只负责界面状态。
 (function () {
-  const TOKEN_KEY = 'barry_token';
-  const NAME_KEY = 'barry_name';
+  const A = window.BarryAccess;
+  const PRODUCT = 'openrouter';
 
   const gateSection = document.getElementById('gate-section');
   const dashboardSection = document.getElementById('dashboard-section');
@@ -41,37 +42,28 @@
     loadingEl.hidden = false;
   }
 
-  function logVisitNonBlocking(token) {
-    if (!window.cbReady) return;
-    window.cbReady
-      .then((cb) => cb.callFunction({
-        name: 'log_visit',
-        data: { token, page: location.pathname, ua: navigator.userAgent },
-      }))
-      .catch(() => {});
-  }
-
+  // 校验通过后：展示看板，记录一次 product=openrouter 的访问（30 分钟窗口去重，失败不阻塞），
+  // 再广播 barry:unlocked 让 dashboard.js 开始加载数据。
   function revealDashboard(name) {
     loadingEl.hidden = true;
     formEl.hidden = true;
     gateSection.hidden = true;
     dashboardSection.hidden = false;
-    viewerNameEl.textContent = name || localStorage.getItem(NAME_KEY) || '';
-    logVisitNonBlocking(localStorage.getItem(TOKEN_KEY));
-    window.dispatchEvent(new CustomEvent('barry:unlocked'));
+    viewerNameEl.textContent = name || A.getName() || '';
+    if (window.cbReady) A.logVisit(window.cbReady, PRODUCT);
+    window.dispatchEvent(new CustomEvent(A.UNLOCK_EVENT));
   }
 
   async function verifyAndReveal(token) {
     showLoading();
     try {
       const cb = await window.cbReady;
-      const res = await cb.callFunction({ name: 'verify_token', data: { token } });
-      const r = res.result || {};
+      const r = await A.verify(cb, token);
       if (r.valid) {
         revealDashboard(r.name);
       } else {
-        localStorage.removeItem(TOKEN_KEY);
-        localStorage.removeItem(NAME_KEY);
+        // 后端明确说无效才清身份；网络失败走 catch，保留 token 让用户刷新重试
+        A.clearIdentity();
         showGateForm();
       }
     } catch (e) {
@@ -85,19 +77,16 @@
     hideFormErr();
     hideInitErr();
 
-    const data = {
-      name: document.getElementById('f-name').value.trim(),
-      org: document.getElementById('f-org').value.trim(),
-      contact: document.getElementById('f-contact').value.trim(),
-      msg: document.getElementById('f-msg').value.trim(),
+    const fields = {
+      name: document.getElementById('f-name').value,
+      org: document.getElementById('f-org').value,
+      contact: document.getElementById('f-contact').value,
+      msg: document.getElementById('f-msg').value,
     };
 
-    if (!data.name || !data.org || !data.contact) {
-      showFormErr('请把姓名、机构、联系方式填完');
-      return;
-    }
-    if (data.contact.length < 5) {
-      showFormErr('联系方式看起来不太对，再确认一下');
+    const check = A.validateForm(fields);
+    if (!check.ok) {
+      showFormErr(check.error);
       return;
     }
 
@@ -106,14 +95,7 @@
 
     try {
       const cb = await window.cbReady;
-      const res = await cb.callFunction({ name: 'submit_form', data });
-      const r = res.result || {};
-      if (r.error) throw new Error(r.error);
-      if (!r.token) throw new Error('未收到 token，请重试');
-
-      localStorage.setItem(TOKEN_KEY, r.token);
-      localStorage.setItem(NAME_KEY, data.name);
-
+      const r = await A.submit(cb, fields, PRODUCT);   // 成功即写入 barry_token / barry_name
       await verifyAndReveal(r.token);
     } catch (err) {
       showFormErr('提交失败：' + (err.message || err));
@@ -125,8 +107,7 @@
 
   resetLink.addEventListener('click', (e) => {
     e.preventDefault();
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(NAME_KEY);
+    A.clearIdentity();
     location.hash = '';
     location.reload();
   });
@@ -140,7 +121,7 @@
       showGateForm();
     });
 
-    const existingToken = localStorage.getItem(TOKEN_KEY);
+    const existingToken = A.getToken();
     if (existingToken) {
       verifyAndReveal(existingToken);
     } else {
