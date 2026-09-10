@@ -12,8 +12,8 @@
 
   // 上方只保留两条 B200 价格，Token 综合支出指数交给下方折线图表达。
   var KPIS = [
-    { block: 'gpu', key: 'neo_b200', label: 'Neo-cloud B200', unit: 'USD / GPU-hour', decimals: 2 },
-    { block: 'ornn', key: 'b200', label: 'Ornn B200', unit: 'USD / GPU-hour', decimals: 2 },
+    { block: 'gpu', key: 'neo_b200', label: 'B200租赁价格丨Neo-cloud B200', unit: 'USD / GPU-hour', decimals: 2 },
+    { block: 'ornn', key: 'b200', label: 'B200租赁价格丨Ornn B200', unit: 'USD / GPU-hour', decimals: 2 },
   ];
 
   function el(tag, cls, text) {
@@ -53,20 +53,23 @@
       var obs = cleanObs(s);
       var latest = obs.length ? obs[obs.length - 1] : null;
       var stale = doc[k.block].freshness && doc[k.block].freshness.stale;
-      var tile = el('div', 'kpi-tile');
-      tile.appendChild(el('p', 'kpi-tile__label', k.label));
-      tile.appendChild(el('p', 'kpi-tile__value', fmt(latest && latest.value, k.decimals)));
-      tile.appendChild(el('p', 'kpi-tile__unit', k.unit));
-      tile.appendChild(el('p', 'kpi-tile__meta', latest ? latest.date + (stale ? '（滞后）' : '') : '暂无观测'));
-      // 30 日前的同序列读数存在时给出变化幅度；不存在就不硬凑。
+      var dateText = latest ? latest.date + (stale ? '（滞后）' : '') : '暂无观测';
+      var deltaText = '30 日 暂无';
+      // 30 日前的同序列读数存在时给出变化幅度；不存在就明确标为暂无。
       if (latest) {
         var cutoff = addDaysISO(latest.date, -TREND_DAYS);
         var base = null;
         for (var i = 0; i < obs.length; i++) if (obs[i].date <= cutoff) base = obs[i];
-        if (base && base.value !== 0) {
-          tile.appendChild(el('p', 'kpi-tile__delta', '30 日 ' + fmtPct((latest.value - base.value) / base.value)));
-        }
+        if (base && base.value !== 0) deltaText = '30 日 ' + fmtPct((latest.value - base.value) / base.value);
       }
+      var tile = el('div', 'kpi-tile');
+      var valueLine = el('p', 'kpi-tile__value-line');
+      valueLine.appendChild(el('span', 'kpi-tile__value', fmt(latest && latest.value, k.decimals)));
+      valueLine.appendChild(document.createTextNode('丨'));
+      valueLine.appendChild(el('span', 'kpi-tile__value-unit', k.unit));
+      tile.appendChild(el('p', 'kpi-tile__label', k.label));
+      tile.appendChild(valueLine);
+      tile.appendChild(el('p', 'kpi-tile__detail', deltaText + '丨' + dateText));
       tiles.push(tile);
     });
     if (!tiles.length) throw new Error('no series');
