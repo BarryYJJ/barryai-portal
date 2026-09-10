@@ -271,12 +271,12 @@ h1{
           <p class="card-top"><span>03</span><span>/briefs/</span></p>
           <h3>今天在涨啥</h3>
           <p class="desc">每日 <span class="keep">AI 卖方研报</span>跟踪</p>
-          <dl>
-            <div class="row"><dt>频率</dt><dd>每日更新</dd></div>
+          <dl data-live="briefs">
+            <div class="row"><dt>最新</dt><dd data-live-updated aria-live="polite">每日更新</dd></div>
+            <div class="row"><dt>数据</dt><dd data-live-kpi>早间、午间、晚间、深夜四档简报</dd></div>
             <div class="row"><dt>范围</dt><dd><span class="keep">A 股</span>、港股、美股科技资产</dd></div>
-            <div class="row"><dt>访问</dt><dd>barryai.cn/briefs</dd></div>
           </dl>
-          <p class="go"><span>打开模块</span><span class="arrow" aria-hidden="true">→</span></p>
+          <p class="go"><span>阅读最新简报</span><span class="arrow" aria-hidden="true">→</span></p>
         </a>
       </li>
       <li>
@@ -284,12 +284,12 @@ h1{
           <p class="card-top"><span>04</span><span>/openrouter/</span></p>
           <h3>OpenRouter 看板</h3>
           <p class="desc">全球大模型 <span class="keep">Token</span> 用量的交互式跟踪</p>
-          <dl>
-            <div class="row"><dt>频率</dt><dd>每日更新</dd></div>
+          <dl data-live="openrouter">
+            <div class="row"><dt>最新</dt><dd data-live-updated aria-live="polite">每日更新</dd></div>
+            <div class="row"><dt>数据</dt><dd data-live-kpi>日 <span class="keep">Token</span> 用量与 7 日变化</dd></div>
             <div class="row"><dt>范围</dt><dd>模型、厂商与地域结构的用量份额</dd></div>
-            <div class="row"><dt>访问</dt><dd>barryai.cn/openrouter</dd></div>
           </dl>
-          <p class="go"><span>打开模块</span><span class="arrow" aria-hidden="true">→</span></p>
+          <p class="go"><span>进入看板</span><span class="arrow" aria-hidden="true">→</span></p>
         </a>
       </li>
       <li>
@@ -297,12 +297,12 @@ h1{
           <p class="card-top"><span>05</span><span>/token-gpu/</span></p>
           <h3>Token + GPU 价格看板</h3>
           <p class="desc">大模型 <span class="keep">Token</span> 成本与 GPU 租赁基准的统一跟踪</p>
-          <dl>
-            <div class="row"><dt>频率</dt><dd>每日更新</dd></div>
+          <dl data-live="token-gpu">
+            <div class="row"><dt>最新</dt><dd data-live-updated aria-live="polite">每日更新</dd></div>
+            <div class="row"><dt>数据</dt><dd data-live-kpi>Neo-cloud 与 Ornn 的 B200 租赁价</dd></div>
             <div class="row"><dt>范围</dt><dd><span class="keep">Token</span> 指数、云 GPU 指数与公开租赁价</dd></div>
-            <div class="row"><dt>访问</dt><dd>barryai.cn/token-gpu</dd></div>
           </dl>
-          <p class="go"><span>打开模块</span><span class="arrow" aria-hidden="true">→</span></p>
+          <p class="go"><span>进入看板</span><span class="arrow" aria-hidden="true">→</span></p>
         </a>
       </li>
       <li>
@@ -329,5 +329,88 @@ h1{
     <p class="dim">barryai.cn</p>
   </div>
 </footer>
+
+<script>
+// 三张产品卡片的同源实时预览：只读各子路径下的公开 JSON，失败时保留静态文案。
+// 门户页本身始终公开；这里不碰 barry_token，也不调用任何云函数。
+(function () {
+  'use strict';
+  if (!window.fetch || !document.querySelector) return;
+
+  function el(product, attr) {
+    var dl = document.querySelector('dl[data-live="' + product + '"]');
+    return dl ? dl.querySelector('[' + attr + ']') : null;
+  }
+  function setText(node, text) { if (node && text) node.textContent = text; }
+  function getJSON(url) {
+    return fetch(url + (url.indexOf('?') < 0 ? '?' : '&') + '_=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error(url + ' ' + r.status); return r.json(); });
+  }
+  function fmtTrillion(n) {
+    if (typeof n !== 'number' || !isFinite(n)) return '';
+    if (n >= 1e12) return (n / 1e12).toFixed(n >= 1e13 ? 0 : 1) + ' 万亿';
+    if (n >= 1e8) return (n / 1e8).toFixed(1) + ' 亿';
+    if (n >= 1e4) return (n / 1e4).toFixed(1) + ' 万';
+    return String(Math.round(n));
+  }
+  function fmtPct(v, digits) {
+    if (typeof v !== 'number' || !isFinite(v)) return '';
+    var s = (v * 100).toFixed(digits == null ? 1 : digits) + '%';
+    return v > 0 ? '+' + s : s;
+  }
+
+  // 今天在涨啥：/briefs/briefs/index.json = { "YYYY-MM-DD": { morning|noon|evening|night: true } }
+  function briefs() {
+    var LABELS = { morning: '早间', noon: '午间', evening: '晚间', night: '深夜' };
+    var ORDER = ['evening', 'noon', 'morning', 'night'];
+    return getJSON('/briefs/briefs/index.json').then(function (index) {
+      var dates = Object.keys(index || {}).sort().reverse();
+      var latest = null, total = 0;
+      dates.forEach(function (d) {
+        Object.keys(index[d] || {}).forEach(function (p) {
+          if (!index[d][p]) return;
+          total += 1;
+          if (!latest || d > latest.date) latest = { date: d, period: p };
+        });
+      });
+      if (!latest) return;
+      var top = ORDER.filter(function (p) { return index[latest.date][p]; })[0] || latest.period;
+      setText(el('briefs', 'data-live-updated'), latest.date + ' ' + (LABELS[top] || top));
+      setText(el('briefs', 'data-live-kpi'), '归档 ' + dates.length + ' 天 / ' + total + ' 期');
+    });
+  }
+
+  // OpenRouter：/openrouter/data/preview.json（由 build_dashboard.py 与主数据同时生成的小文件）
+  function openrouter() {
+    return getJSON('/openrouter/data/preview.json').then(function (p) {
+      if (!p || !p.latest_date) return;
+      setText(el('openrouter', 'data-live-updated'), p.latest_date + (p.snapshot_captured_on ? '（快照 ' + p.snapshot_captured_on + '）' : ''));
+      var parts = [];
+      if (p.totals && typeof p.totals.tokens === 'number') parts.push('日 Token ' + fmtTrillion(p.totals.tokens));
+      if (p.change_7d && typeof p.change_7d.tokens === 'number') parts.push('7 日 ' + fmtPct(p.change_7d.tokens));
+      if (typeof p.cn_share === 'number') parts.push('中国模型份额 ' + (p.cn_share * 100).toFixed(1) + '%');
+      if (parts.length) setText(el('openrouter', 'data-live-kpi'), parts.join(' · '));
+    });
+  }
+
+  // Token & GPU：/token-gpu/data/dashboard.json（两条 B200 最新价格）
+  function tokenGpu() {
+    return getJSON('/token-gpu/data/dashboard.json').then(function (d) {
+      if (!d) return;
+      var gpu = d.gpu || {}, ornn = d.ornn || {};
+      var dates = [gpu.latest && gpu.latest.date, ornn.latest && ornn.latest.date].filter(Boolean).sort();
+      if (dates.length) setText(el('token-gpu', 'data-live-updated'), dates[dates.length - 1] + (d.generated_at_utc ? '（生成 ' + String(d.generated_at_utc).slice(0, 10) + '）' : ''));
+      var parts = [];
+      if (gpu.latest && typeof gpu.latest.neo_b200 === 'number') parts.push('B200 Neo $' + gpu.latest.neo_b200.toFixed(2) + '/h');
+      if (ornn.latest && typeof ornn.latest.b200 === 'number') parts.push('B200 Ornn $' + ornn.latest.b200.toFixed(2) + '/h');
+      if (parts.length) setText(el('token-gpu', 'data-live-kpi'), parts.join(' · '));
+    });
+  }
+
+  [briefs, openrouter, tokenGpu].forEach(function (fn) {
+    try { fn().catch(function () { /* 保留静态文案 */ }); } catch (e) { /* 同上 */ }
+  });
+})();
+</script>
 </body>
 </html>
