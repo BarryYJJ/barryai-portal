@@ -617,7 +617,16 @@
     statusEl.appendChild(el('p', { class: 'error-copy', text: message }));
   }
 
+  // The full dashboard only loads after the access gate (gate.js) unlocks it,
+  // so gated sections never fetch or render for anonymous visitors. gate.js
+  // marks html[data-barry-unlocked] and fires barry:unlocked; either signal
+  // boots exactly once, whichever arrives first.
+  var UNLOCK_EVENT = (window.BarryAccess && window.BarryAccess.UNLOCK_EVENT) || 'barry:unlocked';
+  var booted = false;
+
   function init() {
+    if (booted) return;
+    booted = true;
     initKeyboardNav();
     fetch(DATA_URL, { cache: 'no-store' })
       .then(function (res) {
@@ -636,9 +645,18 @@
       });
   }
 
+  function isUnlocked() {
+    return document.documentElement.getAttribute('data-barry-unlocked') === '1';
+  }
+
+  function boot() {
+    if (isUnlocked()) { init(); return; }
+    window.addEventListener(UNLOCK_EVENT, init, { once: true });
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', boot);
   } else {
-    init();
+    boot();
   }
 })();
