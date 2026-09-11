@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-09-11 晚间 AI 简报</title>
+<style>
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-09-11 20:30:38</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-09-11 晚间 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-09-11 14:30</strong> &nbsp;→&nbsp; <strong>2026-09-11 20:30</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">27</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">14 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">51.9%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">6 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">PCB</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">3</span></div><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">3</span></div><div class="hot-kw-row"><span class="kw-name">大模型</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">3</span></div><div class="hot-kw-row"><span class="kw-name">数据中心</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">3</span></div><div class="hot-kw-row"><span class="kw-name">电子布</span><div class="bar-track"><div class="bar-fill" style="width:67%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">光模块</span><div class="bar-track"><div class="bar-fill" style="width:67%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">燧原</span><div class="bar-track"><div class="bar-fill" style="width:67%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">华为</span><div class="bar-track"><div class="bar-fill" style="width:67%"></div></div><span class="kw-count">2</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-55521182825824154">弘信电子把算力做成“Token工厂”，累计签约订单97.44亿元、上半年净利增129.59%，AI卖铲子开始兑现利润</a></li><li><a class="tldr-jump" href="#t-55521182825824854">PCB涨价进入“交卷季”：德福科技铜箔加工费上调、载体铜箔量产用于1.6T光模块，二线板厂Q3看谁能把成本涨成利润</a></li><li><a class="tldr-jump" href="#t-14425582825214412">AI越热，卖冷却的越忙：海鸥股份上半年末数据中心在手订单较去年末增461.38%，一次侧冷却塔迎来订单爆发</a></li><li><a class="tldr-jump" href="#t-55521182821244244">CPO/NPO带火保偏光纤，长飞、亨通、中天竞逐新赛道，预计2026年底至2027年放量，光纤故事从运营商扩到AI</a></li><li><a class="tldr-jump" href="#t-45548814211145288">AI短距互联给铜缆加戏：神宇股份已开发224Gbps高速铜缆、DAC数据线持续量产，“铜进”也有生意做</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-45548814145142118">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-11 18:16 · 👁 344</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【国泰海通建材】玻纤 Q3业绩...</div>
+  <div class="topic-content">【国泰海通建材】玻纤 Q3业绩弹性估算 202609
+
+玻纤最近开始补反弹，主要是：1.提前交易三季报弹性；2.光纤都反弹就剩玻纤了。行业基本面我在上一条上海复材展调研纪要里写过了，景气没问题。
+
+投资观点也很明确：先后经历了涨景气和杀久期，景气重回关注，这个位置至少跑相对没问题；绝对收益跟市场有关。
+
+这条信息主要满足大家对 Q3 业绩假设的需求，估算细节需要讨论请找杨冬庭。（只是反映弹性假设，正规业绩预测请参考正式报告）。
+
+# 中国巨石：
+Q3【25e】，同比+174%，环比+53%。玻纤粗纱846万吨，吨盈利1000-1100元，<mark>电子布</mark>销量3亿米，米净利5.4-5.5元
+全年业绩85亿元，同比+143%，PE21倍；明年略低于10X。
+
+# 中材科技：
+Q3【8.5e】，同比+118%，环比+32%。1）普通玻纤纱及制品：粗纱销量39万吨，吨盈利900元，细纱销量2万吨，吨净利5000-6000元，e布外销2500万米，米净利4元；2）特种布：预计结构和Q2类似，ldk1(200万米/月)，ldk2(20-30万米/月）、low-cte（5万米/月），米净利分别10、40、50元，合计利润1.1亿元；3）叶片+隔膜盈利合计月1.5亿元。
+全年业绩30亿元，同比+131%，PE28倍；明年略低于 20X。
+
+# 国际复材：
+Q3【6.0e】.同比+1664%，环比+64%；1）粗纱30万吨，吨净利300元；细纱销量2.5万吨，吨净利7000元，e布销量0.5亿米，米净利4.9元；2）特种布：结构也和Q2类似，一代布新产能10月出，二代布珠海二期坩埚能评延误，还是ldk1(50-60万米/月），ldk2(60-70万米/月），米净利分别为10元、30元，合计利润0.9亿元。
+全年业绩20亿元，同比+684%，PE58倍；明年略低于 25X。
+
+# 建滔积层板：
+Q3【35e】同比未知，环比+114%，月产能1000万张，7-9月涨价两轮各10%，单张净利约120元（含布的利润）。
+全年业绩100亿元，同比+426%，PE15倍。明年略低于 10X。
+
+联系人：杨冬庭，花健祎#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">电子布</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548814145142118" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521182825824854">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-11 18:16 · 👁 361</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【浙商电子田发祥】近期想向您重...</div>
+  <div class="topic-content">【浙商电子田发祥】近期想向您重点汇报<mark>PCB</mark>两条主线：# 上游材料涨价与高端升级，# 二线<mark>PCB</mark>提价与利润释放。上游关注德福科技、宏和科技、生益科技；二线板厂关注景旺电子、方正科技、奥士康、金禄电子、崇达技术等。
+
+1、# 上游材料：涨价兑现，高端升级打开空间。<mark>电子布</mark>、铜箔、CCL提价持续推进，高端产能挤占普通品供给，叠加<mark>AI</mark>需求推动材料升级，重点看涨价落地与高端产品放量带来的盈利改善。
+
+2、# 铜箔重点看德福：加工费改善叠加新品突破。HTE、RTF产品已启动加工费提价，HVLP高端产品持续导入，载体铜箔已在1.6T<mark>光模块</mark>项目实现量产，关注产品结构升级与国产替代共振。
+
+3、# 二线<mark>PCB</mark>，关注Q3利润弹性。台系二线板厂月度营收高增提供景气线索，国内板厂重点看重新报价、稼动率回升和订单结构改善；具备成本转嫁能力及低价库存的公司，有望率先释放盈利弹性。
+
+4、# 当下看什么：上游材料从涨价预期走向业绩兑现，二线板厂看提价能否覆盖材料成本上涨，重点挖掘Q3盈利超预期及后续预测上修机会。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">光模块</span><span class="kw-tag">电子布</span><span class="kw-tag">PCB</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521182825824854" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521182825824454">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-11 18:16 · 👁 339</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">中国芯片制造商（<mark>燧原</mark>科技）无需...</div>
+  <div class="topic-content">中国芯片制造商（<mark>燧原</mark>科技）无需盈利，股东即可成为亿万富</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">燧原</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521182825824454" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521182825824154">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-11 18:15 · 👁 350</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">弘信电子更新：
+
+[跳跳]#算...</div>
+  <div class="topic-content">弘信电子更新：
+
+[跳跳]#<mark>算力</mark>订单近百亿。2026年上半年新增<mark>算力</mark>资源综合服务订单45.84亿元，累计签约<mark>算力</mark>资源综合服务订单97.44亿元，逼近百亿大关。2026H1公司实现归母净利润1.24亿元，同比+129.59%，2026Q2归母净利润0.86亿元，同比+82.32%，环比+126.91%。公司以Token工厂模式为核心，<mark>算力</mark>业务进入规模化运营阶段，持续构建覆盖国内、辐射海外的Token生产与交付网络。
+
+[跳跳]#Token工厂陆续落地。2026年5月，公司首座Token工厂于无锡落地，首批部署4台<mark>华为</mark><mark>昇腾</mark>384卡超节点<mark>服务器</mark>。2026年7月，第2座Token工厂于厦门落地，部署<mark>华为</mark>384超节点及异构<mark>算力</mark>。目前无锡、厦门两大<mark>AI</mark> Token工厂已完成技术适配与试点落地。公司已与头部云厂商、<mark>大模型</mark>企业签订长期<mark>算力</mark>租赁合作协议。
+
+[跳跳]#背靠<mark>燧原</mark>，资源禀赋强。<mark>燧原</mark>科技作为国产<mark>AI芯片</mark>标杆冲刺科创板。弘信电子实控人通过旗下基金累计投资超5亿元，是核心投资方之一；无锡Token工厂后续国产超节点将陆续进入，形成异构兼容、多模协同的强大集群。
+
+[跳跳]#<mark>华为</mark>战略协同。子公司燧弘华创是<mark>华为</mark>计算APN钻石级部件伙伴，公司旗下安联通是NVIDIA双Elite精英级合作伙伴，双顶级合作伙伴身份构筑最强卡源护城河。#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI芯片</span><span class="kw-tag">大模型</span><span class="kw-tag">服务器</span><span class="kw-tag">算力</span><span class="kw-tag">华为</span><span class="kw-tag">昇腾</span><span class="kw-tag">燧原</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521182825824154" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521182821244244">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-11 18:13 · 👁 359</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【GLMS通信】深圳光博会｜光...</div>
+  <div class="topic-content">【GLMS通信】深圳光博会｜光纤光缆核心观点
+
+行业逻辑正在从传统运营商集采周期，逐步转向“供需反转 + <mark>AI</mark>带动产品结构升级”的双重驱动。
+
+1️⃣ 保偏光纤：这次展会最值得关注的新增预期差
+长飞、亨通、中天、烽火均重点展示<mark>CPO</mark>/NPO相关保偏光纤，产业端普遍反馈需求明显升温，部分厂商已经开始接单和扩产。其核心逻辑是<mark>CPO</mark>/NPO外置光源方案对稳定偏振态提出更高要求，保偏光纤需求将直接跟随光引擎数量增长。相较空芯光纤，保偏光纤商业化路径更清晰，预计2026年底至2027年有望逐步进入放量阶段，值得作为明年重点业绩增量方向跟踪。
+
+2️⃣ 空芯光纤：已经从实验室阶段走向工程化。
+行业讨论重点也已经从“能不能做出来”转向“怎么铺、怎么熔、怎么测、怎么运维”。我们认为空芯已经跨过纯概念阶段，但连接器、熔接、测试标准、成本和运维体系仍需完善，短期更多体现估值弹性，中长期真正需要观察的是运营商及云厂商从百公里试点走向千公里级规模部署。
+
+3️⃣ G.654.E：兑现确定性较高
+<mark>AI算力</mark>中心之间的跨园区、跨区域互联快速增长，对低损耗、大有效面积光纤提出更高要求，G.654.E在400G/800G长距离传输中的应用正在加快。未来几年更合理的技术演进路径可能是“G.652.D → G.654.E → 空芯光纤”，因此空芯并不会短期直接替代G.654.E，反而可能形成接力。相比空芯，G.654.E当前订单和收入兑现路径更加明确。
+
+4️⃣  高密度光缆：<mark>AI</mark>正在改变光纤需求的统计口径
+中天此次展示17280芯超高芯数光缆，烽火、亨通也都在强化高密度互联方案。<mark>AI</mark><mark>数据中心</mark>带来的并不仅是“铺更多公里光纤”，更重要的是单位机柜、单位园区所需芯数快速提升。因此未来看光纤需求，不能只看皮长公里，更应该关注芯公里数、单位机柜芯数以及高密度光缆渗透率。
+
+整体来看，我们认为本届光博会进一步验证了光纤光缆行业正由“普通光纤供需反转”向“<mark>AI</mark>驱动量价齐升 + 产品结构升级”演绎：
+
+✅ 短期：普通光纤涨价、满产带来利润弹性
+✅ 中期：重点关注保偏光纤、G.654.E及超高芯数光缆放量
+✅ 长期：空芯光纤由试点逐步进入规模商用
+
+公司层面，#长飞  在空芯、保偏、G.654.E等新型光纤布局最全面，技术溢价较高；#亨通  兼具传统光纤周期弹性和<mark>AI</mark>新品类布局，逻辑较均衡；#中天  在高密度光缆、G.654.E及<mark>数据中心</mark>连接方向值得重视；#烽火  则体现出从光纤、连接到传输设备的系统化能力。#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI算力</span><span class="kw-tag">数据中心</span><span class="kw-tag">CPO</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521182821244244" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258815158544521">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-11 18:13 · 👁 328</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">本周连续五天成交量持续在 2 ...</div>
+  <div class="topic-content">本周连续五天成交量持续在 2 万亿以下，市场持续缩量调整，#下半年增量资金不足的压力还在释放，看盘面，今天比较抗跌的是（优质的<mark>AI</mark>+红利），#说明这两个板块目前大家不愿意卖，还拿得住！前期轮动过的板块今天补跌。
+
+近期交流下来，市场预期较 7 月还悲观一些，主要是本周指数往往高开低走，伤害看多人气，市场开始呈现一些底部特征，再坚持坚持，给大家一点乐观的要素：四季度要涨主要靠两件事（科技新的大利好+救市动力超预期），我们猜测如果还要上一些重要 IPO，不会这么放任市场下去，多一点耐心！[抱拳][抱拳]
+
+华创非银 徐康#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258815158544521" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521182821245454">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-11 18:12 · 👁 319</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【长江电新】20260911-...</div>
+  <div class="topic-content">【长江电新】20260911-锂电推荐更新：短期悲观情绪充分交易，哪些中期积极变化被低估？
+
+1、锂电板块近期调整较多，简单复盘看，6-7月市场定价了国内储能下修，但随着中报产业链龙头对27年指引乐观，叠加Q3排产持续上行，市场开始交易旺季机会。但不论从股价表现还是产业链价格落地情况，旺季行情都不尽如人意，背后的原因一方面是市场对27年需求尤其是27Q1淡季的分歧较大，另一方面还是中报电池厂有一定的成品库存，排产增减从反应终端需求趋势演变为库存和涨价的博弈。但我们需要强调的是，锂电产业链有坚实的价值中枢，当前估值已显著偏低，且诸多中期积极变化未被定价。
+
+2、#景气短期看排产、中期看终端趋势、当前应淡化短期数据波动。短期排产固然对旺季交易情绪和价格的边际变化很重要，但并不反应中期景气趋势，尤其是上半年电池厂主动增加成品库存应对旺季采购峰值的情况下，短期排产更多体现的是“库存-涨价-新产能备货”的博弈，对景气度的指引意义下降。但从中期趋势看，锂电各细分市场中，欧洲乘用车、国内商用车均有政策目标托底，新兴市场乘用车的中国品牌崛起和非<mark>美光</mark>储平价都是确定性趋势，锂电需求中枢在3年维度维持20%以上依旧确定。同时近期油价重返100美元、天然气价格不断新高，能源转型的增量需求未被定价。而碳酸锂价格已回落至13万，国内储能、商用车等经济性敏感市场也有望上修需求。
+
+3、#盈利能力进入稳定期的概率较大、尤其是电池有政策托底。锂电产业链从25Q4来看盈利修复，当前多数环节仅恢复到回报率5-8年的分位，属于合理盈利中枢。27年来看，铜箔、隔膜、铝箔、负极的供给增速在20%-25%，与需求匹配，我们认为盈利稳定的概率大。电池27年扩产略多，主要是后续产能扩张限制政策预期，使得电池厂的扩产前置，近期根据财新等媒体报道，已有新建项目暂缓审批出现，28年后电池供需恢复、盈利稳定改善的确定性很强。
+
+4、#从确定性和结构改善、第二增长曲线出发布局低估标的。宁德时代已跌至27年13X，按50%分红比例有4%的股息率，另有200~400亿回购，确定性最强。结构改善和第二增长曲线的逻辑也能带来赔率，1）结构改善方面，一是海外市场、基地需求放量，包括电池的宁德、亿纬，材料的鼎胜、尚太等。二是钠电等新产品订单增长，包括鼎胜等。三是内生的降本提效，包括尚太、璞泰来、富临、裕能等。2）第二增长曲线方面，铜箔有电子箔弹性和产业链延伸，星源立足于隔膜拓展压电陶瓷，信德布局碳纤维等。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">美光</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521182821245454" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425582825214412">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-11 18:12 · 👁 321</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【国金计算机&amp;科技】#海鸥股份...</div>
+  <div class="topic-content">【国金计算机&amp;科技】#海鸥股份：冷却塔龙头_半导体Fab&amp;<mark>数据中心</mark>冷却塔订单双高增
+
+🌹核心观点：公司为国内工业冷却塔龙头，依托台湾太承切入半导体Fab赛道，<mark>液冷</mark>时代抓住IDC一次侧冷却塔爆发机遇。2026H1半导体、<mark>数据中心</mark>在手订单分别较2025年末增长92.51%/461.38%，订单进入密集爆发期。
+
+【1】#受益于全球Fab大扩张_1H26Fab厂冷却塔订单8.47亿元_较25年底暴涨92.51%
+——截至2026年6月末，公司半导体芯片相关在手订单8.47亿元，较2025年末增长92.51%。台湾太承长期服务中国台湾地区知名半导体厂商，具备冷却塔研发、设计、生产、安装及运维能力。公司依托多家境外主体，承接中国台湾、新加坡、美国等多地顶级Fab的冷却塔业务。
+——#我们认为，Fab对冷却系统可靠性、项目经验及持续服务能力要求较高，供应商导入后更换成本较大，客户合作关系具备较强延续性，冷却塔白名单通常只有1-2家。公司有望依托顶尖客户资源，跟随全球建厂，服务顶尖逻辑及存储巨头，订单加速高增。
+
+【2】#<mark>数据中心</mark>订单增长461%_一次侧<mark>液冷</mark>价值或被低估
+——截至2026年6月末，公司<mark>数据中心</mark>相关在手订单4.57亿元，较2025年末增长461.38%。冷却塔是<mark>数据中心</mark><mark>液冷</mark>系统一次侧核心设备之一，直接影响系统PUE、WUE及运行稳定性。
+——冷却塔防火要求高_出海需具备核心认证_公司凭借该优势有望享受全球IDC建设红利。冷却塔通过填料增大水气接触面积，但填料及部分结构件采用高分子材料，防火设计要求高。公司已取得CTI及FM认证，可直接出口美欧中东等地。<mark>液冷</mark>时代，国外1GW<mark>数据中心</mark>的冷却塔价值量约8-12亿，高盛预测2027年美国<mark>数据中心</mark>新增装机容量在36GW，增量市场空间巨大。
+——#我们认为，公司海外IDC冷却塔业务处于爆发期早段，后续订单将受益于全球IDC建设大潮及<mark>液冷</mark>时代红利，有望与Fab冷却塔共振同步加速高增。
+
+风险提示：需求不及预期；订单交付不及预期；<mark>数据中心</mark>收入贡献较低；原材料价格及汇率波动；市场竞争加剧等。
+
+联系人：郑元昊/孙恺祈/刘高畅#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">数据中心</span><span class="kw-tag">液冷</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425582825214412" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548814211145288">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-11 16:14 · 👁 573</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">20260911今日段子汇总
+...</div>
+  <div class="topic-content">20260911今日段子汇总
+
+1、神宇股份：1、公司已开发出传输速率可达224Gbps的高速铜缆，DAC高速数据线持续量产，USB4、Thunderbolt4产品齐全，用于<mark>数据中心</mark>短距高速互联；2、公司射频同轴电缆应用范围包括航天、电子等军用领域，可以用于北斗卫星导航卫星基础建设
+
+2、协和电子：国内领先的高频通讯板生产商；公司车载毫米波雷达等产品且已批量供货，与合众新能源、上汽时代、万帮数字能源等新能源领域的客户建立了合作
+
+3、风华高科：国内被动电子元件行业龙头；公司MLCC、合金电阻、大电流电感已批量导入国内头部<mark>AI服务器</mark>及机器人客户，<mark>AI算力</mark>订单充足
+
+4、闽东电力：1、福建省最大的电力股份制企业；公司主营业务为电力生产与开发，主要以水电、风电、光伏为主；2、持股海交所7.4%，海交所提供不良资产处置服务
+
+5、九鼎新材：1、全球较大的玻纤制砂轮增强片供应商，国家航空航天特种玻纤布定点企业；2、公司的主要产品类别玻璃纤维复合材料就有应用于风力发电领域的风电机舱罩和叶片
+
+6、超声电子：公司M7/M8级高速<mark>覆铜板</mark>处于研发测试阶段，800G、1.6T<mark>光模块</mark>配套<mark>PCB</mark>在研究跟进中
+
+7、凯盛新能：1、国内著名的玻璃生产制造商之一；公司超薄电子玻璃产品结构优势明显,具备批量生产0.12mm-2.0mm系列浮法玻璃生产能力，玻璃板块主导产品为超薄电子玻璃基板；2、公司主营产品包括双玻组件玻璃、AR光伏镀膜玻璃、高透光伏玻璃钢化片等太阳能装备用光伏电池封装材料，在产光伏玻璃原片产能4650吨/日
+
+8、中新赛克：深圳国资委旗下，领先的网络可视化基础架构产品提供商，已有相关的<mark>算力</mark>数据网络监测和调度技术研发储备；公司海睿思产品已成功通过上海数据交易所的数商认证
+
+9、远 望 谷：1、公司拟收购光泰通信100%股权，拓展光通信自动化设备领域；2、公司自主研发的RFID芯片已广泛应用于铁路、烟草、电力、图书等业务领域，且公司提供自芯片、标签、读写器到软件开发等全套产品和服务
+
+10、通达股份：国内架空导线龙头，特高压导线主要供应商
+
+11、铜峰电子：国内领先的薄膜电容及薄膜材料生产商，拥有完整的 “电容器用薄膜 - 金属化薄膜 - 薄膜电容器” 产业链
+
+12、杭州热电：实控人为杭州国资委，公司主营工业园区热电联产、集中供热，提供的主要产品是蒸汽与电力，已覆盖上海、杭州等地区
+
+13、江苏新能：江苏省人民政府旗下，业务主要包括风能发电、生物质能发电和光伏发电三个板块
+
+14、内蒙一机：1、公司为兵器工业集团旗下企业，是我国唯一主战坦克及中重型轮式装甲车公司2、公司研制的两栖无人查险机器人系列产品是公司承担的国家应急管理部揭榜攻关项目，目前已完成研制，正在试验中
+
+15、安彩高科：公司具备太阳能光伏玻璃原片、钢化片、镀膜片全产品链的生产能力
+
+16、风语筑：公司联手宇树科技共同打造杭州市具身智能展示与应用推广中心，深度参与国家级中试基地配套建设
+
+17、三力制药：苗药龙头，儿童咽喉疾病中成药领跑企业，主要产品为开喉剑喷雾剂（儿童型）、开喉剑喷雾剂和强力天麻杜仲胶囊等
+
+18、宏辉果蔬：公司拟收购施美药业41.128%股份，切入医药赛道
+
+19、光电股份：兵工集团唯一光电上市平台，陆军光电武器装备核心供应商；公司光通信核心材料GP是<mark>光模块</mark>光隔离器中的核心材料
+
+20、众泰汽车：汽车整车制造企业，拥有众泰、江南、君马等自主品牌
+
+21、银河电子：1、公司军工业务主要包括技术保障装备、智能供配电系统、综合电子信息系统、综合环境控制系统和保障类电源等，上述各分系统主要用于坦克、装甲车、自行火炮、指挥车、通信车、侦察车、技术保障、后勤等各型军用特种车辆；2、公司通过参股格思航天布局卫星用户终端业务，其关联公司银河航天是我国领先的卫星互联网解决方案提供商和卫星制造商，已建成中国首个低轨宽带通信试验星座“小蜘蛛网”，完成多项低轨宽带卫星互联网通信验证
+
+22、正和生态：国内领先的生态环境科技运营商；公司携手<mark>智谱</mark>共同开发河湖生态修复基础<mark>大模型</mark>RiverLake GLM v1.0通过验收
+
+23、嘉立创：公司主营印制电路板制造业务，<mark>PCB</mark>业务为公司第一大收入来源，拥有五大现代化数字生产基地覆盖<mark>PCB</mark>全制程
+
+24、双星新材：公司MLCC离型膜已切入国内头部客户并实现稳定供货，复合铜箔项目正常推进，受益国产替代
+
+25、天目湖：公司地处长三角，为区域旅游龙头，天目湖旅游度假区是国家5A级旅游景区
+
+26、冠盛股份：公司联合上海<mark>人工智能</mark>研究院等发布洁净环境机器人产品，已获授权发明专利6项，智能仿生关节臂仍处于研发迭代阶段
+
+27、中视传媒：央视与国际足联达成合作，宣布6000万美元拿下美加墨世界杯转播权；公司是中央电视台旗下唯一上市公司，已形成影视、广告、旅游三大主营业务
+
+28、铭普光磁：1、通信磁性元器件研发生产企业；公司<mark>光模块</mark>以PON<mark>光模块</mark>和<mark>数据中心</mark><mark>光模块</mark>为主，主要应用于数通市场和电信市场两大领域；一季度业绩同比减亏；2、公司研发出图腾柱无桥电路PFC电感-4KW，并与半导体供应商Innoscience（英诺赛科公司）芯片系列搭配使用开发&quot;
+
+29、拓日新能：国内较早打通并拥有“从砂到电”垂直一体化光伏产业链的企业之一；公司参与了东方红卫星“开拓一号”单晶硅太阳电池项目，具备成熟的卫星用光伏组件生产制造能力，研发的钙钛矿/晶硅叠层电池技术可应用于航天领域
+
+30、骏亚科技：公司已成功推进人形机器人、<mark>服务器</mark>、<mark>AI</mark>、<mark>光模块</mark>等领域<mark>PCB</mark>开发，其中已成功导入国内头部人形机器人客户并开始批量供货
+
+31、江南水务：江阴市水务平台，拥有4座地面水厂和一家污水处理厂
+
+32、鼎信通讯：公司深耕智能电网，拥有电能计量、配电自动化、中低压数字化全矩阵产品，参与国标制定，具备芯片-方案-系统垂直整合能力
+
+33、三孚股份：1、商务部对原产于日本的进口二氯二氢硅实施临时反倾销措施，唐山三孚电子材料曾代表国内产业提起调查申请；2、公司电子特气产品应用于存储芯片等领域
+
+34、华胜天成：公司全面推进“<mark>AI</mark>+<mark>算力</mark>”战略，拥有新一代<mark>人工智能</mark><mark>算力</mark>中心整体解决方案，并获头部科技企业智能计算ISV核心认证，为<mark>华为</mark>云软件认证合作伙伴、<mark>华为</mark>云服务合作伙伴和<mark>华为</mark>政企金牌合作伙伴
+
+35、博敏电子：公司为国内<mark>PCB</mark>细分HDI板龙头，现已为多家客户批量提供400G、800G<mark>光模块</mark>产品
+
+36、九阳股份：豆浆机龙头；公司表示没有哈基米hachimi相关的产品等
+
+37、崇达技术：公司是全球领先的小批量<mark>PCB</mark>企业，供给工业控制领域客户的<mark>PCB</mark>产品有应用于智能家居、人形机器人、工业机器人等方面
+
+38、澳弘电子：公司拟3.3亿元投建高端<mark>PCB</mark>定制化生产基地，产品以高性能、高可靠性的多层铝基盲孔板、阶梯槽<mark>PCB</mark>、热电分离铜基板、microled板、高多层厚铜板、多层特种线圈板、高频雷达板等高端定制化<mark>PCB</mark>产品为主
+
+39、高斯贝尔：公司依托省级微波电子陶瓷技术工程研究中心，在 5G/6G 新材料领域深入研究开发多年，拥有自主可控的关键技术，开发出能够完全替代国外进口的高端产品及市场所需的高精尖产品，涉及多项高频、高速、封装<mark>覆铜板</mark>、陶瓷新材料等技术#市场段子 #文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI服务器</span><span class="kw-tag">人工智能</span><span class="kw-tag">AI算力</span><span class="kw-tag">数据中心</span><span class="kw-tag">大模型</span><span class="kw-tag">光模块</span><span class="kw-tag">覆铜板</span><span class="kw-tag">PCB</span><span class="kw-tag">华为</span><span class="kw-tag">智谱</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548814211145288" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521182488825554">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-11 16:14 · 👁 594</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title"><mark>Anthropic</mark>再次针对中国...</div>
+  <div class="topic-content"><mark>Anthropic</mark>再次针对中国<mark>大模型</mark>，曝光7家公司蒸馏手法
+
+1. 阿里：规模最大。<mark>Anthropic</mark> 称，5 月至 7 月超过 1.51 亿次交互，峰值接近每天 300 万次，主要提取 Opus 4.6、4.7 的完整推理过程，用于训练 Qwen 3.5、3.6 和 3.7。
+
+2. <mark>月之暗面</mark>：直接拿 <mark>Claude</mark> 给 <mark>Kimi</mark> 用户代答。10 天内近 30 万条真实用户请求被转给 <mark>Claude</mark>，部分请求还带着企业内部代码和有效凭证；5 月至 7 月相关交互超过 2300 万次。
+
+3. <mark>DeepSeek</mark>：也会把用户请求偷偷转给 <mark>Claude</mark>，而且会专门识别使用 <mark>Claude</mark> Code、OpenCode 等工具的用户，再挑选部分请求转给 Opus。14 天超过 1210 万次。
+
+4. <mark>智谱</mark>：专门提取和清洗 <mark>Claude</mark> 的推理过程，还拿美国模型练网络安全能力。<mark>Anthropic</mark> 称，<mark>智谱</mark>一度尝试蒸馏 Fable，发现防护太强后，转向 Opus 4.6 和另一家美国公司的模型。17 天超过 340 万次交互。
+
+5. 小米：把 MiMo 用户已经产生的真实对话和编程记录重新喂给 <mark>Claude</mark>，生成 SFT 和强化学习数据。20 天超过 40 万次请求；<mark>Anthropic</mark> 甚至怀疑，MiMo-V2-Pro 的免费试用期可能也被用来吸引更多海外开发者产生训练素材。
+
+6. 商汤：直接从第三方数据商购买用户与 <mark>Claude</mark> 的聊天记录。这些数据来自代理和中转服务，部分用户并不知道自己的对话会被保存和出售。
+
+7. <mark>MiniMax</mark>：被指通过一家表面看不出关联的公司运营模型中转服务，而且里面只提供 <mark>Anthropic</mark> 和 <mark>OpenAI</mark> 模型，连 <mark>MiniMax</mark> 自己的模型都没有。<mark>Anthropic</mark> 判断，这套服务可能就是为了收集美国模型的用户交互做训练。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Anthropic</span><span class="kw-tag">DeepSeek</span><span class="kw-tag">MiniMax</span><span class="kw-tag">OpenAI</span><span class="kw-tag">Claude</span><span class="kw-tag">月之暗面</span><span class="kw-tag">Kimi</span><span class="kw-tag">大模型</span><span class="kw-tag">智谱</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521182488825554" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258815411285881">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-11 15:41 · 👁 621</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【国泰海通医药】国家医保局召开...</div>
+  <div class="topic-content">【国泰海通医药】国家医保局召开手术机器人专家座谈会，大力支持引领产业发展
+
+[太阳]9月11日，国家医保局组织召开手术机器人专家座谈会，邀7家国内外厂商（华科精准、上海微创、美敦力、直观复星、深圳精锋、天智航、史赛克）及5家医院代表（广东省人民医院、北大人民医院、天坛医院、积水潭医院、北京同仁医院）交流。会议定调&quot;促创新、反内卷&quot;，在机械臂辅助操作已列入价格立项、医保支付单设分组的基础上，国家医保局有望进一步以开放包容和鼓励创新的态度积极推动手术机器人产品运用和产业发展。
+
+[玫瑰]价格与支付基础已落地：机械臂辅助操作等已列入医疗服务价格项目立项指南，各地陆续出台收费标准，医保支付方式改革为手术机器人单设分组，为规范、科学、合理应用奠定制度基础，降低医院与患者的使用门槛。
+
+[玫瑰]应用边界向脑外科/介入延伸、远程手术立项：功能从泌尿外科、骨科、普外科等集中度高的领域，向脑外科、介入科精准发力，并与飞速发展的脑机接口技术无缝衔接；高度肯定远程手术立项定价，边疆、海岛、自然灾害及突发事件现场远程手术将成为应急医疗保障普惠手段。
+
+[玫瑰]受益标的：精锋医疗、天智航、爱康医疗、澳华内镜。
+
+[庆祝]联系人：余<mark>文心</mark>/赵峻峰/江珅</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">文心</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258815411285881" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521182481855154">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-11 14:48 · 👁 731</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【中泰先进产业】海外刀具涨价潮...</div>
+  <div class="topic-content">【中泰先进产业】海外刀具涨价潮再起，国产替代加速兑现！
+
+🔥 美国头部分销商预警：海外刀具仍将提价  
+9月9日，北美头部工业刀具分销商MSC的CEO表示，碳化钨相关原料成本上涨近500%，供应商仍在向下游转嫁成本，后续还有一轮提价。
+
+🔥 覆盖主流刀具品牌，渠道信号更具代表性  
+MSC销售山特维克、肯纳金属、京瓷等主流品牌，其预警表明海外刀具正面临普遍成本压力。
+
+🔥 国内外钨价相差约3倍，进口替代进入黄金窗口期  
+海外刀具原料保供和成本压力持续加大，国产刀具供应链稳定性和性价比优势进一步凸显。
+
+✅ 强推国产刀具龙头【华锐精密】！  
+海外品牌提价叠加低价进口库存消化，公司Q3业绩增长趋势进一步明确；碳化钨粉末与<mark>PCB</mark>棒材打开长期成长空间。
+
+⚠️ 风险提示：海外刀具提价节骤不及预期、低价进口库存消化不及预期、下游需求及新业务推进不及预期。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">PCB</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521182481855154" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425582185842822">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-11 14:47 · 👁 693</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">最新调研汇报：
+
+【北交所】【...</div>
+  <div class="topic-content">最新调研汇报：
+
+【北交所】【鸿仕达】严重低估的先进封装设备+<mark>AI服务器</mark>高精度贴装设备国内独供！
+📌 核心逻辑：先进封装<mark>CoWoS</mark>/CoPoS设备，NV <mark>Rubin</mark>核心L6供应商
+🔥 曲线一：<mark>AI服务器</mark>L6制程 提供业绩成长支撑。
+🔥 曲线二：中国先进封装市场十年十倍大增长，公司处于核心工艺的成长曲线上，公司为<mark>CoWoS</mark>/CoPoS核心工艺国内唯一量产厂商</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI服务器</span><span class="kw-tag">CoWoS</span><span class="kw-tag">Rubin</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425582185842822" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258815418125451">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-11 14:47 · 👁 692</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【交运】数观2026年中报：航...</div>
+  <div class="topic-content">【交运】数观2026年中报：航运周期范式重塑，关注快递旺季价格
+
+[玫瑰]集运：传统周期框架亟需修正，重视三大因素边际催化。
+”码头拥堵、关键水道受阻、贸易流向碎片化形成影响因素的持续爆发点，以码头拥堵为例，8月底全球待泊运力占比约12.6%、仅略低于2022年同期的15.7%，码头新增供给受限、泊位高利用率叠加厄尔尼诺效应导致难以根本解决对有效运力损耗，巴拿马运河等关键水道亦受此影响。多对多、碎片化的贸易流改变叠加新联盟运行机制客观上增加区域集装箱的运输需求。中期来看任何一项或多项因素边际变化均有望形成需求脉冲式上行，继续推荐中谷物流(预计2026年股息率7.5%，下同)、德翔海运(6.9% )、海丰国际(6.3%)、锦江航运(4.5%)，中远海控（6.3%）。
+	
+[玫瑰]油运：VLCC季度利润环增，成品油迎景气度拐点，招商南油性价比凸显。
+霍尔木兹海峡已经摆脱二元状态，绕行、海湾STS等持续消耗有效运力，中东货源已稳定向外流出，关键水道受阻、部分地区能源基础设施被破坏衍生影响仍为下半年原油贸易流向扰动的核心因素。俄罗斯影子船队、美国战略石油储备的释放拉长平均运距，货源替代、运距拉长在美伊冲突进一步加剧的8月表现尤为明显。中国原油进口拐点已现，季度利润年内环比增长有望钝化传统对旺季最高运价的博弈。同时成品油迎景气度拐点，运力西移加剧供给紧张，关注国内出口恢复和季节性驱动，继续推荐招商轮船、中远海能（H/A）、招商南油。
+	
+[玫瑰]快递：关注国内快递旺季价格边际变化，极兔新市场加速培育。9月产粮区反内卷政策趋严，最低市场价标准严格执行，关注广州、莞深和潮汕松动价格补齐，同时底价之上的公斤段竞争或更趋于市场化，Top2有望凭借更优的网络能力实现压缩价差能力的同比强化，持续推动成本分化传导至利润和份额端，关注旺季价格段变化带来估值修复，继续推荐圆通速递，中通快递，极兔速递，关注顺丰控股、顺丰同城估值底。
+	
+[玫瑰]航空&amp;高铁：航空货运旺季<mark>AI</mark>高增速可期，关注雄商高铁通车带来京沪高铁业绩催化。<mark>AI</mark>链接电商形成出货韧性，淡季需求和价格超预期，叠加在手货机交付推动周转量增长，东航物流成长性明确。同时关注雄商高铁开通对京沪高铁引流贡献及风格切换对京沪高铁形成的催化和航空的左侧布局机会。
+
+[抱拳]投资建议：我们认为传统航运周期供需分析范式需要因势利导、相应优化调整。“供应链稳定性和安全性”替换全球化时代的“效率和成本优先”成为首要核心要素，定价权明显向运力控制方转移。继续推荐中谷物流、招商轮船、招商南油、圆通速递、京沪高铁。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258815418125451" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
