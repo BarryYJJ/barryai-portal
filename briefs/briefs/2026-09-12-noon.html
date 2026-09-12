@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-09-12 午间 AI 简报</title>
+<style>
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-09-12 14:30:32</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-09-12 午间 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-09-12 10:00</strong> &nbsp;→&nbsp; <strong>2026-09-12 14:30</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">6</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">4 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">66.7%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">4 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">光模块</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">AI算力</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">CPO</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">硅光</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">AI服务器</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">数据中心</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">液冷</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-45548814124542228">AI互联开始“铜不够、光来凑”，SerDes向448G/lane升级，NPO有望成为可插拔光模块与CPO之间的长期选项</a></li><li><a class="tldr-jump" href="#t-45548814124224818">AI大户也开始看账单：Ramp数据显示，美国Top 1%企业人均AI月支出8月环比下降9.7%</a></li><li><a class="tldr-jump" href="#t-45548814124548588">液冷热到跨界抢座：达瑞电子拟收购东莞运宏70%股权，切入光模块与AI服务器散热赛道</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-45548814124224818">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-12 11:41 · 👁 348</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">Ramp数据显示，美国企业<mark>AI</mark>...</div>
+  <div class="topic-content">Ramp数据显示，美国企业<mark>AI</mark>支出高度集中于头部客户，其中Top 1%企业人均<mark>AI</mark>月支出8月环比下降9.7%</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548814124224818" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548814124542228">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-12 11:04 · 👁 411</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【财通电子&amp;新科技】2026深...</div>
+  <div class="topic-content">【财通电子&amp;新科技】2026深圳光博会逛完后感受：光互联加速渗透，NPO生态加速成形
+
+9月10日-11日，我们现场参加光博会，并全程参加NPO峰会，覆盖二十余家云厂商、标准组织及<mark>光模块</mark>、芯片、连接器和设备企业。最直观的感受是——<mark>AI算力</mark>网络正推动光互联由Scale-out向Scale-up渗透，NPO方案成为讨论热点。
+
+🔥行业趋势：
+1️⃣ #<mark>AI</mark>网络正向Scale-up、Scale-out和Scale-across多层次演进。训练、推理及Agentic <mark>AI</mark>持续提高对带宽、时延和可靠性的要求，其中Scale-up及部分推理场景对微秒级时延尤为敏感。
+2️⃣ #产业整体遵循“短距离优先用铜、铜互连接近极限后导入光”的思路。随着SerDes由224G/lane向448G/lane演进，带宽密度、信号损耗和微秒级时延约束同步提升。NPO兼顾低功耗、高密度与可维护性，有望成为可插拔模块与<mark>CPO</mark>之间的重要长期形态之一。
+
+⛓产业链变化：#竞争由单点器件走向系统工程。  
+NPO/<mark>CPO</mark>带来的增量不只在<mark>光模块</mark>，还向光电芯片、FAU与多芯连接器、外置光源、保偏光纤、高速电连接器、先进封装、耦合及测试设备扩散。产业化瓶颈已转向光、电、热、机械结构、软件管理和故障定位的系统协同，具备跨环节整合能力的厂商更加占优。
+
+💡技术路线：#多模与单模分工明确、内外置光源并行。  
+展台调研显示，VCSEL多模方案在功耗和成本方面更具优势，但是传输距离约50米；单模<mark>硅光</mark>方案可覆盖约500米，在距离和长期扩展性方面更强，但是成本和功耗也更高。内置光源有利于简化系统，外置ELS/ELSFP更便于维护，两条路线短期内预计并存。
+
+⏱产业节奏：#LPO最快、NPO进入系统验证期、<mark>CPO</mark>产业准备度提升。  
+LPO已有万卡级项目应用；3.2T及6.4T NPO普遍处于样品调试、平台验证或等待客户导入阶段；12.8T及以上仍以标准制定和生态共建为主。<mark>CPO</mark>产业准备度持续提升，展会能看到<mark>CPO</mark>光耦合、晶圆检测/OE检测等方案，但良率、耦合难度和维修成本仍待突破。
+
+🔍我们对参展全程信息进行了整理和梳理，欢迎联系财通电子&amp;新科技组交流！
+
+——财通电子&amp;新科技 唐佳 詹小瑁 蒋鹏坤
+#</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI算力</span><span class="kw-tag">光模块</span><span class="kw-tag">CPO</span><span class="kw-tag">硅光</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548814124542228" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548814124548588">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-12 11:01 · 👁 402</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">🏃中信主题策略刘易团队-“跨界...</div>
+  <div class="topic-content">🏃中信主题策略刘易团队-“跨界<mark>液冷</mark>三剑客”🗡️#金洲管道 &amp; #达瑞电子 &amp; #长缆科技 产线首秀联合调研邀约📯
+
+✨#金洲管道（002443）：将<mark>液冷</mark>定位为支撑中长期成长的第二主业，自建为主、并购为辅。以全资子公司金洲智慧<mark>液冷</mark>（上海）为核心载体、控股闪麟时代，冷板核心工艺（铜管/不锈钢管精密焊接）与四十余年高频焊/埋弧焊工艺一脉相承；东莞骅兴新增3万平米厂房扩建冷板/波纹管/内外分水器/CDU-UQD产线，即将投产，补齐<mark>液冷</mark>核心零部件规模化制造能力 。
+⏱时间：9月17日下午
+🏭地址：东莞凤岗镇黄洞村东升工业一路1号
+
+✨#达瑞电子（300976）：以精密制造平台外延切入，拟收购东莞运宏70%股权进入风冷/<mark>液冷</mark>散热核心部件赛道。运宏在水冷板、水冷块、<mark>光模块</mark>散热器、<mark>液冷</mark>Cage已有基础，以及富士康、Boyd、立讯等客户资源；重点发力<mark>光模块</mark>+<mark>AI服务器</mark><mark>液冷</mark>，增量客户含安费诺等核心大客户，年内有望落地。
+⏱时间：9月18日上午
+🏭地址：东莞洪梅镇洪金路48号
+
+✨#长缆科技（002879）：绝缘材料优势产业链延伸，前瞻卡位浸没式<mark>液冷</mark>。公司依托控股子公司双江能源变压器绝缘油研发基础，重点围绕绝缘材料在浸没式<mark>液冷</mark>领域布局。2026年4月，公司参股投资云酷智能并签订战略合作协议，加速推动浸没式<mark>液冷</mark>产业化。云酷智能成立于2022年，自成立之初便专注于单相浸没式<mark>液冷</mark>技术路线，产品已在<mark>数据中心</mark>、通信基站、储能等场景实现规模化商用。
+⏱时间：9月23日下午
+🏭地址：杭州南湖未来科学院
+
+👉需预报名获悉具体时间地址，谢绝空降，交流包括参观<mark>液冷</mark>产线、与管理层交流等；
+
+☎欢迎报名参加！中信主题策略 刘易13761104817/田鹏17666537758</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI服务器</span><span class="kw-tag">数据中心</span><span class="kw-tag">光模块</span><span class="kw-tag">液冷</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548814124548588" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425582841141522">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-12 10:55 · 👁 409</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">可使用龙虾、<mark>Claude</mark> 等 ...</div>
+  <div class="topic-content">可使用龙虾、<mark>Claude</mark> 等 <mark>AI</mark> 工具接入知识星球。
+
+配置方法请查看👉 知识星球 skill 使用手册（如有配置问题请联系星球的官方客服）
+&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fa4gzxrjhc5.feishu.cn%2Fdocx%2FSsSXde9mSoGXlbxXqUNceOOcnaf&quot; title=&quot;https%3A%2F%2Fa4gzxrjhc5.feishu.cn%2Fdocx%2FSsSXde9mSoGXlbxX...&quot; /&gt;</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Claude</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425582841141522" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
