@@ -1,4 +1,4 @@
-// 公开预览：只读同目录 data/dashboard.json，把两条 B200 价格与 Token 综合近 30 日走势
+// 公开预览：只读同目录 data/dashboard.json，把 Neo-cloud B200、Ornn H100 价格与 Token 综合近 30 日走势
 // 填进 #access 分区的预览位。完整的日度序列、区间切换与来源状态仍由 app.js 在解锁后渲染。
 // 任何拉取 / 结构错误都只换成一句降级文案，绝不影响下方表单与闸门。
 (function () {
@@ -10,10 +10,10 @@
   var kpiRow = $('access-preview');
   if (!kpiRow) return;
 
-  // 上方只保留两条 B200 价格，Token 综合支出指数交给下方折线图表达。
+  // 上方保留 Neo-cloud B200 与 Ornn H100 价格，Token 综合支出指数交给下方折线图表达。
   var KPIS = [
     { block: 'gpu', key: 'neo_b200', label: 'B200租赁价格丨Neo-cloud B200', unit: 'USD / GPU-hour', decimals: 2 },
-    { block: 'ornn', key: 'b200', label: 'B200租赁价格丨Ornn B200', unit: 'USD / GPU-hour', decimals: 2 },
+    { block: 'ornn', key: 'h100_sxm', label: 'H100租赁价格丨Ornn H100', unit: 'USD / GPU-hour', decimals: 2 },
   ];
 
   function el(tag, cls, text) {
