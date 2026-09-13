@@ -52,6 +52,31 @@ card_count="$(grep -c 'class="card" href="/' "$PAGE")"
 [ "$card_count" -eq 6 ]
 check $? "首页恰好展示六个项目卡片"
 
+# 项目卡顺序与门户展示文案要稳定。
+actual_order="$(grep -o 'class="card" href="/[^"]*"' "$PAGE" | sed 's/.*href="//; s/"$//' | paste -sd ' ' -)"
+expected_order="/token-gpu/ /openrouter/ /briefs/ /ai-news/ /briefs/agent/ /research/"
+[ "$actual_order" = "$expected_order" ]
+check $? "项目卡顺序为 Token+GPU、Token量与分布、今天在涨啥、AI信号台、AI研究工作台、AI Research OS"
+
+grep -q '<h3>Token量与分布看板</h3>' "$PAGE"
+check $? "OpenRouter 项目卡标题为「Token量与分布看板」"
+
+grep -q '每日AI热点：市场正在交易什么' "$PAGE"
+check $? "今天在涨啥副标题已更新"
+
+grep -q 'AI kol前沿消息高频跟踪' "$PAGE"
+check $? "AI 信号台副标题已更新"
+
+grep -q '全天候研究助理：私人研究与执行终端' "$PAGE"
+check $? "AI 研究工作台副标题已更新"
+
+grep -q 'AI/大模型/算力/科技研究笔记与可检索研究' "$PAGE"
+check $? "AI Research OS 副标题已更新"
+
+! grep -q '<b>barryai\.cn/briefs/agent</b>' "$PAGE" \
+  && ! grep -q '<b>barryai\.cn/research</b>' "$PAGE"
+check $? "AI 研究工作台与 AI Research OS 不再展示访问地址行"
+
 # CTA 与项目入口都不应再指向 briefs 子域（canonical / og:url 里的 barryai.cn 不算）
 ! grep -q 'href="https://briefs\.barryai\.cn' "$PAGE"
 check $? "没有任何链接指向 https://briefs.barryai.cn"

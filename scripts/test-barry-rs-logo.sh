@@ -6,7 +6,7 @@
 #   · 链接是绝对地址 https://barryai.cn/，这样从 /openrouter/reports/
 #     或 /briefs/briefs/ 这种嵌套路径点进去也能回到主站首页；
 #   · 有可读的无障碍名称（aria-label 说明「返回 Barry RS 首页」）。
-# 顺带校验看板改名：不再出现「OpenRouter 用量看板」。
+# 顺带校验 OpenRouter 产品页和门户卡片各自使用约定名称。
 #
 # 用法：bash scripts/test-barry-rs-logo.sh [repo-root]
 
@@ -17,7 +17,8 @@ ROOT="${1:-$( cd "$SCRIPT_DIR/.." && pwd -P )}"
 
 HOME_URL="https://barryai.cn/"
 OLD_NAME="OpenRouter 用量看板"
-NEW_NAME="OpenRouter 看板"
+PRODUCT_NAME="OpenRouter 看板"
+PORTAL_NAME="Token量与分布看板"
 
 PASS=0; FAIL=0
 ok()  { printf '  ✓ %s\n' "$1"; PASS=$(( PASS + 1 )); }
@@ -64,14 +65,14 @@ printf '  · 共检查 %d 个页面\n' "$n_pages"
 
 # ---------- 看板改名 ----------
 echo ""
-grep -q "$NEW_NAME" "$ROOT/index.html"
-check $? "门户首页使用新名称「${NEW_NAME}」"
+grep -q "$PORTAL_NAME" "$ROOT/index.html"
+check $? "门户首页使用卡片名称「${PORTAL_NAME}」"
 
 ! grep -rq "$OLD_NAME" --include='*.html' "$ROOT"
 check $? "任何页面都不再出现旧名称「${OLD_NAME}」"
 
-grep -q "<title>$NEW_NAME" "$ROOT/openrouter/index.html"
-check $? "看板页标题使用新名称"
+grep -q "<title>$PRODUCT_NAME" "$ROOT/openrouter/index.html"
+check $? "OpenRouter 产品页标题使用「${PRODUCT_NAME}」"
 
 echo ""
 printf '通过 %d，失败 %d\n' "$PASS" "$FAIL"
