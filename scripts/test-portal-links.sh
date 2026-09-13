@@ -77,6 +77,12 @@ check $? "AI Research OS 副标题已更新"
   && ! grep -q '<b>barryai\.cn/research</b>' "$PAGE"
 check $? "AI 研究工作台与 AI Research OS 不再展示访问地址行"
 
+grep -q "gpu.latest.neo_h100" "$PAGE" && ! grep -q "ornn.latest.b200" "$PAGE"
+check $? "Token + GPU 卡片展示 Neo-cloud H100 而非 Ornn B200"
+
+! grep -q "p.cn_share" "$PAGE"
+check $? "Token量与分布卡片不再展示中国模型份额"
+
 # CTA 与项目入口都不应再指向 briefs 子域（canonical / og:url 里的 barryai.cn 不算）
 ! grep -q 'href="https://briefs\.barryai\.cn' "$PAGE"
 check $? "没有任何链接指向 https://briefs.barryai.cn"
