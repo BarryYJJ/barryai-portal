@@ -304,6 +304,13 @@
     neo_h100: 'H100', neo_a100: 'A100', neo_h200: 'H200', neo_b200: 'B200', neo_mi300x: 'MI300X',
     hyper_h100: 'H100', hyper_a100: 'A100',
   };
+  var GPU_DISPLAY_ORDER = ['neo_b200', 'neo_h100', 'neo_a100', 'neo_h200', 'neo_mi300x', 'hyper_h100', 'hyper_a100'];
+  function orderSeries(list, keys) {
+    return list.slice().sort(function (a, b) {
+      var ai = keys.indexOf(a.key), bi = keys.indexOf(b.key);
+      return (ai < 0 ? keys.length : ai) - (bi < 0 ? keys.length : bi);
+    });
+  }
   // Portrait 2:3 small multiples, same ratio as the Token cards. Five fit one
   // desktop row; each is drawn alone so it owns its y-domain, which the shared
   // wide chart flattened into near-straight lines.
@@ -323,7 +330,7 @@
     var rangeGetter = wireRangeControl(qs('.controls', section), rerenderChart);
 
     function seriesForGroup(group) {
-      return block.series.filter(function (s) { return s.group === group; });
+      return orderSeries(block.series.filter(function (s) { return s.group === group; }), GPU_DISPLAY_ORDER);
     }
 
     function buildToggles() {
@@ -516,8 +523,10 @@
 
   // ── runtime status (page bottom) ──────────────────────────────────────
   var ORNN_CHART_W = 240, ORNN_CHART_H = 360;
+  var ORNN_DISPLAY_ORDER = ['b200', 'h100_sxm', 'a100_sxm4', 'h200', 'rtx_5090'];
   function initOrnn(doc) {
     var block = doc.ornn;
+    var series = orderSeries(block.series, ORNN_DISPLAY_ORDER);
     var section = document.getElementById('ornn');
     var chartEl = document.getElementById('ornn-chart');
     var caption = document.getElementById('ornn-caption');
@@ -528,11 +537,11 @@
     statusEl.textContent = statusLabel(status) + (freshness.latest_date ? ' · 最近观测 ' + freshness.latest_date + ' · 滞后 ' + freshness.lag_days + ' 天' : ' · 暂无观测');
     statusEl.className = 'panel__status ' + statusClass(status === 'failed' ? status : freshness.stale ? 'stale' : status);
     var rangeGetter = wireRangeControl(qs('.controls', section), render);
-    var visible = buildToggle(document.getElementById('ornn-toggles'), block.series.map(function (s) {
+    var visible = buildToggle(document.getElementById('ornn-toggles'), series.map(function (s) {
       return { key: s.key, label: s.label, color: 'var(--series-ornn-' + s.key + ')' };
     }), render);
     kpis.textContent = '';
-    block.series.forEach(function (s) {
+    series.forEach(function (s) {
       kpis.appendChild(el('div', { class: 'kpi-tile' }, [
         el('p', { class: 'kpi-tile__label', text: s.label }),
         el('p', { class: 'kpi-tile__value', text: fmt(s.latest && s.latest.value, 2) }),
@@ -541,7 +550,7 @@
     });
     function render() {
       chartEl.textContent = '';
-      var selected = block.series.filter(function (s) { return visible[s.key]; }).map(function (s) {
+      var selected = series.filter(function (s) { return visible[s.key]; }).map(function (s) {
         return { key: s.key, label: s.label, color: 'var(--series-ornn-' + s.key + ')', observations: sliceByRange(s.observations, rangeGetter()) };
       });
       selected.forEach(function (series) {
