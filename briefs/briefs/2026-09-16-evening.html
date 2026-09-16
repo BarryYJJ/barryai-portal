@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-09-16 晚间 AI 简报</title>
+<style>
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-09-16 20:30:37</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-09-16 晚间 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-09-16 14:30</strong> &nbsp;→&nbsp; <strong>2026-09-16 20:30</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">24</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">8 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">33.3%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">6 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">PCB</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">智谱</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">算力</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">AI服务器</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">Rubin</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">电子布</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">Transformer</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-45548544221581558">智谱商业化踩油门：ARR达18亿美元、年底指引上修至30亿美元，云厂分成10月开始确认收入</a></li><li><a class="tldr-jump" href="#t-82258255111142552">AI升级先让电子布“吃饱”：M8下半年放量，二代布需求预计从2025年700万米猛增至2027年1.7亿米</a></li><li><a class="tldr-jump" href="#t-82258255442551812">6T光模块叠加CoWoP，把mSAP从“选配”推向“刚需”，超声电子迎国产导入窗口</a></li><li><a class="tldr-jump" href="#t-55521522445228554">算力硬件越做越精，激光设备越卖越忙：明年mSAP设备需求上修至近千台，英诺激光、德龙激光受关注</a></li><li><a class="tldr-jump" href="#t-14425425222458552">科翔股份给自己立军令状：2026年净利考核目标2.5亿元，意味着下半年需赚至少3.16亿元，陶瓷PCB瞄准AI服务器</a></li><li><a class="tldr-jump" href="#t-82258255448145582">成熟制程也喝上AI的汤：气派科技预计三季度收入增61%、扣非扭亏，封测回暖为产业链复苏添证据</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-14425425222458552">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-16 20:21 · 👁 110</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【科翔股份】股价近历史新高！发...</div>
+  <div class="topic-content">【科翔股份】股价近历史新高！发股权激励草案，2026年业绩大幅超预期！[福][福][福]
+
+公司公告拟推2026年限制性股票激励计划，拟授予股票789万股，约占总股本的1.81%。激励对象总人数为206人，授予价格为每股55.60元。
+
+业绩考核目标：2026年净利润不低于2.5 亿；2026-2027 年累计净利润不低于8亿元；2026-2028 年累计净利润不低于15亿元。
+
+公司2026年考核业绩远超我们之前的盈利预测。公司上半年归母净利润为亏损0.66亿元，也就是下半年净利润有望超3.16亿元，业绩将拐点向上！
+
+公司陶瓷<mark>PCB</mark>有望应用于<mark>AI服务器</mark>，稀缺性强，持续力推！[福][福][福]
+
+参考资料：我们【科翔股份】深度报告：陶瓷混压<mark>PCB</mark>先行者，卡位北美客户格局优-2026年7月26日（报告发出后，公司股价上涨84%）</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI服务器</span><span class="kw-tag">PCB</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425425222458552" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258255111142552">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-16 19:49 · 👁 282</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【长江建材】<mark>电子布</mark>股价修复较慢...</div>
+  <div class="topic-content">【长江建材】<mark>电子布</mark>股价修复较慢，被低估了吗？
+
+关于升级：方向明确——27年仍是M9元年，26H2是M8放量期。<mark>Rubin</mark>出货在即、LPU+Google v8有望年底出货，共同奠定26H2 M8 的放量主线，对应<mark>电子布</mark>为二代布，我们测算25-27年二代布需求为700、4300、17000万米，#近期国际复材、中材科技二代布出货均环比改善，分别70+、30+万米/月，预计二者2027年业绩均为70亿元左右，目标市值1400-2000亿元，【中材科技】成长性被显著低估，【国际复材】为二代布标签标的。
+
+关于价格：缺口明确——提价逻辑不变，市场信心何时修复？#一是供给担忧减弱，我们强调行业供给缺口至少持续到2027年底，不仅无新增电子纱产能（2027年无，2028年仅中国巨石5万吨），同时受制于织布机、后处理机等设备约束，最新<mark>电子布</mark>龙头测试国产织布机的反馈有两类：不能织<mark>电子布</mark>、能织但当前良率无经济性。#二是估值足够便宜，以时点10元/米不含税价格算，中国巨石27年业绩为150亿元；以15元/米不含税价格算，中国巨石27年业绩为200亿元，对应PE仅8倍，继续推荐。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Rubin</span><span class="kw-tag">电子布</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258255111142552" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548544221581558">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-16 15:20 · 👁 842</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">各位好，更新下<mark>智谱</mark>今日电话会要...</div>
+  <div class="topic-content">各位好，更新下<mark>智谱</mark>今日电话会要点，主要针对本次战略融资进行解读，回答了近期市场关注和忧虑的部分问题。
+
+【融资：核心仍是解决Scaling与<mark>算力</mark>瓶颈】 本轮融资的核心用途仍是扩大训练与<mark>推理算力</mark>。此前经历新模型发布和coding plan放开后<mark>算力</mark>面临压力；经过两轮融资后，#短期<mark>算力</mark>供给已不再是收入增长的主要约束。当前规划约40%<mark>算力</mark>用于训练、60%用于推理。
+
+【解释融资时间原因】与A股申报节奏相关，9/30后上A前不能通过增资方式引入新增股东，因此融资窗口期为9/11-9/30。
+
+【ARR上修+经营数据继续提速】#ARR最新达18亿美元，年末指引上修至30亿美元。Coding仍是核心增长引擎，其余#cowork商业化快于预期，网安场景率先生产级落地。
+
+【<mark>算力</mark>投入具备收入杠杆】GLM 5.3系列纯推理#毛利率理论上限约80%，按60%<mark>GPU</mark>负载率、70%价格实现率测算，理论推理毛利率约76%。
+
+【云厂分成落地】与国内外多家云厂签署收入分成协议，相关收入10月开始确认。云厂承担<mark>算力</mark>、分发，公司获API收入分成。
+
+【大家关注的反蒸馏问题】蒸馏的重要性体现在深度推理早期，当前coding和cowork时期重要性下降。loop <mark>transformer</mark>首先影响模型厂自身安全对齐和后续scaling，而非限制蒸馏。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Transformer</span><span class="kw-tag">推理算力</span><span class="kw-tag">GPU</span><span class="kw-tag">智谱</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548544221581558" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521522445228554">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-16 14:38 · 👁 962</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">近期，超快激光设备企业有积极变...</div>
+  <div class="topic-content">近期，超快激光设备企业有积极变化：
+
+1、msap明年需求上修，总量近千台。对英诺、德龙弹性大
+
+2、tgv量产订单临门一脚，近日<mark>台积电</mark>产业链将赴大陆沟通后续订单落地事宜。帝尔激光是核心标的
+
+从光伏到<mark>pcb</mark>、半导体、玻璃基板，对加工工艺精度、可控性要求越来越高。
+
+超快激光的需求指数级提升，是新技术，更是量价齐升的设备
+
+重点推荐：帝尔、英诺、大族、德龙、联赢、海目星等相关标的
+
+感谢支持长江机械团队1</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">台积电</span><span class="kw-tag">PCB</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521522445228554" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258255442551812">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-16 14:38 · 👁 953</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">mSAP超预期核心催化：1.6...</div>
+  <div class="topic-content">mSAP超预期核心催化：1.6T<mark>光模块</mark>批量上量叠加CoWoP先进封装落地，mSAP从可选工艺转为<mark>算力</mark>硬件刚需，载体铜箔供给偏紧，国产导入加速，带来超预期的业绩弹性与估值重估空间。
+[红包]核心标的首选#超声电子，同步关注鹏鼎控股、宏景科技、景旺电子、红板科技、宝鼎科技。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">光模块</span><span class="kw-tag">算力</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258255442551812" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548544225441848">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-16 14:38 · 👁 947</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">奥浦迈6%，领涨cro板块
+
+...</div>
+  <div class="topic-content">奥浦迈6%，领涨cro板块
+
+[玫瑰]1、国产化及商业化推动培养基业务增长：培养基国产化率持续提升，跟随康方、百济、齐鲁等多个客户项目放量，后期及商业化管线占比持续提升，临港工厂产能利用率持续爬坡，26H1奥浦迈产品和服务净利润约4400万元。
+[玫瑰]2、澎立生物贡献增量利润：BD和投融资改善带动国内早研需求持续复苏，预计旺盛需求将推定订单金额将持续提升，26H1净利润约3000万元、在手订单同比增长80%+，随着26H2产能突破瓶颈，交付能力将持续增强。
+[玫瑰]3、CDMO业务预计全年减亏：26H1新签订单超25年全年，预计全年将减亏，随着规模效益显现预计2-3年内实现盈亏平衡。
+[玫瑰]4、海外收入有望加速放量：公司培养基跟随多个客户产品 BD 出海后留在海外药企的供应链中，目前公司有十几个 BD 出海项目处于临床 1-2 期，奥浦迈美国工厂预计年底可用。同时，公司也已进入Lonza、<mark>三星</mark>生物等CDMO供应商名单</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">三星</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548544225441848" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258255442551542">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-16 14:37 · 👁 947</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title"><mark>智谱</mark>11%，领涨<mark>ai</mark>板块
+
+1...</div>
+  <div class="topic-content"><mark>智谱</mark>11%，领涨<mark>ai</mark>板块
+
+1）ARR 上修 ：当前企业业务 ARR 18 亿美元 ；年底指引 24 → 30 亿美元，+25% 。背后增量来自新模式：GLM 开源后由&lt;e type=&quot;hashtag&quot; hid=&quot;88211815282422&quot; title=&quot;%23%E5%A4%B4%E9%83%A8%E4%BA%91%E5%8E%82%E5%95%86%E6%89%98%E7%AE%A1%E5%88%86%E5%8F%91%23&quot; /&gt;     ，按调用向<mark>智谱</mark>分成；9 月已签约，&lt;e type=&quot;hashtag&quot; hid=&quot;51588182515454&quot; title=&quot;%2310%23&quot; /&gt;     月起确认收入 。 
+
+2）Co-work 启动：GLM-5.3 发布 1 个月，行业订单超 10 亿元 ；100 家安全企业接入 ；商业化从按 Token 收费，开始&lt;e type=&quot;hashtag&quot; hid=&quot;28211815282421&quot; title=&quot;%23%E5%BB%B6%E4%BC%B8%E5%88%B0%E6%8C%89%E4%B8%9A%E5%8A%A1%E4%BB%B7%E5%80%BC%E6%94%B6%E8%B4%B9%23&quot; /&gt;     ，&lt;e type=&quot;hashtag&quot; hid=&quot;15488582454112&quot; title=&quot;%23%E5%AE%89%E5%85%A8%E6%98%AF%E9%A6%96%E4%B8%AA%E8%A7%84%E6%A8%A1%E5%8C%96%E8%90%BD%E5%9C%B0%E5%9C%BA%E6%99%AF%23&quot; /&gt;     。 
+
+3）<mark>算力</mark>储备足 ：按官方测算，300 亿元资金模型对应约 9.4 万卡等价<mark>算力</mark> ；其中推理约 5.6 万卡，对应理论收入上限约 410 亿元/年 。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">算力</span><span class="kw-tag">智谱</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258255442551542" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258255448145582">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-16 14:37 · 👁 873</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【华源前瞻科技团队】成熟制程产...</div>
+  <div class="topic-content">【华源前瞻科技团队】成熟制程产业链景气再获验证，重点看好&lt;e type=&quot;hashtag&quot; hid=&quot;48511814585848&quot; title=&quot;%23%E3%80%90%E5%AF%8C%E6%BB%A1%E5%BE%AE%23&quot; /&gt;     &amp; 明微电子】，持续关注成熟制程价值重估主线！—0916
+ 
+[红包]事件：
+气派科技预计26Q3实现收入3.3亿元（Yoy+61.26%），扣除股权激励费用后，归母净利润2150万元（去年同期亏损1800万元），扣非归母净利润1770万元（去年同期亏损2230万元），同比实现扭亏。单季度归母净利率约6.5%，这份预告的核心价值，不是气派科技本身，而是作为产业链佐证，验证成熟制程整条链条景气上行！
+ 
+[太阳]这份预告最重要的信号：
+公司明确提到【<mark>AI</mark>等新兴行业发展，半导体行业周期逐步复苏，封测需求不断增加】，同时【产能快速释放、产能利用率提高、单位制造成本明显降低】。
+ 产业链逻辑：成熟制程需求回暖 → 封测稼动率抬升，这是上游设计端订单饱满、出货上行的下游印证。扣非同步扭亏，说明本轮复苏是真实经营改善，不是一次性收益，成熟制程涨价、缺货的产业趋势正在沿产业链逐级兑现！
+ 
+[玫瑰]#核心推荐标的：富满微、明微电子（主线首选）
+我们持续跟踪【成熟制程价值重估】主线，核心抓手就在设计端：
+✅ 富满微：重点跟踪晶圆资源保障 + 出货增长 + 涨价传导；
+✅ 明微电子：重点跟踪价格中枢抬升带来的利润率弹性。
+二季度只是涨价兑现的起点，三季度将是检验设计端最新出货与价格弹性的关键窗口，业绩弹性空间更大。
+气派科技作为封测端景气验证标的，仅作产业链跟踪观察，非本主线核心推荐。
+ 
+[太阳]延伸关注：<mark>中芯国际</mark> / 华虹 / 燕东微 / 新洁能 / 华润微，封测端跟踪气派科技产能利用率改善持续性。
+ 
+[庆祝]即将进入财报季，【成熟制程价值重估】链条基本面扎实，过去两三个月“涨价、缺货”产业现象频发；同时受市场风偏影响，板块近期并未充分表现，市场预期偏低，是财报季优选方向。
+
+气派科技三季报业绩预告，从下游封测端侧面印证产业链景气，随着财报季推进，成熟制程设计端#（富满微、明微电子）有望迎来基本面超预期兑现。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">中芯国际</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258255448145582" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
