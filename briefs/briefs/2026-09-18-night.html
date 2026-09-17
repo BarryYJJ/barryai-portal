@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-09-18 深夜 AI 简报</title>
+<style>
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-09-18 01:30:39</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-09-18 深夜 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-09-17 20:30</strong> &nbsp;→&nbsp; <strong>2026-09-18 01:30</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">24</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">14 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">58.3%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">5 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">CPO</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">5</span></div><div class="hot-kw-row"><span class="kw-name">OpenAI</span><div class="bar-track"><div class="bar-fill" style="width:60%"></div></div><span class="kw-count">3</span></div><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:60%"></div></div><span class="kw-count">3</span></div><div class="hot-kw-row"><span class="kw-name">液冷</span><div class="bar-track"><div class="bar-fill" style="width:60%"></div></div><span class="kw-count">3</span></div><div class="hot-kw-row"><span class="kw-name">Rubin</span><div class="bar-track"><div class="bar-fill" style="width:40%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">Anthropic</span><div class="bar-track"><div class="bar-fill" style="width:40%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">大模型</span><div class="bar-track"><div class="bar-fill" style="width:40%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">光模块</span><div class="bar-track"><div class="bar-fill" style="width:40%"></div></div><span class="kw-count">2</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-55521521545552484">CPO传闻先砸股价、未改供需：研报判断2026—2028年高端CCL需求影响有限，供给紧张逻辑仍在</a></li><li><a class="tldr-jump" href="#t-45548548852185428">华为昇腾960DT预计提前三季度、于2027Q1登场，2000T FP8算力叠加4096卡超节点，国产算力开始踩油门</a></li><li><a class="tldr-jump" href="#t-45548548525554528">亚马逊约24亿美元锁定Generac备电设备，AI军备竞赛从“抢芯片”卷到“保供电”</a></li><li><a class="tldr-jump" href="#t-45548548525554418">申菱环境被指拿下Giga共60亿元订单，液冷交易从“讲散热”转向“看兑现”，研报押注Q3订单、Q4业绩</a></li><li><a class="tldr-jump" href="#t-55521521541545124">Tesla Optimus规划百万台产能并推进国内供应商审厂，机器人行情下一棒要靠量产进度接住</a></li><li><a class="tldr-jump" href="#t-55521521545582114">诺和诺德牵手Anthropic测试Claude Science研发工作流，AI制药从“会聊天”迈向“进实验室干活”</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-22258258218545281">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-17 23:37 · 👁 309</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">关于巨石的公告（更新 0917...</div>
+  <div class="topic-content">关于巨石的公告（更新 0917/2）
+
+1️⃣ 巨石反馈：有 3 个月内减持不超过 1% 的限制。所以，影响有限。（已经减完了 0.71%，剩下有限）
+
+2️⃣ 今天是 <mark>cpo</mark> 传闻影响，和巨石没关系。ccl 、布都跳了。台股先跳的。美股强、这条 <mark>cpo</mark> 影响可忽略。
+
+3️⃣ 估值角度，27 年，巨石（9.5x），中材（15x），复材（20x），宏和（24x）。
+
+4️⃣ 自身催化角度，中材锁了价（周三晚已提示）。
+
+5️⃣ 织布机：布厂反馈，无进度，短期无结果。
+
+6️⃣ 观点不变，三季报是硬核，新技术做弹性。
+------
+（一马平川）</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">CPO</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258258218545281" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548548525184588">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-17 22:23 · 👁 669</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title"><mark>AMD</mark> 通知合作伙伴涨价 10...</div>
+  <div class="topic-content"><mark>AMD</mark> 通知合作伙伴涨价 10%，因<mark>台积电</mark>晶圆成本上涨或挤压 2026 年第四季度锐龙 CPU 产品线</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">台积电</span><span class="kw-tag">AMD</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548548525184588" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548548525142218">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-17 22:22 · 👁 665</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【东吴汽车】[爱心]【小鹏G9...</div>
+  <div class="topic-content">【东吴汽车】[爱心]【小鹏G9L上市发布会要点 20260917】
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;15488424541582&quot; title=&quot;%23%E4%B8%8A%E5%B8%82%E4%BB%B7%E6%A0%BC%E5%8F%8A%E9%99%90%E6%97%B6%E6%9D%83%E7%9B%8A%23&quot; /&gt;    
+定位&quot;新科技旗舰&quot;，纯电+超级增程双动力，共6款配置。限时权益价（含1万元现金减免）：
+超级增程：1602 四驱 Ultra SE 24.98万元（指导价25.98万）、1602 四驱 Ultra 旗舰版 29.98万元（指导价30.98万）。
+纯电：702 Max 23.18万元（指导价24.18万）、660 四驱 Ultra SE 24.98万元（指导价25.98万）、660 四驱 Ultra 27.98万元（指导价28.98万）、755 四驱 Ultra 旗舰版 30.98万元（指导价31.98万）。
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;48511545852818&quot; title=&quot;%23%E5%B0%BA%E5%AF%B8%E4%B8%8E%E5%BA%95%E7%9B%98%23&quot; /&gt;    
+车长5120mm、轴距3100mm，轴长比0.605。全系标配前双叉臂后H臂全铝悬架、智能可变阻尼减振器、双腔空气悬架，以及线控后轮转向，最小转弯半径5.4m。麋鹿测试超80km/h，0-100km/h加速4.45s，100-0km/h制动距离34.2m，配<mark>AI</mark>智能底盘融合运动控制系统X-VMC。
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;88211252824812&quot; title=&quot;%23%E7%A9%BA%E9%97%B4%E4%B8%8E%E5%BA%A7%E8%88%B1%23&quot; /&gt;    
+&quot;六座空间、五座布局&quot;，后排膝部空间252mm、腿部1365mm、肩部1505mm、头部1101mm、坐垫宽1370mm。后备箱1152L，另有230L下沉空间。
+全体型<mark>AI</mark>主动贴合座椅：主驾85个传感器/29个气袋/12L气泵，副驾91个传感器/27个气袋，0.4s自适应调节；副驾<mark>AI</mark>主动贴合零重力座椅，24向电动调节、16点按摩，集成双预紧限力式安全带与防下潜安全气囊；不拆头枕五座一键大床房。
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;51588525154184&quot; title=&quot;%23%E6%99%BA%E8%83%BD%E9%A9%BE%E9%A9%B6%23&quot; /&gt;    
+首发搭载小鹏第二代VLA全新版本：端侧模型参数量提高3.5倍、支持最长30秒有效时序、端到端响应提速300%、预测式世界模型推演未来6秒场景，多维综合安全能力提升20倍。VLA+VLM舱驾一体，支持语音控制靠边停车。G9L Max版首发搭载第二代VLA Lite（蒸馏版），全系搭载图灵<mark>AI芯片</mark>。
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;28211252824811&quot; title=&quot;%23%E4%B8%89%E7%94%B5%E4%B8%8E%E7%BB%AD%E8%88%AA%23&quot; /&gt;    
+超级增程全系标配鲲鹏超级四驱增程技术：CLTC纯电续航435km、综合续航1602km，百公里电耗16.7kWh、亏电油耗6.16L，双电机四驱最大503Ps，兼容92#汽油，进气口离地945mm；全系标配ENC+RNC主动降噪、550W冷却水泵。实测环罗布泊零补能挑战：达成率95.11%、实际1403km。
+纯电全系标配800V+5C超充大电池，充电9分钟续航至高增加450km；。MotorGogo实测702 Max城区达成率122.5%、高速85.3%。电池IP68&amp;IP69K、底部四层防护装甲、EIS电池安全芯片。
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;15488424541422&quot; title=&quot;%23%E5%AE%89%E5%85%A8%E4%B8%8E%E5%85%A8%E7%90%83%E5%8C%96%23&quot; /&gt;    
+符合全球64个国家及地区超3000项法规条目，历时3年、26个国家及地区、累计测试里程674万公里；按Euro NCAP 2027、ANCAP 2027、C-NCAP 2024、C-IASI 2023四大机构五星标准设计。航空级冗余：线控制动三重冗余、驱动系统双重冗余、应急通信双重冗余、车门解锁四重冗余；完成单车水陆空720°七重连环安全挑战，配驾驶员失能辅助系统、700mm涉水。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI芯片</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548548525142218" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548548525142548">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-17 22:22 · 👁 680</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title"><mark>NVDA</mark> 的 <mark>Rubin</mark> 推出...</div>
+  <div class="topic-content"><mark>NVDA</mark> 的 <mark>Rubin</mark> 推出可能会因冷板设计变更而略微延迟</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Rubin</span><span class="kw-tag">NVDA</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548548525142548" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521521545582114">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-17 22:10 · 👁 723</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【国盛计算机臻选】诺和牵手An...</div>
+  <div class="topic-content">【国盛计算机臻选】诺和牵手<mark>Anthropic</mark>，AI4S万亿市场拐点已现
+
+事件：诺和诺德宣布与 <mark>Anthropic</mark> 达成合作，用于药物发现的科学推理和<mark>智能体</mark>软件开发。
+
+🌟诺和诺德携手<mark>Anthropic</mark>，<mark>Claude</mark> 模型和 <mark>Claude</mark> Science 将进入研发主流程。双方的首个项目将在特定研发工作流中测试<mark>Claude</mark> Science的应用效果，这些场景被双方认定为能够产生“最大价值”。此外，诺和还计划借助<mark>Anthropic</mark>的前沿<mark>大模型</mark>强化自身软件开发能力，推动<mark>AI</mark>技术在全公司的规模化落地。
+
+🌟 AI4S商业模式涌现，头部企业步入业绩兑现期。生命科学和生物技术领域是核心增长引擎，头部<mark>大模型</mark>厂商<mark>Anthropic</mark>、<mark>OpenAI</mark> 已于 2026年6月宣布入局，多家海外企业搭建生物医药专用平台，覆盖分子生成、药物筛选、临床数据分析及实验设计自动化等核心环节。
+
+🌟政策与应用突破共振，AI4S落地拐点确认。中美于2025年相继推出国家级战略；行业应用端，AI4S已在科学研究、能源环境等诸多领域落地，近期斯坦福团队在《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3DScience&quot; title=&quot;%E6%9F%A5%E6%89%BE%E5%9B%BE%E4%B9%A6&quot; /&gt;》发布研究成果，AI4S从单分子研究迈向完整生物系统设计，行业应用边界再获突破。
+
+#建议关注  重点布局AI4S公司：晶泰控股、英矽智能、华兰股份、志特新材、<mark>讯飞</mark>医疗科技、迪安诊断、润达医疗。
+
+⚠风险提示：技术迭代不及预期风险；经济下行超预期风险；行业竞争加剧风险
+
+☎详情欢迎联系：孙行臻/李纯瑶#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Anthropic</span><span class="kw-tag">OpenAI</span><span class="kw-tag">Claude</span><span class="kw-tag">大模型</span><span class="kw-tag">智能体</span><span class="kw-tag">讯飞</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521521545582114" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258258242228511">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-17 22:05 · 👁 760</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">LITE：我们收到多位投资者就...</div>
+  <div class="topic-content">LITE：我们收到多位投资者就 LITE 在 2026 年 FIT 技术日上的演示资料提出问询，管理层介绍了超越 1.6T/3.2T <mark>光模块</mark>的结构性光学转型路线，覆盖 NPO、<mark>CPO</mark>、OCS（光路切换）、SiPh（<mark>硅光</mark>子学），最终落地光学 I/O。公司提出，行业重心正从芯片转向系统层面的扩容，网络利用率会越来越多地决定<mark>算力</mark>利用率，该观点与 Gokul 及其团队的研究结论保持一致 —— 带宽与互联是 <mark>AI</mark> 领域核心瓶颈之一，也是从台北电脑展到半导体展会贯穿的核心主线。
+Craig McDowell 同时上调 Soitec 评级至增持（OW），调整依据是我们上调<mark>硅光</mark>子业务盈利预测。
+相关亚洲标的包含 JXAM，投资者呼吁管理层大幅扩充 InP（磷化铟）衬底产能；SEI 同步推进 InP + 连续波激光器产能扩张；Genius 新一代项目进入 COHR 供应链；Win 承接博通与 LITE 的相关项目。
+<mark>CPO</mark> 规模化量产一直是投资者高频提问。Gokul 判断，行业会优先发展 NPO 方案，<mark>CPO</mark> 规模落地时间或将推迟至 2028 年之后，国内相关公司如 Innolight 将从中受益。
+Jerry 提到，致茂（Chroma）预计 2027 年启动 Insertion 3 量产设备的扩产爬坡，同时强调这套设备 <mark>CPO</mark>、NPO 场景均可适配，但短期来看 NPO 落地可能性更高；鸿海（Hon）拥有 Insertion 4 原型样机，不过交付时间尚未敲定。
+本地媒体也将欣兴电子（Unimicron）列为 <mark>CPO</mark> 产业链标的，报道其已向多家客户交付 <mark>CPO</mark>（光收发器）基板，与 Jerry 的研究结论吻合。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">光模块</span><span class="kw-tag">CPO</span><span class="kw-tag">算力</span><span class="kw-tag">硅光</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258258242228511" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258258242225142">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-17 22:04 · 👁 749</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">Jeff Pu 关于 CCL ...</div>
+  <div class="topic-content">Jeff Pu 关于 CCL 升级辩论
+
+“理论上正确，但实际上 CCL 升级仍然保留。”
+
+1. <mark>CPO</mark> 短期内不会触发计算机升级。
+
+2. 明年 NVSwitch NPO/<mark>CPO</mark> 仍将使用更高规格的 CCL（PTFE + M8/9），关键论点仍是 PTFE。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">CPO</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258258242225142" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521521545552484">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-17 22:04 · 👁 743</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">大中华区科技硬件
+
+短期内共封...</div>
+  <div class="topic-content">大中华区科技硬件
+
+短期内共封装光学（<mark>CPO</mark>）不太会冲击高端<mark>覆铜板</mark>（CCL）需求
+
+共封装光学（<mark>CPO</mark>）属于长期风险，并不会立刻造成需求冲击。
+
+我们认同，若 <mark>CPO</mark> 大规模落地，长期来看确实会对高端<mark>覆铜板</mark>（CCL）的用量形成可信风险，但我们判断 2026 至 2028 年的需求展望所受影响有限。
+
+我们认为，<mark>CPO</mark> 对<mark>覆铜板</mark>（CCL）需求，以及对联茂（EMC）、台耀（TUC）盈利预测的短期影响有限，因此维持高端<mark>覆铜板</mark>供给紧张的核心逻辑，同时保持基本面乐观判断不变。
+
+事件背景
+
+9 月 17 日，联茂（shturl.）股价下跌 7.7%，台耀（6274.TWO）股价下跌 6.7%，同期台股加权指数上涨 0.8%。在本次股价回调后，投资者开始质疑 <mark>CPO</mark> 是否会冲击高端<mark>覆铜板</mark>（CCL）的需求。市场担忧点在于，将光引擎与专用集成电路（<mark>ASIC</mark>）集成在封装基板上，会缩短原本需要经过印刷电路板（<mark>PCB</mark>）的高速电信号传输路径，或降低市场对超低介电常数 / 超低损耗因子高速<mark>覆铜板</mark>（CCL）的需求。
+
+我们的观点
+
+这并非新议题，我们此前已经探讨过 <mark>CPO</mark> 对高速<mark>覆铜板</mark>（CCL）需求的潜在影响。我们认为该议题在规模化架构场景下尤为关键，<mark>CPO</mark> 落地目前仍面临成本、制造良率、可靠性、可维护性以及热管理等诸多实质性挑战。因此，我们判断 2028 年之前，<mark>AI</mark> 系统出现<mark>覆铜板</mark>（CCL）需求大面积下滑的风险仍然有限。我们认为，由 <mark>CPO</mark> 相关担忧引发的<mark>覆铜板</mark>板块个股回调，是潜在的布局机会。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">ASIC</span><span class="kw-tag">覆铜板</span><span class="kw-tag">CPO</span><span class="kw-tag">PCB</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521521545552484" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548548525554528">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-17 22:04 · 👁 726</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">🔥🔥【<mark>AI算力</mark>备电事件点评：亚...</div>
+  <div class="topic-content">🔥🔥【<mark>AI算力</mark>备电事件点评：亚马逊24亿美元锁定Generac，<mark>数据中心</mark>电力保障从“配套设备”升级为核心Capex】
+
+🎉🎉事件：Generac与亚马逊签署长期<mark>数据中心</mark>备用发电机供应协议，首批交付预计集中在2027—2028年，规模约24亿美元。更值得重视的是，亚马逊获得Generac认股权，后续股份归属与采购额挂钩，潜在采购规模最高可对应约80亿美元。这意味着AWS正在通过“长期订单+股权绑定”的方式，提前#锁定<mark>AI</mark><mark>数据中心</mark>关键电力设备产能。
+
+我们认为，<mark>AI</mark>基础设施投资正在出现明显扩散：过去市场主要交易<mark>GPU</mark>、交换机、<mark>光模块</mark>和<mark>液冷</mark>，但当单个<mark>AI</mark>园区功率迈向数百MW甚至GW级后，“有<mark>算力</mark>、没电力保障”正在成为新的瓶颈。#备用发电机、UPS、燃气轮机及自备电站的重要性持续提升。此次Amazon直接锁定Generac多年产能，说明备电设备已经从传统IDC配套，升级为Hyperscaler必须提前规划的战略资产。
+
+👉🏻👉🏻A股可重点关注四个方向。#科泰电源 对应<mark>数据中心</mark>柴油发电机组，是国内IDC柴发产业链的重要映射；#潍柴重机 具备大功率发电机组及发动机能力，对应国产大功率备用电源方向。#博盈特焊 其核心HRSG产品与GE Vernova等全球燃机产业链相关，<mark>AI</mark><mark>数据中心</mark>从短时柴发进一步向燃气轮机自备电站扩散，产业空间有望进一步打开。近期GE Vernova燃机项目也明确受到<mark>数据中心</mark>新增电力需求驱动。此外关注#科华数据。其<mark>数据中心</mark>UPS、供配电及高可靠备电系统。
+
+📣 整体来看，本次Amazon大单的核心信号在于：<mark>AI算力</mark>资本开支正在从“<mark>算力</mark>设备”向“电力连续性”扩散，#柴发—UPS—燃机—自备电站有望成为下一阶段<mark>AI</mark>基础设施的重要增量方向。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI算力</span><span class="kw-tag">数据中心</span><span class="kw-tag">光模块</span><span class="kw-tag">GPU</span><span class="kw-tag">液冷</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548548525554528" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548548525554418">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-17 22:03 · 👁 714</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">申菱环境简评：Giga是我们一...</div>
+  <div class="topic-content">申菱环境简评：Giga是我们一直在说的公司北美大客户，总共有60亿订单。公司层面首次承认北美大单[庆祝]之前的质疑不攻自破[呲牙]
+
+维持750亿目标市值不变。<mark>液冷</mark>板块Q3进入订单爆发期，Q4整体业绩兑现。#当前首推高澜股份（目标市值300亿，三倍空间，弹性最大）、申菱环境。
+
+具体细节欢迎联系，MJ</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">液冷</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548548525554418" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521521541545124">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-17 21:23 · 👁 830</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【申万机器人】<mark>GPT</mark>-6 As...</div>
+  <div class="topic-content">【申万机器人】<mark>GPT</mark>-6 Astra展现具身智能潜力，Tesla加速推进量产进度
+
+[庆祝]机器人板块今日反弹，主要来自两大催化：
+1️⃣<mark>GPT</mark>-6 Astra 展现具身智能控制能力：
+最近包括RoboDojo在内的多家测评显示，Astra作为通用模型可以完成机器人任务，在语言理解、空间推理和纠错能力方面展现较强能力，测评得分高于其他开源模型。
+
+当前机器人产业最大的瓶颈在于大脑模型，<mark>OpenAI</mark>重建机器人团队后，模型迭代和数据积累的进度加快，已然成为行业领导者之一，未来有望拉动技术收敛和商业化落地速度。
+
+2️⃣Tesla审厂和订单下达：
+Tesla Fremont的机器人产线正在建设，产能规划100万台，其月产能持续爬坡，9/10月份周产产能实现1/2k台，年底进一步爬升。本周特斯拉团队在国内走访核心供应商，保障年底量产工作。
+
+Tesla Optimus的量产进度是板块最重要的股价催化剂。标的层面，我们建议关注超跌的特斯拉核心供应商。
+
+欢迎联系申万机器人团队 王珂/胡</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">OpenAI</span><span class="kw-tag">GPT</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521521541545124" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258258824181512">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-17 20:32 · 👁 961</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">针对 “<mark>CPO</mark> 相关 <mark>PCB</mark> ...</div>
+  <div class="topic-content">针对 “<mark>CPO</mark> 相关 <mark>PCB</mark> 从原本的 M9 降级至 M4” 的传闻：
+“首先 <mark>CPO</mark> 不会这么快落地，良率上不来是一个主要的原因，而且实际的应用上还有非常多不同的信号要兼顾，芯片运算速度迭代上去还是得升回来，加上就算落地也不是全部场景，不可能 Scale up 和通用<mark>服务器</mark>全部上 <mark>CPO</mark>。最后就是规格层面，就拿 Nvidia SpectrumX 采用 <mark>CPO</mark> 的方案来看，也只是从 M8 改成 M7，并没有像传闻里降级幅度那么大。”</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">服务器</span><span class="kw-tag">CPO</span><span class="kw-tag">PCB</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258258824181512" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548548852185428">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-17 20:31 · 👁 927</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【东方通信-半导体】<mark>昇腾</mark>芯片迭...</div>
+  <div class="topic-content">【东方通信-半导体】<mark>昇腾</mark>芯片迭代超预期，国产超节点加速升级
+
+1、<mark>昇腾</mark>960系列芯片预计27Q1推出，保持1年1代的高速迭代。根据<mark>华为</mark>2026全链接大会，<mark>昇腾</mark>960DT计算性能达2000T FP8，最大支持288GB 显存，显存带宽可达9.6TB/s，计算性能介于<mark>H200</mark>与<mark>B200</mark>间。其预计2027Q1推出，较原计划目标提前三季度。960PR将实现8000T FP4计算性能，并于2027Q3推出，较原计划目标提前一季度。970/980预计分别于2028/2029年陆续推出，其FP4计算性能分别为14000/28000，分别对标B300/<mark>Rubin</mark>芯片。并且会议发布基于灵衢UnifiedBus的超节点集群11颗关键芯片，主要包括鲲鹏CPU、<mark>昇腾</mark><mark>NPU</mark>、灵衢互联芯片、智能存储芯片等，实现算、存、运领域全覆盖。
+
+2、灵衢+二层CLOS组网架构，目标打造10万卡以上超大规模集群。<mark>华为</mark>正式发布<mark>昇腾</mark>960超节点，其可实现4096卡集群规模，最大可提供8 EFLOPS FP8<mark>算力</mark>，预计风冷与<mark>液冷</mark>版本将分别于2027Q2和Q3上市。<mark>华为</mark>超节点集群支持多种组网模式：一种是采用两层CLOS单平面组网，可实现3.2万张<mark>昇腾</mark>960高速互联；第二种是采用两层CLOS多平面组网，可实现51.2万张<mark>昇腾</mark>960互联。基于10万卡以上的超节点集群，国产卡或将加速10万亿级别<mark>大模型</mark>训练，驱动国产<mark>AI</mark><mark>大模型</mark>性能升级。
+
+3、国产<mark>算力</mark>需求高企，国产半导体产业链闭环加速业绩释放。目前国产<mark>算力</mark>芯片需求旺盛，伴随国产FAB与<mark>HBM</mark>厂商持续扩产，国内半导体产业链预计加速闭环，驱动国产<mark>算力</mark>芯片业绩释放。
+
+4、投资建议：（1）国产<mark>算力</mark>芯片，<mark>寒武纪</mark>、<mark>海光</mark>信息、<mark>燧原</mark>科技、天数智芯、摩尔线程、沐曦股份、<mark>壁仞</mark>科技、芯原股份；（2）超节点，华丰科技、盛科通信、锐捷网络等。
+
+欢迎联系：舒迪/段笑南</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Rubin</span><span class="kw-tag">H200</span><span class="kw-tag">B200</span><span class="kw-tag">大模型</span><span class="kw-tag">寒武纪</span><span class="kw-tag">NPU</span><span class="kw-tag">HBM</span><span class="kw-tag">算力</span><span class="kw-tag">华为</span><span class="kw-tag">昇腾</span><span class="kw-tag">海光</span><span class="kw-tag">壁仞</span><span class="kw-tag">燧原</span><span class="kw-tag">液冷</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548548852185428" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258258824444422">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-17 20:31 · 👁 896</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">Brad Gerstner 在...</div>
+  <div class="topic-content">Brad Gerstner 在 All-In Summit 上的分享：
+
+ <mark>Anthropic</mark>、<mark>OpenAI</mark> 和 SpaceX 的集体年化收入 ARR 目前 约为 1000 亿美元。Brad 认为，到年底达到 1800 亿美元，才能维持 <mark>AI</mark> 交易的完整性
+
+<mark>AI</mark> 实验室的收入必须在 2029 年达到 1 万亿美元，才能跟上超大规模云服务商（MAG 5）的资本支出
+
+2026 年新增 19 GW 计算能力，其中 7 GW 来自 <mark>OpenAI</mark> + <mark>Anthropic</mark>。2027 年将新增 43 GW</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Anthropic</span><span class="kw-tag">OpenAI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258258824444422" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
