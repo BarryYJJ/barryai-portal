@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-09-19 深夜 AI 简报</title>
+<style>
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-09-19 01:30:37</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-09-19 深夜 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-09-18 20:30</strong> &nbsp;→&nbsp; <strong>2026-09-19 01:30</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">9</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">5 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">55.6%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">5 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">光模块</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">CPO</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">英伟达</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">Rubin</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">AI算力</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">液冷</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">人工智能</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">阿里巴巴</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-82258258158124412">联想集团AI服务器储备订单达540亿美元、环比增157.1%，ISG营收同比近翻倍，算力卖铲子开始兑现利润</a></li><li><a class="tldr-jump" href="#t-14425425825812252">AI散热“小辅材卡住大算力”：英伟达Rubin转向石墨烯TIM，1—3年客户认证周期让高端材料供应商坐上稀缺席位</a></li><li><a class="tldr-jump" href="#t-45548548148124428">思瑞浦给光模块升级“收配套费”：1.6T/CPO模拟芯片用量有望成倍提升，OCS高压DAC预计2027年放量再添引擎</a></li><li><a class="tldr-jump" href="#t-55521521821854854">汇量科技AI Infra预计10月上线，广告算法换脑、IAP拓预算池，能否复制AppLovin AXON 2.0的增长加速值得盯紧</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-45548548148124428">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-18 22:34 · 👁 334</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">[红包]【思瑞浦】近况更新
+
+...</div>
+  <div class="topic-content">[红包]【思瑞浦】近况更新
+
+#业绩：截止26Q2连续9个季度收入环比增长，工业、通信、汽车三大板块全面爆发，在手订单充足，Q3环比增长势头有望持续延续！
+
+#<mark>光模块</mark>：26H1光通信相关收入1.8亿元（收入占比11%），预计下半年收入及收入占比持续提高。产品布局方面，<mark>光模块</mark>中公司产品单模块价值量约7-8美金（核心产品为AFE，以及运放、LDO、DCDC等周边芯片），目前已基本覆盖国内外<mark>光模块</mark>内部客户。此外与<mark>光模块</mark>头部客户合作定制1.6T、3.2T、NPO、<mark>CPO</mark>等新一代产品相关的模拟芯片，随着产品升级，模拟芯片用量有望成倍提升。
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;48511588485558&quot; title=&quot;%23OCS%EF%BC%9A%E9%AB%98%E5%8E%8BDAC%E8%8A%AF%E7%89%87%23&quot; /&gt;  目前仅ADI能做，公司自研芯片客户端测试表现优异，海外单颗售价100美元，单台OCS需求数十颗——市场前景巨大。2027年有望开启放量增长，重磅收入新引擎即将起航！
+
+#关于价格调整：虽未公开普涨，但通过缩减低毛利产品、中小客户涨价以及新产品报价参考海外等方式，变相提高整体出货asp。26H1公司收入同比增长69.19%，其中销量增长54%，剩余增长由产品结构优化和ASP提升贡献。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">光模块</span><span class="kw-tag">CPO</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548548148124428" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425425825812252">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-18 22:34 · 👁 330</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【浙商计算机】<mark>AI</mark>散热的“价值...</div>
+  <div class="topic-content">【浙商计算机】<mark>AI</mark>散热的“价值窄门”——<mark>AI</mark>散热专题一之TIM材料
+
+#<mark>AI</mark>功耗跃迁下TIM从辅材变瓶颈、高端TIM供给紧。 
+[太阳]TIM是填充发热源与散热器微观间隙、大幅降低热阻的关键材料。<mark>AI</mark>功耗跃迁使其从辅材升级为瓶颈，材料正由传统硅脂向石墨烯及液态金属迭代，并催生TIM1.5/TIM3新层级，高端市场呈梯度紧缺。高端TIM真正的壁垒在于量产工艺闭环与长达1-3年的客户认证周期，导致有效供给稀缺。鸿富诚凭借石墨烯先发优势获头部认证，2025年碳基垫片收入翻6倍，印证了高壁垒下的强盈利弹性。
+
+#散热BOM价值重分配、TIM打开百亿增量空间。
+[太阳]近年来，全球TIM市场稳步增长，中国增速达11.09%且占据过半份额。<mark>AI算力</mark>升级重塑了TIM价值：传统风冷辅材向<mark>液冷</mark>核心界面跃迁，<mark>英伟达</mark><mark>Rubin</mark>转向全面采用新型石墨烯热界面材料，打开了高端TIM2的成长空间；无盖裸片与3D堆叠更催生了高壁垒的TIM“从0到1”纯增量；叠加1.6T<mark>光模块</mark>与<mark>CPO</mark>架构带来的密集界面需求，共同支撑TIM市场规模快速攀升。
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;15488455254442&quot; title=&quot;%23%E9%87%8D%E7%82%B9%E5%8E%82%E5%95%86%E5%8D%A1%E4%BD%8D%E5%9B%BD%E4%BA%A7%E6%9B%BF%E4%BB%A3%E3%80%82%23&quot; /&gt; [太阳]竞争格局方面，全球TIM材料竞争格局呈现鲜明的分层特征：高端市场长期由欧美日龙头企业主导，其凭借数十年配方积累与全流程品控能力，占据半导体级、车规级等高附加值领域的主要份额；中低端市场技术门槛较低，国内中小企业众多，价格竞争激烈，已实现规模量产。国内厂商起步较晚，正加快高端产品研发，在导热膏、导热垫片、相变材料及石墨烯、碳纳米管等新型高导热材料方面取得阶段性突破。
+
+[红包]相关公司： 建议关注#中石科技、阿莱德、德邦科技、苏州天脉、飞荣达等
+
+‼️风险提示： <mark>AI算力</mark>及高速<mark>光模块</mark>需求不及预期风险；石墨烯TIM产业化及客户导入不及预期风险</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Rubin</span><span class="kw-tag">AI算力</span><span class="kw-tag">英伟达</span><span class="kw-tag">光模块</span><span class="kw-tag">CPO</span><span class="kw-tag">液冷</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425425825812252" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548548148151448">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-18 22:34 · 👁 325</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【顺丰同城】：集团大宗增持股份...</div>
+  <div class="topic-content">【顺丰同城】：集团大宗增持股份，公司成长路径清晰，盈利进入加速释放期，持续推荐
+
+9月18日，顺丰控股全资附属公司 Celestial Ocean Investments Limited，通过大宗交易收购 4584.4万股顺丰同城H股。本次收购占已发行股本4.9973%，增持后持股比例提升至63.48%。本次增持体现控股股东对公司业务前景、长期价值的信心。
+
+此前，顺丰与<mark>阿里巴巴</mark>达成战略合作。双方将重点围绕电商履约、跨境物流、数智供应链、<mark>人工智能</mark>应用、智能协同与组织数字化等领域探索合作。
+
+公司自身盈利进入释放期: 26H1实现收入117.40亿元，同比+14.7%；实现净利润3.49亿元，同比+154.9%；经调整净利润2.66亿元，同比+70.8%。公司收入与利润均实现健康增长，盈利能力持续提升。
+ 
+26H1毛利为8.23亿元，同比+20.9%；毛利率为7.0%，同比提升0.3个百分点，主要得益于规模效应释放及运营效率提升。经调整净利润率为2.3%，同比提升0.8个百分点。
+
+[烟花]业绩增长核心驱动力：
+
+       面向商家（To B）： 收入57.22亿元，同比+28.1%，增长强劲。增长得益于商家规模持续扩大及客户结构优化，截至2026年6月30日止12个月，年活跃商家规模达到123万，同比+44%。
+
+       面向消费者（To C）： 收入14.67亿元，同比+11.8%，稳健增长。截至2026年6月30日止12个月，活跃消费者规模逾2,703万人。
+
+      最后一公里配送服务： 26H1实现收入45.51亿元，同比+2.1%。增速放缓，主要受去年同期高基数及部分业务影响。公司持续深化与顺丰集团的生态协同，揽收和同城转运等支持服务收入实现健康增长。同时，与顺丰集团共同服务的月结客户带来外部增量收入2.63亿元，同比+26.4%。
+
+2026年6月8日，顺丰同城宣布董事会决定行使股份购回授权，在公开市场回购H股上限4亿港元。
+
+26-27年预测经调整净利润为6.0、8.1亿人民币，对应经调PE分别为12、9倍。继续推荐。
+
+欢迎联系 华创交运 吴一凡 吴晨玥</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">人工智能</span><span class="kw-tag">阿里巴巴</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548548148151448" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521521821854854">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-18 22:33 · 👁 328</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">汇量科技：<mark>AI</mark> infra预计...</div>
+  <div class="topic-content">汇量科技：<mark>AI</mark> infra预计10月上线，看好业绩估值双击
+
+[玫瑰]<mark>AI</mark> Infra预计10月上线，短期催化明确。
+新平台从<mark>算力</mark>、数据、模型训练到实时决策全面升级，支持<mark>GPU</mark>及更复杂模型，有望提升模型迭代效率和广告ROI。
+[烟花]参考Applovin和unity，广告平台算法升级后收入往往明显提速：
+1）AppLovin AXON 2.0：2023Q2上线，2023Q3 Software Platform收入同比+65%、环比+24%，公司明确表示增长由AXON 2.0及广告主加大投放驱动。
+2）Unity Vector：2025Q2 Unity Ad Network收入环比+15%；此后Vector持续放量，2026Q1 Strategic Grow收入同比+49%，2026Q2进一步同比+63%。
+
+[玫瑰]IAA基本盘稳健，IAP提供第二增长曲线。
+目前IAA规模仍高于IAP，但两块业务均在增长。公司正重点拓展IAP及混合变现，新增客户案例显示更多IAP游戏公司开始尝试或扩大在Mintegral投放，有望打开更大的游戏广告预算池。
+
+[玫瑰]公司仍处于较快成长，参考Applovin双击路径。
+2026H1收入同比+23%、Mintegral收入+24%、调整后净利润+40%，且新<mark>AI</mark> Infra尚未贡献主要增量。参考AppLovin算法升级后收入加速等有明显空间。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">GPU</span><span class="kw-tag">算力</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521521821854854" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258258158124412">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-18 22:33 · 👁 328</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【联想集团】股价创新高，价值重...</div>
+  <div class="topic-content">【联想集团】股价创新高，价值重估正当时！
+
+[庆祝]9.18日联想集团盘中股价涨超9%，创历史新高！
+
+ISG：<mark>AI</mark>储备订单高增，ISG利润有望加速兑现！
+➠根据IDC数据，26Q2公司x86<mark>服务器</mark>出货量首次登顶全球第一，同比增长45.6%，市场份额7.4%，yoy+1.9pct。
+➠营收&amp;订单：FY26/27Q1 ISG营收85.1亿美元，yoy+98.4%，qoq+51.0%，截至FY26/27Q1末，公司<mark>AI服务器</mark>在手储备订单达540亿美元，qoq+157.1%，持续受益新云客户capex扩张及企业<mark>AI推理</mark>需求增长。
+➠超节点：26年中旬中标国内头部CSP超节点项目，26H2陆续交付，其他头部CSP有望陆续导入；计划26年底推出128、256卡超节点样机。
+➠盈利能力：FY26/27Q1 ISG OPM达9.1%，yoy+11.1pct，qoq+5.5pct，若参照此前研发投入资本化会计处理方式，OPM超10%。在运营效率、客户结构以及产品结构持续优化（<mark>AI</mark>占比提升+新云&amp;ESMB客户占比提升）的加持下，高盈利能力具备可持续性，CSP客户毛利率目标15%，ESMB客户毛利率25%-30%（部分项目超30%），短期OPM有望维持高个位数，长期向10%+提升。
+
+IDG：RTX Spark AIPC有望10月推出，公司新品发布率先卡位
+联想为<mark>英伟达</mark>RTX Spark AIPC首批核心合作厂商，9月3日于IFA发布搭载RTX Spark的Yoga Pro 9n轻薄本及Yoga 9n二合一变形本，IDG业务有望持续受益AIPC渗透升级实现ASP和盈利能力同步提升，长期运营利润率有望达到10%以上。
+
+[玫瑰]盈利预测：预计公司FY26/27-FY28/29调整后净利润为45/62/80亿美元，PE估值13/10/7倍，显著低于戴尔等<mark>服务器</mark>厂商20x+PE，持续推荐！</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI服务器</span><span class="kw-tag">AI推理</span><span class="kw-tag">英伟达</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258258158124412" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
