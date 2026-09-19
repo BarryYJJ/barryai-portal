@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-09-19 午间 AI 简报</title>
+<style>
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-09-19 14:30:35</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-09-19 午间 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-09-19 10:00</strong> &nbsp;→&nbsp; <strong>2026-09-19 14:30</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">8</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">5 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">62.5%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">4 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">Anthropic</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">数据中心</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">OpenAI</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">大模型</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-22258252584221221">OpenAI 预计到2030年累计消耗2800亿美元、当年收入冲至3500亿美元，AI军备竞赛先比谁的钱包扛烧</a></li><li><a class="tldr-jump" href="#t-14425424258814822">中国电信657A2光缆集采四大家顶格报价，折算裸光纤约220元，长飞光纤、亨通光电的涨价逻辑有了订单撑腰</a></li><li><a class="tldr-jump" href="#t-82258252584245242">帖称Anthropic 2026年年化收入将超1000亿美元，商业化故事直接跳到千亿档，兑现还得看后账</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-14425424258814822">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-19 12:53 · 👁 242</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">电信集采A2光缆，头部四大家均...</div>
+  <div class="topic-content">电信集采A2光缆，头部四大家均220元顶格报价
+
+[玫瑰]0918中国电信2026年室外光缆集中采购启动招标，此次招标的是657A2的光缆，头部四大家均顶格报价。
+
+[玫瑰]此次招标，四大家每家数量大概为100万+芯公里，A2光缆每公里不含税350元，换算成裸光纤大致在220元左右，基本和无人机市场价相符。运营商招标A2的价格已经和散纤市场价相同，由此可见，供需仍非常紧张。电信此次招标A2光缆，证明了运营商后续逐渐承建<mark>数据中心</mark>的趋势。
+
+[玫瑰]光纤厂商Q3产能结构652D占很少，预计低于10%，业绩会很亮眼。Q4厂商要交货运营商订单，产能挤压，657必将上涨。坚定推荐：长飞光纤A、长飞光纤H、亨通光电、长盈通、中天科技、烽火通信等。#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">数据中心</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425424258814822" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548545481152488">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-19 12:42 · 👁 249</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">据消息人士称，Anthropi...</div>
+  <div class="topic-content">据消息人士称，<mark>Anthropic</mark>计划在首次公开募股之前发布新的<mark>AI</mark>模型。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Anthropic</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548545481152488" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258252584245242">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-19 10:01 · 👁 443</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title"><mark>Anthropic</mark> 公司 20...</div>
+  <div class="topic-content"><mark>Anthropic</mark> 公司 2026 年的年化收入将超过 1000 亿美元</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Anthropic</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258252584245242" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258252584221221">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-19 10:01 · 👁 438</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">英国金融时报：<mark>OpenAI</mark> 预...</div>
+  <div class="topic-content">英国金融时报：<mark>OpenAI</mark> 预计到 2030 年将消耗 2800 亿美元
+
+<mark>OpenAI</mark> 预计其支出将远超收入，而收入在同一时期预计将增长十倍，从今年的 360 亿美元增至 2030 年的 3500 亿美元。总体而言，该公司预计从现在到 2030 年底将累计实现 8400 亿美元收入。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">OpenAI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258252584221221" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521525214554814">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-19 10:00 · 👁 431</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【华创家电】老板电器拟收购It...</div>
+  <div class="topic-content">【华创家电】老板电器拟收购Itronics，扩张海外落下一子
+
+#老板电器拟收购iTronics。上市公司先以0元转让海南老板49%股权给控股股东老板集团，再通过海南老板旗下子公司香港老板电器，以1.75亿美元收购Itronics 60%股份。上市公司持有Itronics 30%的股权，交易完成后并表。
+
+#Itronics是做什么的？Itronics主营业务是智能家用温湿度计研发、设计和销售。主要产品为各类烹饪温度计，用于食材烹饪过程中的精准温控，在欧美地区被广泛应用。Itronics自有品牌系TempPro，销售渠道以线上为主、线下为辅，线上以Amazon、境外自运营网站、Tiktok等渠道为主，线下已成功进驻Walmart、Lowe&#x27;s、Home Depot、Sam&#x27;s Club、Academy、Costco、Target 等线下零售渠道。Itronics 25年收入1.3亿美元，净利润0.3亿美元，经营性现金流0.4亿美元，无论是利润率还是现金流表现均较佳。
+
+#老板电器为什么要收购Itronics？我们认为主要因为：1）Itronics深耕欧美市场多年，通过智能温度计的渗透已积累了大量欧美家庭的烹饪数据，本次收购可以补齐老板电器对于欧美用户的数据空缺，为未来食神<mark>大模型</mark>出海，以及为研制符合海外用户需求的烹饪电器奠定基础；2）公司多年来深耕国内渠道，海外市场布局较晚，渠道力薄弱。并购Itronics后可利用已有渠道进行公司产品海外销售，加快公司出海进程；3）Itronics经营稳健，并购后短期能增厚公司海外收入和利润。
+
+TempPro官网：&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Ftemppro.com%2Fcollections%2Finstant-read-meat-thermometer&quot; title=&quot;Instant-Read%20Meat%20Thermometers%20%7C%20Fast%20%26%20Accurate%20%E2%80%93...&quot; /&gt;
+
+☎欢迎联系韩星雨18652689415/陆偲聪 19864589027</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">大模型</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521525214554814" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
