@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-09-19 晚间 AI 简报</title>
+<style>
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-09-19 20:30:36</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-09-19 晚间 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-09-19 14:30</strong> &nbsp;→&nbsp; <strong>2026-09-19 20:30</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">15</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">9 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">60.0%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">6 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">5</span></div><div class="hot-kw-row"><span class="kw-name">CPO</span><div class="bar-track"><div class="bar-fill" style="width:40%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">Anthropic</span><div class="bar-track"><div class="bar-fill" style="width:40%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">Claude</span><div class="bar-track"><div class="bar-fill" style="width:40%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">光模块</span><div class="bar-track"><div class="bar-fill" style="width:20%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">硅光</span><div class="bar-track"><div class="bar-fill" style="width:20%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">AGI</span><div class="bar-track"><div class="bar-fill" style="width:20%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">机器学习</span><div class="bar-track"><div class="bar-fill" style="width:20%"></div></div><span class="kw-count">1</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-14425424244888882">AI开始“自己卷自己”：Claude主导Anthropic研发的比例半年从不足1%升至26%，算力需求再添发动机</a></li><li><a class="tldr-jump" href="#t-22258252524588541">6T光互联去掉DSP，价值没消失只是换座位：PIC+EIC占物料成本约六成，硅光工艺平台成焦点</a></li><li><a class="tldr-jump" href="#t-55521525255888424">新雷能给AI机柜“送电”：800V转50V产品进入谷歌供应链，模块电源月产能计划年底从20万只扩至30万只</a></li><li><a class="tldr-jump" href="#t-45548545452444458">AI制药从讲故事走向拼实验：Anew Labs融资2.9亿美元，金斯瑞牵手礼来平台，湿实验“卖铲人”迎来关注</a></li><li><a class="tldr-jump" href="#t-22258252522242411">CPO还没大规模上桌，电子布先别吓退席：短期涨价仍强，高速互连向近芯片端迁移支撑高端PCB与IC载板需求</a></li><li><a class="tldr-jump" href="#t-82258252522822582">安德利拿7.93亿元从果汁跨界高速覆铜板：拟控股甬强科技，M8/M9已获认证，但高速产品去年收入占比仅5.82%</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-22258252524588541">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-19 16:58 · 👁 435</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">🚀 NPO <mark>CPO</mark>: 1.6T...</div>
+  <div class="topic-content">🚀 NPO <mark>CPO</mark>: 1.6T去DSP后 PIC+EIC物料占比超60% 成为第一
+
+🔥 1.6T进入<mark>CPO</mark>/NPO时代，最大的变化不是简单“少一颗DSP”，而是<mark>光模块</mark>价值量重新分配。传统模块中DSP约占BOM的25%–35%；DSP取消后，PIC和EIC仍是高速链路不可缺少的核心。按8×200G<mark>硅光</mark>架构估算，去DSP后，PIC约占BOM 30%–38%，EIC（TIA+Driver）约22%–27%，两者合计约55%–65%，中枢约60%。
+
+🌟更重要的是，DSP去掉后，部分均衡和信号补偿能力需要向交换芯片SerDes及TIA/Driver转移，意味着EIC对带宽、线性度、噪声和功耗要求进一步提高，价值量反而可能上升。
+
+🔥 A股核心看点是PIC+EIC底层工艺平台。
+
+卓胜微已将12英寸异质硅基工艺、先进异构集成列为核心平台，并明确布局光互联，具备向<mark>硅光</mark>PIC+高速电芯片EIC延伸的工艺基础。
+
+粤芯已实现12英寸90nm SiPho<mark>硅光</mark>平台规模量产，产品覆盖400G、800G和1.6T，并规划建设12英寸数模混合+<mark>硅光</mark>特色工艺产线。
+
+核心逻辑：DSP退出 → 价值量向PIC+TIA/Driver集中 → 掌握PIC与EIC工艺平台的晶圆厂价值重估。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">光模块</span><span class="kw-tag">CPO</span><span class="kw-tag">硅光</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258252524588541" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258252524588522">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-19 16:58 · 👁 432</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">科技反击，坚定看好<mark>AI</mark>进入AG...</div>
+  <div class="topic-content">科技反击，坚定看好<mark>AI</mark>进入<mark>AGI</mark>的新阶段，<mark>AI</mark>需求进一步激增，重点继续看好算租和专家标注。
+#算租：  艾可蓝、盛视科技等；
+#专家标注：  友邦吊顶、麦迪科技。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AGI</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258252524588522" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548545452444458">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-19 16:46 · 👁 442</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">[红包]【<mark>AI</mark>制药】已升级成板...</div>
+  <div class="topic-content">[红包]【<mark>AI</mark>制药】已升级成板块主线之一，维持前期观点，看好AIDD行业
+
+🔥AIDD行业一天3大新闻：
+
+[玫瑰]<mark>字节跳动</mark>AIDD业务Anew Labs完成首轮2.9亿美元融资，本轮融资由HSG、IDG资本、高瓴投资、五源资本为联合领投方，其他投资者包括高榕创投、元生创投、博裕资本，以及战略投资者中国生物制药和国资上海未来产业基金。
+
+[玫瑰]金斯瑞生物科技与礼来的<mark>AI</mark>/<mark>机器学习</mark>药物发现协作平台Lilly TuneLab达成合作。金斯瑞将向Lilly TuneLab参与企业提供湿实验服务，助力其快速生成实验数据，将<mark>AI</mark>预测转化为生物学验证数据，加速候选药物评估。
+
+[玫瑰]诺和诺德与<mark>Anthropic</mark>正式宣布达成合作，诺和诺德将使用<mark>Anthropic</mark>的<mark>Claude</mark>系列模型（包括<mark>Claude</mark> Science）辅助其研发工作流程。合作将围绕诺和诺德科学家和计算团队确定的关键药物发现挑战展开，帮助加速新药的发现和开发。
+
+[太阳]短期行情虽波动较大，但我们看好AIDD行业走在持续进化的道路上，建议持续关注AIDD行业和相关重点公司，<mark>AI</mark>平台【剂泰、英矽、晶泰】、卖铲人【金斯瑞、华大智造及CXO各环节龙头】等。
+
+[红包]<mark>AI</mark>制药观点：前有<mark>Anthropic</mark>抬高行业天花板，后有国内AIDD产业链公司百花齐放
+
+🔥<mark>Anthropic</mark>加大<mark>AI</mark> for Bio布局，抬高行业价值和估值的天花板：根据媒体报道，<mark>Anthropic</mark>正在招聘Corporate Development Lead, Life Sciences，核心职责负责围绕药物发现、临床开发、监管与医学写作、实验室自动化、医疗数据基础设施等重点方向进行收购、投资、战略合作。继<mark>AI</mark>大厂高举高打投入DNA/蛋白合成等湿实验验证之后，<mark>Anthropic</mark>未来或将通过并购、投资等方式进一步加大投入到<mark>AI</mark> for Bio领域。<mark>Anthropic</mark>在前，通过高举高打的投入有望抬高行业天花板，最受益的就是AIDD公司估值，像Isomorphic Labs最新估值预估150-200亿美金左右，Discovery Loop最新估值达100亿美金，Chai Discovery估值40亿美金，随着热钱流入，行业估值天花板或将被打开，而英矽、剂泰、晶泰这些已有成熟管线且AIDD具备国际竞争力的公司价值或有望被进一步挖掘。
+
+[礼物]国内AIDD产业链公司百花齐放：在各自专长领域各具特色，他们都是durable <mark>AI</mark>-native business而非thin-wrapper。这轮为什么市场非常关注剂泰科技，核心原因之一就是他聚焦<mark>AI</mark> LNP领域，这是一个公开数据稀缺，需要大量湿实验迭代，在成药环节又很关键的垂类领域，剂泰在这方面已经建立较深壁垒；同时英矽在新靶点发现匹配领域、晶泰在实验室自动化领域的优势，都将被不断验证。未来这些AIDD公司的BD效率、能力圈扩展、重磅管线的推进，都将值得期待。
+
+欢迎交流#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Anthropic</span><span class="kw-tag">Claude</span><span class="kw-tag">机器学习</span><span class="kw-tag">字节跳动</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548545452444458" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425424244888882">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-19 16:46 · 👁 452</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">🔥#RSI进展迅速  ！减速？...</div>
+  <div class="topic-content">🔥#RSI进展迅速  ！减速？不存在的！（0918）
+
+<mark>Anthropic</mark>和<mark>智谱</mark>纷纷披露#最新RSI进展。 
+
+<mark>Anthropic</mark>：
+1）给自动化水平（AL）划了AL0-AL5级别，目前<mark>Claude</mark> “主导（AL4级别——人类只给高层目标，<mark>AI</mark> 基本端到端完成）”了 #<mark>Anthropic</mark>约26%的<mark>AI</mark>研发工作。
+2）AL4 占比从 2026 年 2 月的不足 1%，升到 8 月的 26%，提升迅速。
+3）#<mark>AI</mark>安全那是要费<mark>算力</mark>的  ！<mark>Anthropic</mark> 统计了 2026 年 7 月 13～20 日一周的全部<mark>算力</mark>使用情况，<mark>AI</mark> 驱动的 <mark>AI</mark> R&amp;D <mark>算力</mark>中，#约12%用于安全研究。 
+
+<mark>智谱</mark>：
+1）通过“<mark>AI</mark> 优化自己的推理系统”，实现GLM 5.3 Flash从零部署在超过 10 万张中国国产 <mark>AI</mark> 加速卡上。
+2）实际优化了数值精度、专家并行效率、硬件Kernel 1.71× 加速。
+
+#<mark>智谱</mark>  #<mark>MiniMax</mark></div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Anthropic</span><span class="kw-tag">MiniMax</span><span class="kw-tag">Claude</span><span class="kw-tag">算力</span><span class="kw-tag">智谱</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425424244888882" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258252522111421">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-19 16:45 · 👁 445</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">今天我们安排了【九州一轨】全市...</div>
+  <div class="topic-content">今天我们安排了【九州一轨】全市场首次小范围现场调研（无锡江阴，通用半导体+苏州，晶禧半导体），金刚石芯片基板未来潜力大！[福][福][福]
+
+聚焦超强阿尔法品种！
+
+重点：
+1、周期价值“老登股”：松发股份、中国船舶、华通线缆、三一重工等
+
+2、科技成长“<mark>AI</mark>装备”：九州一轨、科翔股份、杰美特、斯莱克、优利德、杰瑞股份、涛涛车业等[福][福][福]
+
+感恩您的力挺！[抱拳][微笑]</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258252522111421" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521525255888424">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-19 16:45 · 👁 451</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【新雷能】All in <mark>AI</mark>-...</div>
+  <div class="topic-content">【新雷能】All in <mark>AI</mark>-持续推荐！
+
+-----------------------------
+🎺截至上午收盘公司上涨4.3%。公司在<mark>数据中心</mark>领域已形成覆盖一次（OCP 及CRPS电源）、二次及三次变换的全系列电源解决方案供给能力，品种稀缺。
+
+[爆竹]PDB产品实现<mark>服务器</mark>机柜内800V（±400V）转50V的功能，该产品已确定进入<mark>谷歌</mark>供应链。
+
+[爆竹] 二次电源目前已经正式发布 1.6KW 及2KW 两款母线变换器，本年度还将发布比例变换器、2.5KW 母线变换器等。
+
+[爆竹]三次电源领域，PowerBlock及VPD产品均已经与ADI开展合作，预计2027年开始批量。
+
+[太阳]产能：当前模块电源月产20万只，持续扩产年底达30万只/月，新租5000平厂房。马来西亚工厂预计于 2026 年年底达到批量生产认证阶段。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">数据中心</span><span class="kw-tag">服务器</span><span class="kw-tag">谷歌</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521525255888424" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521525255884444">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-19 16:45 · 👁 445</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title"><mark>AI应用</mark>最强音，从7月的【迈富...</div>
+  <div class="topic-content"><mark>AI应用</mark>最强音，从7月的【迈富时】已成为三季度股价走势最强的<mark>AI应用</mark>，到这两天我们重点提示的【汇量科技】[玫瑰]
+
+请重点关注我们#国金传媒互联网团队，深耕产业、前瞻洞察行业变化、精准提示[庆祝]</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI应用</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521525255884444" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258252522242411">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-19 15:44 · 👁 475</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">🌞本周工作：精工钢构、福莱特等...</div>
+  <div class="topic-content">🌞本周工作：精工钢构、福莱特等公司交流
+
+[红包]【财通建筑建材】建材周观点0919：继续看好强基本面科技品种反弹，同时关注地产链的困境反转机会
+
+[太阳]核心观点：本周沪深300跌0.06%，申万建材涨2.82%，主要受建材科技股（<mark>电子布</mark>+玻璃基板+转型品种）明显反弹带动。近期美联储加息阶段性利空落地给中美科技板块均带来情绪侧提升，另一方面，<mark>电子布</mark>短期涨价趋势仍强劲。我们认为虽然从八月底至今，建材科技股已有一定幅度的反弹，但后续有持续基本面支撑的品种仍有望表现较好。因此虽然下半周传言未来<mark>CPO</mark>大规模量产后会对<mark>PCB</mark>板材降级使用从而影响<mark>电子布</mark>需求，但是一方面<mark>CPO</mark>大规模落地尚需时间，对<mark>电子布</mark>的短期基本面并不构成影响，另一方面高速互连需求向近芯片端光电载板迁移，带动超低损耗、高密度、高散热的高端<mark>PCB</mark>与IC载板价值量提升，国产芯片的持续升级也将持续支撑<mark>电子布</mark>需求，中长期影响可控。地产链经过了前期地产政策的利空情绪宣泄，后续反而可能发现基本面没有想象中那么差，比如地价分期支付可能修复现房政策对新开工的部分影响，公积金政策优化也有望带动销售端表现，因此我们认为地产链存在困境反转的机会，当前，一方面建议重点关注供给趋势性回落的玻璃（库存已连续三周回落），继续推荐旗滨集团；另一方面建议关注消费建材超跌后的反弹机会。
+
+[太阳]地产数据跟踪：1—8月份，房地产开发投资同比下降19.9%，增速环降0.7pct；新房销售面积同比下降12.1%，增速环降0.3pct；新开工面积同比下降24.8%，增速环降0.8pct；竣工面积同比下降23.7%，增速环降0.5pct。8月单月，开发投资同降26.15%，增速环比+2.56pct；销售面积同降15.41%，增速环降0.91pct；新开工面积同降30.49%，增速环降1.97pct；竣工面积同降28.49%，增速环降8.49pct。1 8 月房地产开发投资、销售、新开工、竣工累计同比降幅均较 1 7 月扩大，地产基本面延续筑底；8 月单月开发投资跌幅小幅收窄，但新房销售走弱，新开工、竣工同比跌幅显著扩大。
+
+[太阳] 本周推荐组合：旗滨集团，中国巨石，兔宝宝，华新建材，瑞纳智能</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">电子布</span><span class="kw-tag">CPO</span><span class="kw-tag">PCB</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258252522242411" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258252522822582">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-19 15:08 · 👁 519</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【国金电子&amp;计算机】#安德利：...</div>
+  <div class="topic-content">【国金电子&amp;计算机】#安德利：拟收购甬强科技控制权_布局高端高速<mark>覆铜板</mark>
+
+【1】#拟收购甬强科技约62%股权_三年累计业绩承诺1.35亿元
+——事件：公司9月18日公告，拟以现金7.93亿元收购甬强科技62.06%股权。
+——业绩承诺：甬强科技实控人承诺26~28年净利润分别达2,300/4,200/7,000万元，累计不低于1.35亿元。
+
+【2】#甬强科技布局高端高速<mark>覆铜板</mark>_M8/M9通过终端客户认证
+——定位：据公司6月问询回复，甬强科技M8、M9等级高速<mark>覆铜板</mark>已通过终端客户认证，M10等级产品处于验证阶段，亦已研发I50系列封装基板用材料，拓展高端电子材料产品布局。
+——看点：高端产品已有客户导入，规模化放量可期。甬强科技高速<mark>覆铜板</mark>主要客户包括生益电子、方正、深南、<mark>胜宏</mark>等。25年营收2.29亿元、净亏损4,327万元，26Q1营收4,326万元、净利润448万元。高速<mark>覆铜板</mark>25年收入占比5.82%，产品结构仍以FR4为主。
+
+【3】#果汁主业扎实_持续扩品类  
+——定位：公司是国内浓缩<mark>苹果</mark>汁龙头，浓缩<mark>苹果</mark>汁约占主营业务收入九成。26H1实现营收7.16亿元、归母净利润1.23亿元。
+——看点：公司持续开拓国内市场，在<mark>苹果</mark>汁、梨汁基础上拓展NFC<mark>苹果</mark>汁、<mark>苹果</mark>浊汁等产品，并加大山楂汁、桃汁、番茄汁等小品种销售推广力度，推动产品多元化布局。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">覆铜板</span><span class="kw-tag">苹果</span><span class="kw-tag">胜宏</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258252522822582" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
