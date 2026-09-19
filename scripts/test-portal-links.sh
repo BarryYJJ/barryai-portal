@@ -27,6 +27,9 @@ grep -q '<title>BARRY RS</title>' "$PAGE" \
   && grep -q '<p>BARRY RS</p>' "$PAGE"
 check $? "首页品牌名称统一使用全大写 BARRY RS"
 
+grep -q 'rel="icon".*%3EBARRY%3C%2Ftext%3E.*%3ERS%3C%2Ftext%3E' "$PAGE"
+check $? "浏览器 favicon 复用左上角 Barry RS 标识"
+
 grep -q 'class="card" href="/briefs/"' "$PAGE"
 check $? "项目区有 /briefs/ 入口"
 
