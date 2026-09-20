@@ -26,7 +26,11 @@
   --pad:clamp(20px,5vw,72px);
   --font:"Montserrat","PingFang SC",-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans GB","Microsoft YaHei","Source Han Sans SC","Noto Sans CJK SC","Helvetica Neue",Arial,sans-serif;
   --mono:"Montserrat","PingFang SC",ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono","Courier New",monospace;
-  --roll-ms:720ms;
+  --roll-ms:2000ms;
+  --roll-launch-ms:260ms;
+  --roll-tumble-ms:440ms;
+  --roll-land-ms:360ms;
+  --roll-lift:-56px;
 }
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;overflow-x:hidden}
@@ -181,11 +185,17 @@ h1{
 .block-label{color:var(--blue);letter-spacing:.14em}
 .block-side{color:var(--ink-dim);white-space:nowrap}
 
+.table{perspective:900px;perspective-origin:50% 40%}
 .jiao{
   display:block;width:clamp(72px,18vw,112px);height:auto;
   filter:drop-shadow(0 6px 0 rgba(27,52,232,.12));
-  transform-origin:50% 100%;
+  transform-origin:50% 50%;
+  transform-style:preserve-3d;
+  backface-visibility:visible;
 }
+/* 翻转中：标签与文案切换为进行态 */
+.block[data-roll-state="launch"] .block-side,
+.block[data-roll-state="tumble"] .block-side{color:var(--blue)}
 /* 两面重叠绘制，按 data-side 切换可见：yang=平面向上，yin=凸面向上 */
 .face{transition:opacity .18s ease}
 .block[data-side="yang"] .face-yin{opacity:0}
@@ -278,17 +288,43 @@ h1{
   @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
   html{scroll-behavior:smooth}
 
-  /* 掷筊：抛起—翻转—落定，左右相位略有差异 */
-  .is-rolling .jiao{animation:toss var(--roll-ms) cubic-bezier(.3,.7,.3,1) both}
-  .is-rolling .block[data-block="right"] .jiao{animation-delay:60ms}
-  @keyframes toss{
-    0%{transform:translateY(0) rotate(0)}
-    35%{transform:translateY(-38px) rotate(-14deg) scaleX(.94)}
-    62%{transform:translateY(-8px) rotate(10deg) scaleX(1.02)}
-    82%{transform:translateY(-3px) rotate(-3deg)}
-    100%{transform:translateY(0) rotate(0)}
+  /* 掷筊三段：抛起（launch）→ 多圈 3D 翻转（tumble）→ 落定回弹（landed）。
+     阶段由 app.js 按时间线写入 data-roll-state；翻转中 face 淡入淡出关闭，翻面立即可见。 */
+  .is-rolling .face{transition:none}
+  .block[data-roll-state="launch"] .jiao{
+    animation:jiao-launch var(--roll-launch-ms) cubic-bezier(.2,.7,.4,1) both;
   }
-  .is-rolling .readout h3,.is-rolling .readout-desc{opacity:.35;transition:opacity .2s ease}
+  .block[data-roll-state="tumble"] .jiao{
+    animation:jiao-tumble var(--roll-tumble-ms) linear infinite;
+  }
+  .block[data-roll-state="tumble"][data-block="right"] .jiao{
+    animation-name:jiao-tumble-r;animation-duration:calc(var(--roll-tumble-ms) * 1.1);
+  }
+  .block[data-roll-state="landed"] .jiao{
+    animation:jiao-land var(--roll-land-ms) cubic-bezier(.22,.9,.32,1.2) both;
+  }
+  @keyframes jiao-launch{
+    0%{transform:translateY(0) rotateX(0) rotateY(0)}
+    100%{transform:translateY(var(--roll-lift)) rotateX(-180deg) rotateY(20deg)}
+  }
+  @keyframes jiao-tumble{
+    0%{transform:translateY(var(--roll-lift)) rotateX(0) rotateY(0) rotateZ(-6deg)}
+    50%{transform:translateY(calc(var(--roll-lift) - 14px)) rotateX(-360deg) rotateY(180deg) rotateZ(6deg)}
+    100%{transform:translateY(var(--roll-lift)) rotateX(-720deg) rotateY(360deg) rotateZ(-6deg)}
+  }
+  @keyframes jiao-tumble-r{
+    0%{transform:translateY(var(--roll-lift)) rotateX(0) rotateY(0) rotateZ(6deg)}
+    50%{transform:translateY(calc(var(--roll-lift) - 10px)) rotateX(360deg) rotateY(-180deg) rotateZ(-6deg)}
+    100%{transform:translateY(var(--roll-lift)) rotateX(720deg) rotateY(-360deg) rotateZ(6deg)}
+  }
+  @keyframes jiao-land{
+    0%{transform:translateY(var(--roll-lift)) rotateX(-40deg) rotateY(12deg)}
+    55%{transform:translateY(0) rotateX(0) rotateY(0) scaleY(.94)}
+    72%{transform:translateY(-7px) rotateX(-4deg) rotateY(-3deg)}
+    86%{transform:translateY(0) scaleY(.98)}
+    100%{transform:translateY(0) rotateX(0) rotateY(0)}
+  }
+  .is-rolling .readout h3,.is-rolling .readout-desc{opacity:.55;transition:opacity .2s ease}
   .readout h3,.readout-desc{transition:opacity .25s ease}
 }
 @media (prefers-reduced-motion: reduce){

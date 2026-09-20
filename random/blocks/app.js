@@ -56,18 +56,52 @@ export function randomSide(cryptoObj) {
   return SIDES[buf[0] & 1];
 }
 
+// ---------- 掷筊时间线 ----------
+
+export const ROLL_DURATION_MS = 2000;
+
+function flip(side) {
+  return side === 'yang' ? 'yin' : 'yang';
+}
+
+/**
+ * 由最终朝向反推一条确定性的模拟时间线：抛起 → 多次翻面 → 左筊落定 → 右筊落定并揭示。
+ * 中间帧只是演示画面，不是新的随机结果；最终帧与传入的最终朝向严格一致。
+ * @param {'yang'|'yin'} finalLeft
+ * @param {'yang'|'yin'} finalRight
+ * @returns {{durationMs:number, frames:Array<{at:number,phase:string,left:string,right:string,reveal:boolean}>}}
+ */
+export function buildRollTimeline(finalLeft, finalRight) {
+  if (!SIDES.includes(finalLeft) || !SIDES.includes(finalRight)) {
+    throw new RangeError('side must be "yang" or "yin"');
+  }
+  const L = finalLeft;
+  const R = finalRight;
+  const l = flip(L);
+  const r = flip(R);
+  const frame = (at, phase, left, right, reveal = false) => ({ at, phase, left, right, reveal });
+  return {
+    durationMs: ROLL_DURATION_MS,
+    frames: [
+      frame(0, 'launch', l, r),
+      frame(260, 'tumble', L, r),
+      frame(480, 'tumble', l, R),
+      frame(700, 'tumble', L, R),
+      frame(900, 'tumble', l, r),
+      frame(1100, 'tumble', L, r),
+      frame(1320, 'land-left', L, R),
+      frame(1540, 'land-left', L, r),
+      frame(1640, 'land-right', L, R),
+      frame(ROLL_DURATION_MS, 'land-right', L, R, true),
+    ],
+  };
+}
+
 // ---------- DOM ----------
 
 function prefersReducedMotion() {
   return typeof matchMedia === 'function'
     && matchMedia('(prefers-reduced-motion: reduce)').matches;
-}
-
-function rollDurationMs(root) {
-  if (prefersReducedMotion()) return 0;
-  const raw = getComputedStyle(root).getPropertyValue('--roll-ms').trim();
-  const n = parseFloat(raw);
-  return Number.isFinite(n) ? n : 720;
 }
 
 function init(doc) {
@@ -87,12 +121,30 @@ function init(doc) {
   let rolling = false;
   let count = 0;
 
+  function which(el) {
+    return el.dataset.block === 'left' ? '左' : '右';
+  }
+
   function setBlock(el, side) {
     el.dataset.side = side;
     const label = el.querySelector('[data-side-label]');
     if (label) label.textContent = SIDE_LABEL[side];
-    const which = el.dataset.block === 'left' ? '左' : '右';
-    el.setAttribute('aria-label', `${which}筊：${SIDE_LABEL[side]}，点击掷筊`);
+    el.setAttribute('aria-label', `${which(el)}筊：${SIDE_LABEL[side]}，点击掷筊`);
+  }
+
+  // 翻转中：只换可见面，文案与 aria-label 固定为「翻转中」，不逐帧刷新。
+  function showFace(el, side) {
+    el.dataset.side = side;
+  }
+
+  function setBlockState(el, state) {
+    if (state) el.dataset.rollState = state;
+    else delete el.dataset.rollState;
+    const label = el.querySelector('[data-side-label]');
+    if (state && state !== 'landed') {
+      if (label) label.textContent = '翻转中';
+      el.setAttribute('aria-label', `${which(el)}筊：翻转中`);
+    }
   }
 
   function render(left, right) {
@@ -106,28 +158,72 @@ function init(doc) {
     if (counter) counter.textContent = String(count);
   }
 
+  // 开始时宣告一次「掷筊中」，之后 aria-live 区域直到落定才再变化。
+  function renderRolling() {
+    delete readout.dataset.result;
+    title.textContent = '掷筊中';
+    if (tag) tag.textContent = `第 ${count + 1} 次 · 掷筊中`;
+    if (desc) desc.textContent = '正在翻转 · 请稍候';
+  }
+
+  function applyFrame(f) {
+    stage.dataset.rollPhase = f.phase;
+    showFace(blocks.left, f.left);
+    showFace(blocks.right, f.right);
+    if (f.phase === 'launch') {
+      setBlockState(blocks.left, 'launch');
+      setBlockState(blocks.right, 'launch');
+    } else if (f.phase === 'tumble') {
+      setBlockState(blocks.left, 'tumble');
+      setBlockState(blocks.right, 'tumble');
+    } else if (f.phase === 'land-left') {
+      // 左筊先落定并显示真实朝向，右筊继续翻转。
+      setBlockState(blocks.left, 'landed');
+      setBlock(blocks.left, f.left);
+      setBlockState(blocks.right, 'tumble');
+    } else if (f.phase === 'land-right') {
+      setBlockState(blocks.right, 'landed');
+      setBlock(blocks.right, f.right);
+    }
+  }
+
   function roll() {
     if (rolling) return;
+
+    // 在改变交互状态前完成所有可能失败的随机数与时间线计算，避免异常时界面卡在「掷筊中」。
+    const left = randomSide();
+    const right = randomSide();
+    const timeline = buildRollTimeline(left, right);
+
     rolling = true;
     triggers.forEach((b) => { b.disabled = true; });
     stage.classList.add('is-rolling');
     doc.body.classList.add('is-rolling');
 
-    // 先取随机，再等动画落定后揭示，保证结果不受动画时长影响。
-    const left = randomSide();
-    const right = randomSide();
-    const wait = rollDurationMs(doc.documentElement);
-
     const settle = () => {
       count += 1;
       render(left, right);
+      delete stage.dataset.rollPhase;
+      setBlockState(blocks.left, null);
+      setBlockState(blocks.right, null);
       stage.classList.remove('is-rolling');
       doc.body.classList.remove('is-rolling');
       triggers.forEach((b) => { b.disabled = false; });
       rolling = false;
     };
-    if (wait === 0) settle();
-    else setTimeout(settle, wait);
+
+    if (prefersReducedMotion()) {
+      settle();
+      return;
+    }
+
+    renderRolling();
+    timeline.frames.forEach((f) => {
+      setTimeout(() => {
+        applyFrame(f);
+        if (f.reveal) settle();
+      }, f.at);
+    });
   }
 
   triggers.forEach((b) => b.addEventListener('click', roll));
