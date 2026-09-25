@@ -10,7 +10,7 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20fill='%231B34E8'/%3E%3Crect%20x='16'%20y='16'%20width='32'%20height='32'%20fill='none'%20stroke='%23fff'%20stroke-width='4'/%3E%3Crect%20x='28'%20y='28'%20width='8'%20height='8'%20fill='%23fff'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="./app.css?v=202609023">
+<link rel="stylesheet" href="./app.css?v=202609251">
 </head>
 <body class="is-locked">
 
@@ -38,6 +38,7 @@
               aria-haspopup="dialog" aria-expanded="false" aria-controls="history-dialog">
         <span class="key" aria-hidden="true">H</span><span>历史会话</span>
       </button>
+      <button type="button" class="tbtn" id="btn-research" disabled>入库回执</button>
       <button type="button" class="tbtn tbtn-lock" id="btn-lock" disabled>
         <span class="key" aria-hidden="true">L</span><span>锁定</span>
       </button>
@@ -98,6 +99,8 @@
 
       <p class="out-status" id="out-status" hidden></p>
     </section>
+    <section id="research-results" class="research-results" aria-live="polite" hidden></section>
+    <p class="empty-note">默认只研究、不写库。保存时发送「把这次研究过程沉淀下来」或「把这次研究结论沉淀下来」。</p>
   </main>
 
   <!-- ────── 右栏：事件时间线 ────── -->
@@ -165,14 +168,7 @@
       <button type="submit" class="btn btn-send btn-block" id="gate-submit">解锁工作台</button>
       <p class="gate-err" id="gate-err" role="alert" hidden></p>
       <p class="gate-note" id="gate-note">
-        这里输入的是 <strong>主口令</strong>（Hermes 的 API_SERVER_KEY）。它只被 POST 给
-        <code>/v1/console/auth/login</code> 换一枚<strong>设备令牌</strong>，随即丢弃 ——
-        主口令不进任何浏览器存储。存进 <code>localStorage</code> 的只有那枚设备令牌：
-        服务端签发、默认 90 天到期、随时可撤销，所以关标签页、重启浏览器之后工作台
-        仍然是激活的。点「锁定」会尽力向 Hermes 撤销这枚令牌并清空本地状态，
-        <strong>服务端的历史会话不受影响</strong>。
-        输入框已声明 <code>autocomplete=&quot;off&quot;</code>，但这只是给浏览器的提示 ——
-        浏览器与密码管理器仍可能自行记住这里的内容，页面无法保证它们不记。
+        主口令仅用于换取设备令牌；设备令牌仅存内存，刷新后需重新解锁。会话与入库回执保存在服务端。
       </p>
     </form>
 
@@ -204,7 +200,11 @@
   </div>
 </div>
 
-<script src="./config.js?v=202609021"></script>
-<script src="./app.js?v=202609023"></script>
+<script src="./config.js?v=202609251"></script>
+<script src="./app.js?v=202609251"></script>
+<dialog id="research-dialog" aria-label="已保存的研究原文">
+  <button type="button" id="research-close" class="tbtn">关闭原文</button>
+  <pre id="research-content"></pre>
+</dialog>
 </body>
 </html>

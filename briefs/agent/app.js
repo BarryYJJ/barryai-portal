@@ -5,9 +5,7 @@
  * 安全约定（改动时请一并核对 tests/test_agent_console.py）：
  *   1. **主口令**（Hermes API_SERVER_KEY）只活在闸门提交那一瞬间的局部变量里：
  *      POST 给 /v1/console/auth/login 换成设备令牌，响应一到立刻丢弃，不进任何存储；
- *   2. **设备令牌**（服务端签发、可撤销、有到期）才进 localStorage —— 这样关标签页、
- *      重启浏览器之后工作台仍是激活的；两者都只以 `Authorization: Bearer …` 发出，
- *      不进 URL / DOM / 日志；
+ *   2. 设备令牌仅在内存；刷新重新解锁，旧版浏览器凭据会清理。
  *   3. 一切模型输出、工具预览、历史会话预览都用 textContent 渲染，绝不 innerHTML；
  *   4. 401 一律视为设备令牌失效：清令牌 → 回到闸门。**绝不删服务端历史**；
  *   5. 会话历史的真相是 Hermes 的 SessionDB；本地那份只是运行时视图，
@@ -552,7 +550,7 @@
   };
 
   var state = {
-    token: null,        // 设备令牌：只在这里和 localStorage（主口令永远不在）
+    token: null,        // 设备令牌：仅内存保存（所有凭据均不落浏览器存储）
     logicalSessionId: null, // 逻辑 / 根会话 id（briefs-agent-*）：稳定，本机只记它
     sessionId: null,    // 当前**物理**会话 id：POST /v1/runs 真正写进去的那一个
     pointerPending: false,  // 正在核对「这一场现在写到哪儿」，期间不放行发送
@@ -615,17 +613,15 @@
 
   /* ── 凭据存取：唯一允许接触设备令牌的地方 ─────────────────────
      主口令从不经过这里。它只在闸门提交那一瞬间存在于一个局部变量里，
-     换到设备令牌之后立刻被置空 —— 落进 localStorage 的永远只有可撤销的令牌。
+     换到设备令牌之后立刻被置空；设备令牌仅在内存中，旧版存储会清理。
      ───────────────────────────────────────────────────────────── */
   function loadDeviceToken() {
-    try { return global.localStorage.getItem(STORE.deviceToken) || null; }
-    catch (e) { return null; }
+    try { global.localStorage.removeItem(STORE.deviceToken); } catch (e) { /* 清理旧版凭据 */ }
+    return null;
   }
   function saveDeviceToken(value) {
     var old = state.token || loadDeviceToken();
     state.token = value;
-    try { global.localStorage.setItem(STORE.deviceToken, value); }
-    catch (e) { /* 隐私模式：仅内存，本次仍可用 */ }
     if (old && old !== value) bestEffortLogout(old);
   }
   function dropDeviceToken() {
@@ -764,6 +760,9 @@
 
   /* ── 闸门 ↔ 工作台 ── */
   function showGate(message) {
+    renderResearch([], '');
+    $('research-content').textContent = '';
+    $('research-dialog').close();
     state.unlocked = false;
     closeHistoryDialog();
     dom.body.classList.add('is-locked');
@@ -806,6 +805,7 @@
     // 「新会话」永远是出路：即使会话指针核对不出来，也必须能重新开一场。
     dom.btnNew.disabled = !on || state.running;
     dom.btnHistory.disabled = !on;
+    $('btn-research').disabled = !on;
     dom.btnLock.disabled = !on;
     var buttons = dom.qaList.querySelectorAll('button');
     for (var i = 0; i < buttons.length; i++) buttons[i].disabled = !on;
@@ -882,6 +882,7 @@
      ───────────────────────────────────────────────────────────── */
 
   function clearCanvas() {
+    renderResearch([], '');
     dom.docTask.textContent = '尚未下达任务。';
     dom.taskMeta.textContent = '—';
     dom.outMeta.textContent = '待命';
@@ -917,6 +918,8 @@
   /** 把某一轮完整地画到主画布上（切换轮次、以及每次新任务都会走这里）。 */
   function renderTurn(turn) {
     if (!turn) return;
+    renderResearch(turn.researchReceipt ? [turn.researchReceipt] : (turn.researchSources || []),
+      turn.researchReceipt ? '真实入库回执' : '找回的历史研究 · 日期与观点需重新核验');
     dom.docTask.textContent = turn.task;
     dom.taskMeta.textContent = turn.time;
     dom.outMeta.textContent = turn.outMeta;
@@ -1599,6 +1602,64 @@
     return reconcileRun(run, reason);
   }
 
+  function openResearch(item) {
+    if (!state.unlocked || !item || !/^[A-Za-z0-9_-]{1,160}$/.test(item.doc_id || '')) return;
+    var generation = state.generation;
+    apiFetch('/v1/console/research/' + encodeURIComponent(item.doc_id), { timeout: 15000 })
+      .then(function (res) {
+        if (generation !== state.generation) throw abandoned();
+        if (res.status === 401) { handleUnauthorized(generation); throw abandoned(); }
+        if (!res.ok) throw new Error('研究内容读取失败');
+        return res.json();
+      }).then(function (body) {
+        if (generation !== state.generation || !state.unlocked) return;
+        $('research-content').textContent = String(body.title || '') + '\n' + String(body.date || '')
+          + '\n出处：' + String(body.source || '') + '\n\n' + String(body.content || '').slice(0, 100000);
+        $('research-dialog').showModal();
+      }).catch(function (err) {
+        if (!err.abandoned && generation === state.generation) addEvent('研究', 'warn', '读取失败', '请重新尝试');
+      });
+  }
+
+  function renderResearch(items, label) {
+    var box = $('research-results');
+    clear(box);
+    box.hidden = !items || !items.length;
+    if (box.hidden) return;
+    box.appendChild(el('p', '', label));
+    items.forEach(function (item) {
+      var row = el('div', 'research-row');
+      row.appendChild(el('p', '', String(item.title || '') + ' · ' + String(item.date || '')));
+      row.appendChild(el('p', '', item.message || ('出处：' + String(item.source || ''))));
+      if (item.status) row.appendChild(el('p', '', '状态：' + item.status + ' · Wiki：' + item.wiki_status));
+      if (item.doc_id) {
+        row.appendChild(el('code', '', item.doc_id));
+        var link = el('a', '', '鉴权打开原文');
+        link.href = '#research-' + encodeURIComponent(item.doc_id);
+        link.addEventListener('click', function (event) { event.preventDefault(); openResearch(item); });
+        row.appendChild(link);
+      }
+      box.appendChild(row);
+    });
+  }
+
+  function listResearch() {
+    if (!state.unlocked) return;
+    var generation = state.generation;
+    apiFetch('/v1/console/research', { timeout: 15000 }).then(function (res) {
+      if (generation !== state.generation) throw abandoned();
+      if (res.status === 401) { handleUnauthorized(generation); throw abandoned(); }
+      if (!res.ok) throw new Error('无法读取回执');
+      return res.json();
+    }).then(function (body) {
+      if (generation !== state.generation || !state.unlocked) return;
+      renderResearch(body.data || [], '真实入库回执（最近 30 条）');
+      if (!body.data || !body.data.length) addEvent('研究', null, '暂无入库回执', '明确发送保存命令后才会写入。');
+    }).catch(function (err) {
+      if (!err.abandoned && generation === state.generation) addEvent('研究', 'warn', '回执读取失败', '请重试');
+    });
+  }
+
   function submitTask(text) {
     // 按钮的 disabled 只是外观；真正的闸门在这里，「回车 + 点击」也绕不过去。
     if (state.submitting || !canSendNow(state)) return;
@@ -1643,6 +1704,7 @@
     var payload = {
       input: task,
       session_id: sessionId(),
+      research_session_id: state.logicalSessionId,
       instructions: CFG.instructions,
       conversation_history: capHistory(state.history, CFG.history)
     };
@@ -1650,7 +1712,7 @@
     apiFetch('/v1/runs', {
       method: 'POST',
       json: payload,
-      timeout: TIMEOUTS.createRun || 20000,
+      timeout: 200000, // 保存管线可能包含模型加载；丢响应可从真实回执恢复
       signal: controller.signal
     }).then(function (res) {
       if (!isCurrentRun(run)) throw abandoned();
@@ -1659,6 +1721,21 @@
       return res.json();
     }).then(function (body) {
       if (!isCurrentRun(run)) throw abandoned();
+      if (body && body.research_receipt) {
+        var receipt = body.research_receipt;
+        var savedTurn = state.turns[run.turnId];
+        if (savedTurn) { savedTurn.researchReceipt = receipt; savedTurn.text = receipt.message; }
+        setStatus('warn', receipt.message, run);
+        setOutMeta('入库回执', run);
+        markTask(run.turnId, receipt.status === 'stored' ? 'done' : 'failed');
+        releaseRun(run);
+        return;
+      }
+      if (body && body.research_sources) {
+        var turn = state.turns[run.turnId];
+        if (turn) turn.researchSources = body.research_sources;
+        renderResearch(body.research_sources, '找回的历史研究 · 日期与观点需重新核验');
+      }
       var runId = body && body.run_id;
       if (!runId) throw new Error('Hermes 没有返回 run_id。');
       run.runId = String(runId);
@@ -2333,47 +2410,16 @@
     });
 
     global.addEventListener('storage', onDeviceTokenStorageChange);
+    $('btn-research').addEventListener('click', listResearch);
+    $('research-close').addEventListener('click', function () { $('research-dialog').close(); });
 
     global.addEventListener('online', function () {
       if (state.unlocked && !state.running) setConn('ok', '已连接');
     });
     global.addEventListener('offline', function () { setConn('err', '离线'); });
 
-    // 换标签页 / 重启浏览器之后，用已存的设备令牌复验一次；失败就老实回到闸门。
-    var stored = loadDeviceToken();
-    if (stored) {
-      // 复验期间用户完全可能手输一份新口令；那次提交会抬升 generation，
-      // 于是这条迟到回调必须彻底闭嘴：不解锁、不清凭据、不覆盖任何新状态。
-      var bootGeneration = nextGeneration();
-      dom.gateState.textContent = '正在复验设备令牌…';
-      setConn('busy', '验证中');
-      verifyToken(stored).then(function (result) {
-        if (!isCurrentGeneration(bootGeneration)) { stored = null; return; }
-        if (result.ok) {
-          saveDeviceToken(stored);   // 验过才上岗：未验证的令牌不进 state
-          stored = null;
-          clearLocalHistory();
-          dom.gateState.textContent = '已通过';
-          unlock();
-          addEvent('AUTH ✓', 'ok', '设备令牌仍有效，工作台已恢复',
-            truncate(endpointLabel, 60));
-          hydrateFromServer(bootGeneration);
-        } else {
-          stored = null;
-          clearLocalHistory();
-          if (result.unauthorized) {
-            // 服务端明说这枚令牌不认了：删掉它，回闸门换一枚新的。
-            // 只清本地 —— 服务端历史原封不动，重新解锁还能从「历史会话」找回来。
-            dropDeviceToken();
-            showGate(result.message + ' 服务端的历史会话不受影响。');
-          } else {
-            // 离线 / 5xx / CORS 没放行：这枚令牌很可能还是好的，留着等下次刷新。
-            showGate(result.message
-              + ' 本地设备令牌已保留：网络恢复后刷新页面即可自动重试。');
-          }
-        }
-      });
-    }
+    // 刷新必须重新解锁；这里只清理旧版持久化凭据。
+    loadDeviceToken();
   }
 
   if (document.readyState === 'loading') {

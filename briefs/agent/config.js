@@ -9,8 +9,7 @@
  * 凭据模型（两样东西，别混）：
  *    · 主口令 = Hermes 的 API_SERVER_KEY。使用者手输一次，POST 给
  *      /v1/console/auth/login 换成设备令牌，响应一到就丢弃，任何存储都不碰。
- *    · 设备令牌 = 服务端签发的不透明串，可撤销、默认 90 天到期。只有它进
- *      localStorage —— 所以关了标签页、重启浏览器，工作台仍然是激活的。
+ *    · 设备令牌 = 服务端签发的不透明串，仅存内存，刷新后重新解锁。
  */
 (function (global) {
   'use strict';
@@ -44,8 +43,8 @@
     sessionKeyHeader: 'X-Hermes-Session-Key',
     sessionKey: 'agent:main:web:briefs-agent:barry',
 
-    // localStorage 键名。这里**只**放两样非口令的东西：
-    //   · deviceToken：服务端签发、可撤销、有到期的设备令牌；
+    // 浏览器存储键名：仅会话逻辑根可写入，旧令牌键只用于迁移清理。
+    //   · deviceToken：旧版遗留键，只删除，不读写凭据；
     //   · sessionId：会话的**逻辑根** id（形如 briefs-agent-<hex>，非机密）。
     //     刻意不存「当前物理会话 id」—— 上下文压缩会让 Hermes 换一个 id 继续写，
     //     把那个 id 腌进浏览器只会留下一个过期指针。
