@@ -302,17 +302,17 @@
   // button, so repeating "Neo-cloud" on all five card titles adds no signal.
   var GPU_MODEL_LABELS = {
     neo_h100: 'H100', neo_a100: 'A100', neo_h200: 'H200', neo_b200: 'B200', neo_mi300x: 'MI300X',
-    hyper_h100: 'H100', hyper_a100: 'A100',
+    hyper_h100: 'H100', hyper_a100: 'A100', neo_b300: 'B300',
   };
-  var GPU_DISPLAY_ORDER = ['neo_b200', 'neo_h100', 'neo_a100', 'neo_h200', 'neo_mi300x', 'hyper_h100', 'hyper_a100'];
+  var GPU_DISPLAY_ORDER = ['neo_b300', 'neo_b200', 'neo_h100', 'neo_a100', 'neo_h200', 'neo_mi300x', 'hyper_h100', 'hyper_a100'];
   function orderSeries(list, keys) {
     return list.slice().sort(function (a, b) {
       var ai = keys.indexOf(a.key), bi = keys.indexOf(b.key);
       return (ai < 0 ? keys.length : ai) - (bi < 0 ? keys.length : bi);
     });
   }
-  // Portrait 2:3 small multiples, same ratio as the Token cards. Five fit one
-  // desktop row; each is drawn alone so it owns its y-domain, which the shared
+  // Portrait 2:3 small multiples, same ratio as the Token cards. All six
+  // Neo-cloud cards fit one desktop row; each is drawn alone so it owns its y-domain, which the shared
   // wide chart flattened into near-straight lines.
   var GPU_CHART_W = 240, GPU_CHART_H = 360;
 
@@ -584,10 +584,14 @@
       doc.token.freshness.latest_date ? (doc.token.freshness.latest_date + ' · 滞后 ' + doc.token.freshness.lag_days + ' 天') : '暂无观测',
       doc.token.freshness.stale ? 'is-stale' : 'is-ok'
     ));
+    // Series keep their own windows (B300 is collected apart from the wide
+    // table), so report the stalest series: a fresh B300 must not mask the rest.
+    var gpuLatest = doc.gpu.series.filter(function (s) { return s.latest; }).map(function (s) { return s.latest.date; }).sort()[0];
+    var gpuLag = gpuLatest ? doc.gpu.freshness.lag_days + Math.round((Date.parse(doc.gpu.freshness.latest_date) - Date.parse(gpuLatest)) / 86400000) : null;
     statusEl.appendChild(statusCard(
       'GPU 新鲜度',
-      doc.gpu.freshness.latest_date ? (doc.gpu.freshness.latest_date + ' · 滞后 ' + doc.gpu.freshness.lag_days + ' 天') : '暂无观测',
-      doc.gpu.freshness.stale ? 'is-stale' : 'is-ok'
+      gpuLatest ? (gpuLatest + ' · 滞后 ' + gpuLag + ' 天') : '暂无观测',
+      !gpuLatest || gpuLag >= 4 ? 'is-stale' : 'is-ok'
     ));
     statusEl.appendChild(statusCard('Ornn GPU 新鲜度', doc.ornn.freshness.latest_date ? doc.ornn.freshness.latest_date + ' · 滞后 ' + doc.ornn.freshness.lag_days + ' 天 · ' + statusLabel(doc.status.ornn.status) : '暂无观测', statusClass(doc.status.ornn.status === 'failed' ? 'failed' : doc.ornn.freshness.stale ? 'stale' : doc.status.ornn.status)));
     var pipelineKeys = Object.keys(doc.status.pipeline);

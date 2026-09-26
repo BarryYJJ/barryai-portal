@@ -1,4 +1,4 @@
-// 公开预览：只读同目录 data/dashboard.json，把 Neo-cloud B200、Ornn H100 价格与 Token 综合近 30 日走势
+// 公开预览：只读同目录 data/dashboard.json，把 Silicon Data B300、B200 价格与 Token 综合近 30 日走势
 // 填进 #access 分区的预览位。完整的日度序列、区间切换与来源状态仍由 app.js 在解锁后渲染。
 // 任何拉取 / 结构错误都只换成一句降级文案，绝不影响下方表单与闸门。
 (function () {
@@ -10,11 +10,12 @@
   var kpiRow = $('access-preview');
   if (!kpiRow) return;
 
-  // 上方保留 Neo-cloud B200 与 Ornn H100 价格，Token 综合支出指数交给下方折线图表达。
+  // 上方是同源 Silicon Data 的 B300 与 B200 价格，Token 综合支出指数交给下方折线图表达。
   var KPIS = [
-    { block: 'gpu', key: 'neo_b200', label: 'B200租赁价格丨Neo-cloud B200', unit: 'USD / GPU-hour', decimals: 2 },
-    { block: 'ornn', key: 'h100_sxm', label: 'H100租赁价格丨Ornn H100', unit: 'USD / GPU-hour', decimals: 2 },
+    { block: 'gpu', key: 'neo_b300', label: 'B300租赁价格丨Silicon Data B300', unit: 'USD / GPU-hour', decimals: 2 },
+    { block: 'gpu', key: 'neo_b200', label: 'B200租赁价格丨Silicon Data B200', unit: 'USD / GPU-hour', decimals: 2 },
   ];
+  var STALE_DAYS = 4;
 
   function el(tag, cls, text) {
     var node = document.createElement(tag);
@@ -52,7 +53,9 @@
       if (!s) return;
       var obs = cleanObs(s);
       var latest = obs.length ? obs[obs.length - 1] : null;
-      var stale = doc[k.block].freshness && doc[k.block].freshness.stale;
+      // 每条序列按自己的最新观测日判断滞后：B300 与 B200 各有独立窗口。
+      var today = typeof doc.generated_at_utc === 'string' ? doc.generated_at_utc.slice(0, 10) : null;
+      var stale = latest && today && (Date.parse(today) - Date.parse(latest.date)) / 86400000 >= STALE_DAYS;
       var dateText = latest ? latest.date + (stale ? '（滞后）' : '') : '暂无观测';
       var deltaText = '30 日 暂无';
       // 30 日前的同序列读数存在时给出变化幅度；不存在就明确标为暂无。

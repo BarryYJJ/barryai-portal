@@ -80,8 +80,10 @@ check $? "AI Research OS 副标题已更新"
   && ! grep -q '<b>barryai\.cn/research</b>' "$PAGE"
 check $? "AI 研究工作台与 AI Research OS 不再展示访问地址行"
 
-grep -q "gpu.latest.neo_h100" "$PAGE" && ! grep -q "ornn.latest.b200" "$PAGE"
-check $? "Token + GPU 卡片展示 Neo-cloud H100 而非 Ornn B200"
+grep -q "latest('neo_b300')" "$PAGE" && grep -q "latest('neo_b200')" "$PAGE" \
+  && grep -q 'Silicon Data B300 与 B200 租赁价 USD/GPU-hour' "$PAGE" \
+  && ! grep -q 'gpu.latest.neo_h100\|ornn.latest.b200' "$PAGE"
+check $? "Token + GPU 卡片展示同源 Silicon Data B300 与 B200，使用各序列日期和单位"
 
 ! grep -q "p.cn_share" "$PAGE"
 check $? "Token量与分布卡片不再展示中国模型份额"

@@ -247,7 +247,7 @@ h1{
           <p class="desc">大模型 <span class="keep">Token</span> 成本与 GPU 租赁基准的统一跟踪</p>
           <dl data-live="token-gpu">
             <div class="row"><dt>最新</dt><dd data-live-updated aria-live="polite">每日更新</dd></div>
-            <div class="row"><dt>数据</dt><dd data-live-kpi>Neo-cloud B200 与 H100 租赁价</dd></div>
+            <div class="row"><dt>数据</dt><dd data-live-kpi>Silicon Data B300 与 B200 租赁价 USD/GPU-hour</dd></div>
             <div class="row"><dt>范围</dt><dd><span class="keep">Token</span> 指数、云 GPU 指数与公开租赁价</dd></div>
           </dl>
           <p class="go"><span>进入看板</span><span class="arrow" aria-hidden="true">→</span></p>
@@ -390,17 +390,23 @@ h1{
     });
   }
 
-  // Token & GPU：/token-gpu/data/dashboard.json（Neo-cloud B200 与 H100 最新价格）
+  // Token & GPU：/token-gpu/data/dashboard.json（Silicon Data B300 与 B200，各取序列自己的最新观测）
   function tokenGpu() {
     return getJSON('/token-gpu/data/dashboard.json').then(function (d) {
-      if (!d) return;
-      var gpu = d.gpu || {};
-      var dates = [gpu.latest && gpu.latest.date].filter(Boolean);
-      if (dates.length) setText(el('token-gpu', 'data-live-updated'), dates[dates.length - 1] + (d.generated_at_utc ? '（生成 ' + String(d.generated_at_utc).slice(0, 10) + '）' : ''));
-      var parts = [];
-      if (gpu.latest && typeof gpu.latest.neo_b200 === 'number') parts.push('B200 Neo $' + gpu.latest.neo_b200.toFixed(2) + '/h');
-      if (gpu.latest && typeof gpu.latest.neo_h100 === 'number') parts.push('H100 Neo $' + gpu.latest.neo_h100.toFixed(2) + '/h');
-      if (parts.length) setText(el('token-gpu', 'data-live-kpi'), parts.join(' · '));
+      var series = (d && d.gpu && d.gpu.series) || [];
+      function latest(key) {
+        for (var i = 0; i < series.length; i++) {
+          var s = series[i], l = s && s.key === key && s.latest;
+          if (l && typeof l.date === 'string' && typeof l.value === 'number' && isFinite(l.value)) return l;
+        }
+        return null;
+      }
+      var picks = [['B300', latest('neo_b300')], ['B200', latest('neo_b200')]].filter(function (p) { return p[1]; });
+      if (!picks.length) return;
+      var sameDay = picks.every(function (p) { return p[1].date === picks[0][1].date; });
+      var updated = sameDay ? picks[0][1].date : picks.map(function (p) { return p[0] + ' ' + p[1].date; }).join(' · ');
+      setText(el('token-gpu', 'data-live-updated'), updated + (d.generated_at_utc ? '（生成 ' + String(d.generated_at_utc).slice(0, 10) + '）' : ''));
+      setText(el('token-gpu', 'data-live-kpi'), 'Silicon Data ' + picks.map(function (p) { return p[0] + ' ' + p[1].value.toFixed(2); }).join(' · ') + ' USD/GPU-hour');
     });
   }
 
