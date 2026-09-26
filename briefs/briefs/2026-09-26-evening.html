@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-09-26 晚间 AI 简报</title>
+<style>
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-09-26 20:30:34</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-09-26 晚间 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-09-26 14:30</strong> &nbsp;→&nbsp; <strong>2026-09-26 20:30</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">8</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">4 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">50.0%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">6 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">光模块</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">硅光</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">Meta</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">人工智能</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-82258251228248452">高盛看多年底行情：Meta Muse 点燃消费级 AI 想象，盘整 3 个月后，市场又怕“没上车”</a></li><li><a class="tldr-jump" href="#t-14425428445415482">中美建立人工智能对话、下次定于 11 月，AI 竞争之外也架起了“沟通热线”</a></li><li><a class="tldr-jump" href="#t-82258251228248442">国海机械聚焦硅光晶圆全自动探针台，光模块“卖铲子”逻辑细化到晶圆测试设备</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-55521528551541884">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-26 19:09 · 👁 277</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">美国时间9月25日，白宫公布历...</div>
+  <div class="topic-content">美国时间9月25日，白宫公布历史性国事访问成果：
+
+一、DELIVERING FOR AMERICANS  
+1.	头条是芬太尼，欢迎中国为芬太尼设立的新的出口管制和执法措施。
+
+2.	敦促中国增加成品油产量以稳定全球供应——（注：芬太尼和油价直接跟中选相关）。
+
+3.	Welcome 两只大熊猫落地美国。
+
+二、经贸议题：落实贸易与投资委员会机制
+1. 关税30bn/30bn： 贸易委员会协调下，双方就300亿美元非敏感商品关税优惠达成共识；同时，贸易委员会还成立了工作组，专门致力于农业领域市场准入问题。
+美：农产品、鱼类及海产品、原木木制品、化妆品及医疗设备；
+中：小型电器、玩具、儿童汽车左右等消费品。
+
+2. 煤炭进口：2027/2028年将至少从美国进口1000万吨煤炭。
+
+3.	成立投资委员会。职责：探讨潜在的投资机会以及与投资相关的障碍，并为双方提供一个正式的渠道。
+
+4.	双方共同致力于稀土及其他关键矿产供应短缺问题，旨在让相关物资供应链恢复到正常水平。
+
+三、双方同意在尊重、公平和互惠的基础上，建立建设性战略稳定关系
+
+1.	作为G20和APEC东道主，两国将互相支持，双方领导人也都计划出席对方峰会。
+
+2.	双方领导人讨论了多变问题：俄罗斯、朝鲜和伊朗局势。一致认为，伊朗绝不能拥有核武器，同时也部允许任何国家和机构对国际水道施加限制。
+
+3.	两位领导人都回顾并提及中美曾是二战盟友，为二战胜利并肩作战。
+
+4.	Trump提议美、俄、中开展三方军控谈判。
+
+5.	<mark>AI</mark>：双方领导人同意使用SI 而非 <mark>AI</mark>来指代新兴技术。
+
+6.	双方建立了超级智能（SI）对话机制，下一次对话将于2026年11月深圳举行。双方还同意针对SI incident建立相关双边沟通渠道。
+
+总结：这是一次中美关系稳定之旅，双方延续了2025年釜山会晤、5月北京会晤以来的总体稳定，丰富了建设性战略稳定关系；在具体问题上取得一些进展，但进展相对有限（芬太尼、关税互减、<mark>AI</mark>对话机制、伊朗等地缘问题上取得了一些进展）。年内后续还有两次会晤，年底前中美关系总体稳定的基调维持不变。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521528551541884" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258251228248442">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-26 19:09 · 👁 254</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">国海机械：图解<mark>光模块</mark>设备--硅...</div>
+  <div class="topic-content">国海机械：图解<mark>光模块</mark>设备--<mark>硅光</mark>晶圆全自动探针台</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">光模块</span><span class="kw-tag">硅光</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258251228248442" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258251228248452">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-26 19:08 · 👁 254</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">高盛的weekly mash：...</div>
+  <div class="topic-content">高盛的weekly mash：
+
+尽管当前宏观与微观主题交织、复杂性毋庸置疑，但有 3 个关键理由表明，年末前股市的上行机会正变得日益清晰——而这些理由最好结合当前市场上两股关键驱动力量来解释，本周的价格走势再次印证了这两点：
+
+1/ 在经历了为期 3 个月的大范围 <mark>AI</mark> 相关主题盘整（最简单直观的方式就是看纳斯达克指数，如下图）、且二季度历史性大涨之后投资者对<mark>AI</mark>主题的配置和仓位大幅削减之后，本周一出现了令人信服的突破——<mark>Meta</mark> 的 Muse 产品既加速了市场对&quot;<mark>AI</mark> 走向广泛消费者采用&quot;时间表的认知，也在许多人中间点燃了明确的&quot;错失恐惧&quot;（FOMO）……
+
+2/ 收益率再次向上突破；但这一次的催化剂，既不是政府开支与 <mark>AI</mark> 资本开支周期对资本的极端争夺，也不是能源综合体引发的通胀推力——而是美国名义增长持续强劲的势头（如强于预期的 PMI 数据所示）。
+
+一方面，考虑到收益率变动的幅度，股市本周还能守住涨幅确实令人意外；但考虑到增长的上行兑现以及我们已经看到的去杠杆/去风险，这或许可以用很简单的方式来合理化。从表面上看，再结合对投资者情绪的综合判断，目前还有另外两个观点似乎被普遍持有：
+1/ 在 10 年期美债收益率连续 7 个月走高之后（50 年来最长的一轮！见下图），债券市场引发股市下跌的风险正在上升；
+2/ 在重新增加风险敞口之前，市场需要看到海湾局势降温，以及（安全地）跨过中期选举这道坎。
+
+当然，一如既往，核心问题是——这些共识观点到底有多正确，以及这两股关键驱动力将如何演变？这就引出年末前股市上行机会日益清晰的 3 个理由：
+
+通胀：如前图所示（收益率连涨 7 个月），自伊朗冲突爆发以来，能源价格的头条冲击一直笼罩着核心通胀的辩论。然而，关税传导正在减弱，加息（以及随之而来的金融条件收紧）正在发挥作用，增长的二阶导正在放缓，而且我们从伊朗冲突中发现：一旦霍尔木兹海峡（SoH）的通行恢复正常，能源价格存在有意义的下行风险。伊朗谈判筹码最大的窗口期大概是从现在到 11 月 2 日，因此随时出现新一轮&quot;通缩性能源故事&quot;的风险非常明显。或许最重要、也压过能源叙事的一点是：<mark>Meta</mark> 的 Muse 刚刚向消费品与服务领域打响了通缩的第一枪。我们关于&quot;商业的代理式 <mark>AI</mark> 时代（agentic <mark>AI</mark> era for commerce）&quot;的研究，以及我们组合团队关于&quot;消费者惯性（consumer inertia）&quot;股票的研究（下方第 3 张图……），都值得一读。
+
+增长：经济活动（特别是在美国）好于预期，而且考虑到过去 6 个月地缘政治与能源价格的不确定性，其韧性也超出预期。但往后看，上行风险将减弱，二阶导会放缓。Jan Hatzius 阐述了财政利好为何从此开始消退（减税红利递减）、汽油价格和按揭利率上升将对部分经济板块和消费者造成挤压；我们的策略师也阐述了 <mark>AI</mark> 资本开支时代为何将延续、但从此放缓。结合前述通胀观点，所有这一切意味着：央行的加息幅度很可能不及当前市场定价，而且现在根本不是担心更高收益率的时候——该担心的时间是 7 个月前。
+
+盈利：当前市场上正在展开一场非常合理的辩论——企业盈利增长的可持续性，以及我们是否正处于一场&quot;盈利泡沫&quot;之中。幸运的是，正如最近反复发生的那样——Ben Snider 的美国策略团队刚刚写出了帮你选边站所需的研究报告：《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D&quot; title=&quot;%E6%9F%A5%E6%89%BE%E5%9B%BE%E4%B9%A6&quot; /&gt;盈利超预期，但不是盈利泡沫》（&quot;Over-earning, but not an earnings bubble&quot;）。市场在同时容纳多个真相方面能力之差令人失望，但在这个主题上，似乎有 3 个大概率为真的判断：
+1/ 不要为创纪录的&quot;其他收入（other income）&quot;付溢价；
+2/ 存储芯片股和部分半导体股盈利确实超出常态；
+3/ 核心盈利很可能保持格外强劲——即便增速放缓——至少持续到 2027 年底。
+
+市场一直在试图为&quot;增长与盈利显著放缓 + 利率更高&quot;的组合定价。滞胀叙事听起来很顺——但它与数据并不一致；增长放缓 + 通胀威胁消退 + 央行鹰派态度缓和，对股市而言并不是坏组合——尤其是在股票全年都在降估值（de-rated）的情况下。从很多方面看，这正是上世纪 90 年代中后期上一轮重大技术变革期间，市场反复拉锯多年的状态。往后看，如果市场预期的是滞胀、而实际兑现的是&quot;金发姑娘&quot;（goldilocks）情景，那么股市完全有条件遵循那个被广泛记录的历史规律——从中期选举到年末取得可观涨幅。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Meta</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258251228248452" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425428445415482">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-26 19:08 · 👁 262</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【兴证策略】中美元首会晤成果公...</div>
+  <div class="topic-content">【兴证策略】中美元首会晤成果公布
+
+1、#外交层面官宣互访。两国元首有意出席对方主办的会议。
+
+2、#共同应对国际油价。美方希望中方增加成品油产量。
+
+3、#应对芬太尼的合作。中国把奥啡类物质纳入管控，并对两种芬太尼前体实施了新的出口管制。美国强烈要求中方判处中国根据美方情报逮捕的21名中国犯罪嫌疑人最高刑罚。
+
+4、#中方协调美伊冲突。两国元首同意伊朗应履行不发展核武器的承诺，任何国家或机构都不得对国际水道征收通行费。
+
+5、#建立<mark>人工智能</mark>对话。下次对话将于今年11月举行。
+
+6、#两军将签署备忘录。中美两军同意尽快签署加强危机沟通与预防的谅解备忘录（MOU）。
+
+7、#等金额降关税落地。① 本次会晤正式启动5月成立的贸易和投资两个专门委员会；② 在贸易委员会下专门成立一个工作组负责消除农业的市场准入壁垒。③ 就双边600亿、单边300亿美元非敏感商品的“更优惠关税待遇”达成共识：美国出口商品包括农产品、海产品、木制品、化妆品和医疗器械。中国出口商品包括小家电、玩具、小商品、儿童汽车座椅等。
+
+8、#其他： 据贝森特，中美贸易战休战期延长2个月至27年1月。据彭博社，中国应允27年和28年自美进口各1000万吨煤炭。据格里尔，此次访问期间达成的有限贸易协议的细节将于周一（28日）公布。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">人工智能</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425428445415482" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
