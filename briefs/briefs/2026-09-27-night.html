@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-09-27 深夜 AI 简报</title>
+<style>
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-09-27 01:30:31</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-09-27 深夜 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-09-26 20:30</strong> &nbsp;→&nbsp; <strong>2026-09-27 01:30</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">3</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">2 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">66.7%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">5 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">人工智能</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">AI服务器</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">AI芯片</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">电子布</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">覆铜板</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">PCB</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">1</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-14425428412225212">AI服务器抢高端电子布，普通布也可能被“挤”涨价，供给重分配才是主线</a></li><li><a class="tldr-jump" href="#t-14425428412225212">高端电子布不是买台织机就能印钞，电子纱、玻璃配方、工艺和客户认证才是护城河</a></li><li><a class="tldr-jump" href="#t-45548541524448588">中美AI对话被列入合作清单，研报押注竞争开始“装护栏”，关系转向战略稳定</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-45548541524448588">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-26 22:54 · 👁 290</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">一句话总结：合作清单主要就是战...</div>
+  <div class="topic-content">一句话总结：合作清单主要就是战略稳定定调、APEC/G20互挺、伊朗和国际水道共识、二战盟友、300亿对等降税、贸易理事会、禁毒联合执法、<mark>AI</mark>对话、两军危机沟通、大熊猫这些。
+
+这些都有历史性转变：
+
+关系定位：从对抗竞争，到战略稳定
+
+高层交往：从冷处理，到互相站台
+
+经贸：从互加关税，到对等降税
+
+军事安全：从没护栏，到要设护栏
+
+禁毒：从喊话，到联合执法
+
+<mark>人工智能</mark>：从各管各，到有对话
+
+国际议题：从各说各话，到找共同点
+
+气氛叙事：从对手叙事，到重提二战盟友、熊猫回美
+
+最大的历史性转变，就是中美从“对抗、脱钩、没护栏”，往“管理竞争、建机制、设护栏、具体合作”转。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">人工智能</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548541524448588" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425428412225212">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-26 22:53 · 👁 282</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title"><mark>电子布</mark>高端需求挤压普通供给
+
+...</div>
+  <div class="topic-content"><mark>电子布</mark>高端需求挤压普通供给
+
+最近<mark>电子布</mark>这一轮涨价，表面看是价格在涨，往深了看，其实是产业链开始出现了一个更值得关注的变化：高端需求正在抢走原本属于普通<mark>电子布</mark>的资源。电子纱、织机、高端配方、产线能力，甚至客户认证，都开始变得重要。
+
+判断1、<mark>电子布</mark>正在从“标准品”变成“工艺品”
+传统<mark>电子布</mark>更接近规模化标准品，核心是稳定生产和成本控制。但<mark>AI服务器</mark>对高速、高频、低损耗的要求不断提高，<mark>电子布</mark>的介电性能、热膨胀系数、厚度和均匀性都在升级。同样叫<mark>电子布</mark>，性能要求已经不是一个维度。未来真正有价值的，不只是“能生产多少米”，而是能不能持续生产符合高端<mark>覆铜板</mark>要求的产品。
+
+判断2、<mark>电子布</mark>真正的瓶颈，不只是一台织布机
+这一轮涨价容易让人把原因归结为“设备不够”。但织布机只是显性瓶颈，高端<mark>电子布</mark>的门槛远不止织造设备。上游要有合适的电子纱和玻璃配方，中游要解决超薄织造、张力控制和后处理，下游还要通过<mark>覆铜板</mark>及<mark>PCB</mark>客户长期验证。任何一个环节不过关，最终都无法变成稳定的高端产能。 所以<mark>电子布</mark>真正的竞争，正在从“设备竞争”变成纱线+配方+工艺+认证的综合竞争。
+
+判断3、普通<mark>电子布</mark>的供给，可能被高端需求“挤”出来
+这是这轮非常值得关注的一个变化。当企业把织机和产线转向低介电、低热膨胀等高端<mark>电子布</mark>时，设备并没有消失。但普通<mark>电子布</mark>能够获得的有效产能减少了。这就形成一个很有意思的产业现象：高端需求增长，同时挤压普通产品供给。 因此，即使行业总产能没有大幅下降，某些传统规格仍然可能持续偏紧。真正需要关注的不是“<mark>电子布</mark>总产能”，而是不同规格之间的有效产能正在重新分配。
+
+判断4、<mark>电子布</mark>的价值，正在跟着<mark>AI</mark> <mark>PCB</mark>一起升级
+<mark>电子布</mark>最终进入<mark>覆铜板</mark>，而<mark>覆铜板</mark>又决定<mark>PCB</mark>能不能承载更高速的信号。<mark>AI芯片</mark>、<mark>服务器</mark>平台持续升级，<mark>PCB</mark>向更高层数、更高频高速方向发展，<mark>覆铜板</mark>材料等级也从M6向M8/M9升级。于是<mark>电子布</mark>不再只是一个“用量型材料”。它正在成为影响信号损耗、热稳定性和可靠性的基础材料之一。 这意味着未来<mark>电子布</mark>的价值量增长，不一定来自简单的“用得更多”，也可能来自每一代产品的材料等级不断提高。
+
+判断5、<mark>电子布</mark>出海，真正的机会不是卖“布”
+<mark>电子布</mark>本身并不是一个特别适合简单出口的生意。高端<mark>电子布</mark>需要匹配当地<mark>覆铜板</mark>、<mark>PCB</mark>客户的材料体系，还涉及长期验证和稳定供货。因此，中国企业如果进入海外市场，更值得关注的是：跟着<mark>覆铜板</mark>和<mark>PCB</mark>客户走。 从产品出口进一步走向海外客户认证、本地仓储、技术支持和稳定供应，才更容易进入海外高端电子材料供应链。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI服务器</span><span class="kw-tag">AI芯片</span><span class="kw-tag">电子布</span><span class="kw-tag">覆铜板</span><span class="kw-tag">PCB</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425428412225212" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
