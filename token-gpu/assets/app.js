@@ -228,12 +228,56 @@
     var chartEl = document.getElementById('token-chart');
     var caption = document.getElementById('token-caption');
     var toggleContainer = document.getElementById('token-toggles');
+    var startInput = document.getElementById('token-date-start');
+    var endInput = document.getElementById('token-date-end');
+    var dateError = document.getElementById('token-date-error');
+    var customRange = null;
+    var datasetDates = unionDates(block.series);
+    var minDate = datasetDates[0], maxDate = datasetDates[datasetDates.length - 1];
+    var lastChartWidth = 0;
+    [startInput, endInput].forEach(function (input, i) {
+      if (datasetDates.length) {
+        input.min = minDate;
+        input.max = maxDate;
+        input.value = i === 0 ? minDate : maxDate;
+      }
+    });
+
+    function clearDateError() {
+      dateError.hidden = true;
+      dateError.textContent = '';
+      startInput.removeAttribute('aria-invalid');
+      endInput.removeAttribute('aria-invalid');
+    }
+
+    document.getElementById('token-date-apply').addEventListener('click', function () {
+      var start = startInput.value, end = endInput.value;
+      var error = !start || !end ? '请填写开始日期和结束日期。'
+        : start > end ? '开始日期不能晚于结束日期。'
+        : !datasetDates.length ? 'Token 暂无可选观测日期。'
+        : start < minDate || end > maxDate ? '请选择 ' + minDate + ' 至 ' + maxDate + ' 内的日期。' : '';
+      if (error) {
+        dateError.textContent = error;
+        dateError.hidden = false;
+        startInput.setAttribute('aria-invalid', 'true');
+        endInput.setAttribute('aria-invalid', 'true');
+        return;
+      }
+      clearDateError();
+      customRange = { start: start, end: end };
+      qsa('.range-control .range-btn', section).forEach(function (btn) { btn.classList.remove('is-active'); });
+      rerenderChart();
+    });
 
     var items = block.series.map(function (s) {
       return { key: s.key, label: TOKEN_LABELS[s.key] || s.label_zh, color: 'var(--series-token-' + s.key + ')' };
     });
     var visibleState = buildToggle(toggleContainer, items, rerenderChart);
-    var rangeGetter = wireRangeControl(qs('.controls', section), rerenderChart);
+    var rangeGetter = wireRangeControl(qs('.range-control', section), function () {
+      customRange = null;
+      clearDateError();
+      rerenderChart();
+    });
 
     function visibleSeries() {
       return block.series.filter(function (s) { return visibleState[s.key]; }).map(function (s) {
@@ -241,7 +285,9 @@
           key: s.key,
           label: TOKEN_LABELS[s.key] || s.label_zh,
           color: 'var(--series-token-' + s.key + ')',
-          observations: sliceByRange(s.observations, rangeGetter()),
+          observations: customRange ? s.observations.filter(function (o) {
+            return o.date >= customRange.start && o.date <= customRange.end;
+          }) : sliceByRange(s.observations, rangeGetter()),
         };
       });
     }
@@ -250,6 +296,9 @@
     // each card scales to its own values instead of a shared y-domain.
     function rerenderChart() {
       var seriesList = visibleSeries();
+      var single = seriesList.length === 1;
+      section.classList.toggle('is-single', single);
+      lastChartWidth = chartEl.getBoundingClientRect().width;
       chartEl.textContent = '';
       if (!seriesList.length) {
         chartEl.appendChild(el('p', { class: 'loading-copy', text: '当前筛选下暂无可绘制的数据。' }));
@@ -260,19 +309,31 @@
           el('h3', { class: 'token-chart-card__title', text: series.label }),
           plot,
         ]));
-        renderLineChart(plot, [series], {
+        var chartOptions = {
           decimals: 4,
           width: TOKEN_CHART_W, height: TOKEN_CHART_H,
           pad: { top: 14, right: 16, bottom: 34, left: 52 },
           yTicks: 6,
           xTickCount: 2,
           ariaLabel: 'Token ' + series.label + '支出指数走势图',
-        });
+        };
+        if (single) {
+          // Match SVG units to rendered pixels: labels stay legible without
+          // stretching the portrait viewBox. Hidden sections are measured later.
+          var rect = plot.getBoundingClientRect();
+          chartOptions.width = rect.width || TOKEN_CHART_W;
+          chartOptions.height = rect.height || 340;
+        }
+        renderLineChart(plot, [series], chartOptions);
       });
       var dates = unionDates(seriesList);
       caption.textContent = dates.length
         ? (dates[0] + ' ~ ' + dates[dates.length - 1] + '，' + dates.length + ' 个观测日')
         : '当前筛选下暂无数据';
+      if (customRange) {
+        caption.textContent = '所选范围：' + customRange.start + ' ~ ' + customRange.end +
+          '；实际观测：' + caption.textContent;
+      }
     }
 
     function renderKpis() {
@@ -295,6 +356,17 @@
 
     renderKpis();
     rerenderChart();
+    // Observe the stable row, not replaced SVGs; height-only notifications and
+    // gated/hidden sections must not cause a render loop.
+    if (window.ResizeObserver) {
+      var resizeObserver = new ResizeObserver(function () {
+        var width = chartEl.getBoundingClientRect().width;
+        if (!section.hidden && section.classList.contains('is-single') && width > 0 && Math.abs(width - lastChartWidth) > 0.5) {
+          rerenderChart();
+        }
+      });
+      resizeObserver.observe(chartEl);
+    }
   }
 
   // ── gpu section ───────────────────────────────────────────────────────
