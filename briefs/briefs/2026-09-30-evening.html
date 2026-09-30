@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-09-30 晚间 AI 简报</title>
+<style>
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-09-30 20:30:34</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-09-30 晚间 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-09-30 14:30</strong> &nbsp;→&nbsp; <strong>2026-09-30 20:30</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">10</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">4 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">40.0%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">6 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">3</span></div><div class="hot-kw-row"><span class="kw-name">PCB</span><div class="bar-track"><div class="bar-fill" style="width:67%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">CPO</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">硅光</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">人工智能</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">数据中心</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">大模型</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">智能体</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="kw-count">1</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-14425458211544442">AI 服务器把 PCB 供应链买成“排队经济”：HVLP4 铜箔、ABF 载板到设备全面吃紧，缺货预计至少持续至 2027 年</a></li><li><a class="tldr-jump" href="#t-14425458284441852">华盛昌盯上光通信“卖铲子”：硅光晶圆测试设备已签单超 20 台套，光示波器预计节后落单</a></li><li><a class="tldr-jump" href="#t-14425458284441852">瑞松科技的 MPO 设备弹性看放量：首套整线订单落地在即，研报测算若放量 1000—2000 台，可贡献营收 8—15 亿元</a></li><li><a class="tldr-jump" href="#t-55521518244425414">AI 长逻辑也扛不住短线“挤车门”：帖子将科技下跌归因于季末调仓、交易拥挤与实际利率走高，资金转向医药、地产</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-14425458284441852">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-30 18:29 · 👁 292</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【东财机械】坚定看好光通信设备...</div>
+  <div class="topic-content">【东财机械】坚定看好光通信设备
+
+[红包]各位领导好，节前专门对重点推荐个股进行调研更新，当前位置重点推荐有业绩支撑的光仪器【华盛昌、联讯仪器等】#个股及空间测算欢迎私戳  [太阳]重点推荐个股更新：
+#【华盛昌】基本面稳健向上：   1）光示波器送样多家验证，预计节后订单落地，国内第二❗#若27年预计出货1000台，对应5-6亿利润增量，40xPE=200-240e市值增量❗2）<mark>硅光</mark>晶圆测试设备已实现20多台套签单；3）产能持续提升中，预计年底年化产值30-35e
+
+#【瑞松科技】MPO、PFC放量可期：   1）MPO跳线插芯设备首台套整线订单落地在即，国内外众多客户（molex、senko、天孚、富联等）对接，若放量1000-2000台，对应营收约8-15亿，净利润2-4亿，爆发放量弹性可期；2）FPC柔性插装设备 ：已获富士康等十几台小批量；3）高精度六轴机器人多领域拓展可期
+
+[红包][红包]板块相关
+#【联讯仪器】-   国产光示仪器龙头&amp;弹性高标
+#【华兴源创】-   海外客户光示波器验证中，10月验证通过有望Q4订单落地，#若27年预计出货1000台，51%股权对应约3+亿利润增量
+#【鼎阳科技】-   VNA26Q2已经实现多家高速铜缆领域头部企业测试公司产品、落地订单；高速<mark>PCB</mark>领域进入客户测试阶段
+#【罗博特科-FiconTEC】-   全球光电封装测试龙头
+#【科瑞技术】-   拟定增7.52亿元，卡位半导体设备国产化与<mark>CPO</mark>光互联，加码超高精密度零部件布局
+
+#重视   普源精电、日联科技等测试仪器厂商不断突围；博众精工、埃科光电、固高科技、康平科技等光设备铲子骨</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">CPO</span><span class="kw-tag">PCB</span><span class="kw-tag">硅光</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425458284441852" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258281512224541">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-30 18:28 · 👁 281</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">20260930今日段子汇总
+...</div>
+  <div class="topic-content">20260930今日段子汇总
+
+1、松原安全：公司主业汽车安全带+安全气囊，投l市场大（被动安全系统全球1500-2000亿市场空间），格局好（全球CR3约80%，奥托立夫30%+、均胜23%、采埃孚24%，松原直接pk外资），替代广阔（松原当前全球份额不到2%），好公司（盈利能力远超竞争对手，30%毛利率，友商15%）
+
+2、善水科技：公司生产2-氯吡啶等氯代吡啶系列产品。2-氯吡啶是一种高附加值的精细化工产品，它可以作为吡啶类精细化工中间体，又是重要农药品种的原料，如用来生产敌草快、氯吡脲等。公司旗下2,3-二氯吡啶是氯虫苯甲酰胺的核心原材料，现有产能550吨，在建8000吨
+
+3、均瑶健康：国内最早生产与销售常温乳酸菌饮品的品牌企业之一；公司J26植物乳植杆菌人体临床研究登上Nature Portfolio旗下《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3Dnpj&quot; title=&quot;%E6%9F%A5%E6%89%BE%E5%9B%BE%E4%B9%A6&quot; /&gt; Science of Food》，成为全球首个自研单菌株在代谢综合征人群完成[减重增肌】RCT临床验证
+
+4、东风科技：公司智能装备业务涉及机器人产品；<mark>华为</mark>与东风合作打造高端新能源汽车品牌，重点围绕奕境X9、猛士X700、岚图梦想家9等联合打造的战略新车型交换看法，并聚焦未来产品定义、智能技术落地、市场营销等维度探讨深化合作方向
+
+5、时代万恒：控股子公司九夷锂能主营业务为锂电池的研产销，拥有国内领先的圆柱形锂电池全自动化产线，目标市场定位于高端电动工具领域，开拓了博世、飞利浦、斯蒂尔、宝时得等优质客户
+
+6、深物业A：深圳国资委控股的深圳投资控股公司旗下；主营房地产开发、房屋租赁、物业管理，餐饮业务和仓储业务
+
+7、亚邦股份：公司曾是全球最大的蒽醌结构分散染料和还原染料生产企业。公司主要从事染料及农药的产销，打造了“原材料-中间体-商品”的完整的产业链，是全球最大的蒽醌结构分散染料和还原染料生产企业，拥有二百多个品种的染料产品
+
+8、传艺科技：1、公司在钠电池正负极材料、电解液等关键环节进行一体化布局并实现量产交付，产品可应用于A00级车、小动力车、电动工具及储能等领域；2、公司专注于柔性线路板（FPC）的设计、研发、制造和销售，为客户提供定制化解决方案；3、消费电子零组件行业头部企业之一，拟定增募资不超8.71亿元，加码智能化产线升级
+
+9、园林股份：公司拟收购存储芯片及模组企业华澜微93.5%股份
+
+10、上海洗霸：公司应用于eVTOL的高比能软包锂离子固态电池已设计完成
+
+11、紫竹高科：1、公司核心业务聚焦于铝塑膜业务及汽车检具业务，铝塑膜是软包锂电池电芯封装的关键材料，下游主要应用于3C消费电子、动力、储能三类软包电池；2、公司具备《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D&quot; title=&quot;%E6%9F%A5%E6%89%BE%E5%9B%BE%E4%B9%A6&quot; /&gt;民用核安全电气设备设计许可证》和《民用核安全电气设备制造许可证》，为福清/方家山核电站供货核级压力变送器；公司有能力生产核级的仪器仪表产品
+
+12、海南橡胶：中国天然橡胶产业龙头，拥有341万亩橡胶园（国内第一）、20家橡胶基地分公司
+
+13、龙溪股份：关节轴承行业龙头，广泛应用于航空军工等领域，也是机器人的主要配套件
+
+14、惠天热电：沈阳地区规模最大的国有专业化供热公司；沈阳市发改委确定公司为70万千瓦风电项目业主
+
+15、贝瑞基因：公司自主研发了 NLPearl 遗传疾病<mark>人工智能</mark>临床决策支持系统、CNVisi 智能报告解读系统，为科研和临床工作者提供智能决策支持
+
+16、中天服务：公司的主营业务物业管理服务（占比81.14%），主要经营模式是通过市场化竞争获取物业管理项目，开展基础物业管理服务，并围绕业主、房地产开发商等用户需求提供综合配套服务及增值服务
+
+17、奥赛康：公司产品剂型主要定位于冻干粉针制剂、固体口服制剂，国内抗消化性溃疡药物质子泵抑制剂注射剂产品细分领域市场占有率第一
+
+18、恒丰纸业：国内卷烟辅料龙头，五大卷烟辅料供应商之一；公司主要业务为特种纸、纸浆的生产和销售
+
+19、陆家嘴：陆家嘴金融贸易区城市开发商，公司以 “商业地产 + 商业运营 + 金融服务” 为核心格局，聚焦商办楼宇、高端住宅开发及租赁
+
+20、新亚制程：公司产品已批量用于人型机器人主板，与多家客户建立合作
+
+21、中船科技：中国船舶集团旗下，船舶工业领域龙头；公司是DP2/DP3级动态定位系统龙头，为领航者号、星际归航号、提供风浪中平台稳定技术，是海上回收的基础保障
+
+22、松芝股份：新能源汽车热管理系统及零部件供应商，2025年净利润同比增长81.32%
+
+23、康希诺：国内创新疫苗研发先进企业，与德普世生物达成mRNA治疗型肿瘤疫苗战略合作
+
+24、凯迪股份：公司是线性驱动系统龙头，网传资料显示，公司招聘电机研发工程师，工作让内容包括负责机器人用伺服电机电磁方案分析及结构方案设计
+
+25、阳光乳业：公司主营业务为液态乳，包括儿童调制乳、A2牛奶
+
+26、弘元绿能：公司为国内光伏硅片龙头
+
+27、兴业股份：公司已研发成功半导体光刻胶用酚醛树脂、特种半导体封装用酚醛树脂等一批特种有机合成功能新材料
+
+28、金徽酒：公司为甘肃浓香型白酒龙头
+
+29、五方光电：公司表示拓展TGV技术在光学领域的应用
+
+30、江南化工：公司民爆与新能源“双核驱动”，截至2025年底新能源装机106万千瓦，风、光电站布局内蒙古、新疆等资源区，受益绿电政策
+
+31、蔚蓝生物：公司在猪用疫苗领域布局多款产品，其中猪伪狂犬病病毒基因缺失灭活疫苗已获新兽药证书，猪圆环-副猪-链球菌三联灭活疫苗已通过产品质量复核检验
+
+32、昭衍新药：国内创新药龙头；公司核心业务为药物的非临床评价服务，是新药研发链条中非临床安全性评价的关键环节，主要为创新药客户提供药物非临床药理毒理学评价，受益于国内创新药融资与BD授权交易回暖带来的行业需求增长
+
+33、龙蟠科技：公司签署锂矿投资条款清单拟认购GL1股份并支付7500万美元预付款；25年净利润同比减亏
+
+34、美诺华：诺和诺德司美格鲁肽在中国的核心化合物专利到期；公司储备了减肥多肽类中间体，正在进行GLP-1的研发和技术的储备
+
+35、龙版传媒：1、公司首部<mark>AI</mark>漫剧《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D&quot; title=&quot;%E6%9F%A5%E6%89%BE%E5%9B%BE%E4%B9%A6&quot; /&gt;穿越1988》完成170集制作上线，全网播放量突破1.2亿，红果热度值超4000万；2、大型现代化综合性国有文化企业；公司旗下109家新华书店门店实现连锁经营，涵盖包括大中型书城、特色书店、专业书店等多种形式；旗下产品多维边疆知识服务产品数据库暂未实现盈收
+
+36、国网信通：1、公司主要是为企业提供云应用软件的定制化设计、研发及应用推广，主要包括电力营销、ERP、企业门户、能源交易；2、公司的云网融合业务产品立足于服务电力能源行业智能化相关应用，具备为虚拟电厂类应用提供服务的能力
+
+37、宏英智能：公司已在电网侧储能完成多个大型项目，浸没式储能已经在<mark>数据中心</mark>、电信基站等商用化
+
+38、登海种业：国内杂交玉米种子龙头企业
+
+39、建业股份：公司电子化学品板块主要产品包括电子特气超纯氨及湿电子化学品，应用于LED、太阳能、集成电路、半导体等领域，超纯氨已形成年产21,000吨的生产能力，产品质量达到7N等级
+
+40、亚联发展：公司基于<mark>华为</mark>Atlas<mark>人工智能</mark>计算机平台开发的“无人值守变电站智能运检系统”已在南方电网顺利使用，基于<mark>华为</mark>Tai Shan200系列开发的“变电站智能网关系统”能够为电力行业客户提供网络安全解决方案
+
+41、依依股份：公司专注于宠物卫生护理用品领域，表示与主要客户的调价已基本达成共识，产能利用率处于合理区间
+
+42、德才股份：1、控股孙公司奇想无限作为漫剧制作以及提出AIGC领域<mark>智能体</mark>一站式解决方案的团队，受邀参与火山引擎<mark>大模型</mark>游戏+漫剧 <mark>AI</mark> 工坊”广州企业沙龙；2、公司主营业务涵盖内装装饰工程、建筑幕墙工程、智能化工程、古建筑工程等
+
+43、杭州热电：实控人为杭州国资委，公司主营工业园区热电联产、集中供热，提供的主要产品是蒸汽与电力，已覆盖上海、杭州等地区
+
+44、天虹股份：1、深圳本地股；国内拥有门店最多的零售商；已确立百货、超市、购物中心、便利店四大实体业态与移动生活消费服务平台天虹APP的线上线下融合的多业态发展格局；2、公司自有品牌开发并推出了天优酱香酒，生产工厂位于贵州省仁怀市茅台镇核心产区，占地面积1200余亩&quot;
+
+45、南华生物：湖南省政府旗下，干细胞储存和节能环保双主业，其中生物医药板块主要为细胞医疗服务，为客户提供干细胞、免疫细胞等生物资源的检测及储存服务
+
+46、宁波东力：公司的产品包括行星减速器等，杭州湾电机、减速器部分车间已投入生产；同时拟实施年产52万台电机及减速机项目
+
+47、古越龙山：公司拥有中国最大的黄酒生产基地，有少量的白酒生产和销售
+
+48、康辰药业：创新型制药研发企业，主要产品“苏灵”是目前国内血凝酶制剂市场唯一的国家一类新药，在研管线深入布局靶向抗肿瘤药产品系列
+
+49、泰诺麦博：公司是面向全球市场的创新生物制药企业，核心产品斯泰度塔单抗注射液为全球同类首创（First-in-Class）重组抗破伤风毒素全人源单克隆抗体药物，被CDE认定为突破性治疗药物并纳入优先审评程序，另一核心产品TNM001已递交NDA并纳入优先审评</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">人工智能</span><span class="kw-tag">数据中心</span><span class="kw-tag">大模型</span><span class="kw-tag">智能体</span><span class="kw-tag">华为</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258281512224541" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521518244425414">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-30 14:55 · 👁 598</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">说一下科技大跌的背后原因：
+
+...</div>
+  <div class="topic-content">说一下科技大跌的背后原因：
+
+一，季末公募调仓，科技小登沦为老登，规避风格飘逸以及提前部署四季度；
+
+二，主力杀入医药，并反扑地产，主打的就是预判你的预判；
+
+三，科技小登成为散户聚集地，拉升难度极大，主力选择去人少的地方，越拥挤的地方越危险；
+
+四，外围风险、美伊冲突以及<mark>AI</mark>扰动，资金纷纷选择避险风险更大的科技，尤其实际利率走高压制的科技等风险资产</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521518244425414" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425458211544442">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-30 14:31 · 👁 652</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">🚩<mark>AI</mark> 热潮加剧 <mark>PCB</mark> 供应...</div>
+  <div class="topic-content">🚩<mark>AI</mark> 热潮加剧 <mark>PCB</mark> 供应链压力，材料与设备短缺将持续至 2027 年
+
+📈自 2025 年下半年以来，<mark>AI</mark> <mark>服务器</mark>与高速网络需求的快速增长，已导致 <mark>PCB</mark>、IC 载板以及核心材料供应全面趋紧。
+⚠️即使在 2026 年，供应改善的信号仍有限。供应短缺首先从低 CTE 和低 Dk2 玻璃纤维布以及 HVLP4 铜箔等先进材料开始，此后已蔓延至 CCL、高阶 <mark>PCB</mark>、ABF 载板、制程设备以及耗材。
+📅交期开始拉长，甚至部分中低阶材料与通用 CCL 等级也出现涨价迹象。
+🔎截至 2026 年第二季度，先进材料、<mark>PCB</mark>、载板以及特定制程设备的供应仍维持紧绌状态。
+🏭<mark>PCB</mark> 与载板厂商、材料供应商以及设备制造公司皆在扩增产能，新产能预计将于 2027 年至 2029 年陆续上线。
+❗然而，随着 <mark>AI</mark> 需求持续上升以及规格要求提高，客户认证与良率爬坡需时，短期内新增供应难以完全填补供需缺口。
+✅因此，<mark>PCB</mark> 供应链的紧绌状态很可能将持续至少至 2027 年。
+🏢台湾 <mark>PCB</mark> 制造供应链包括臻鼎、欣兴、景硕、华通、华邦、金居、楠梓电以及华星科。
+📦主要材料供应商包括联茂、南亚、台光、伊特、台玻、富喆、科定、东台以及上福。
+⚙️主要设备供应商包括新高、GPM、上银、永光、大同以及亚金属。
+📊根据台湾印刷电路协会（TPCA）统计，2026 年上半年台湾 <mark>PCB</mark> 材料产业国内外生产总值达新台币 2716 亿元（年增 38.6%）。
+📈增长主要受硬板用高频高速 CCL 带动，而玻璃纤维布与铜箔等核心材料供应短缺状况持续。
+💹产能紧绌与原物料成本上涨，导致材料供应商逐步调涨价格，进而推升 <mark>PCB</mark> 材料生产总值。
+📋同期，台湾 <mark>PCB</mark> 设备产业国内外生产总值达新台币 460.8 亿元（年增 27.8%）。
+🔧机械钻孔设备与钻头表现特别强劲。
+📐随着 <mark>PCB</mark> 层数与厚度增加，钻孔复杂度上升，带动相关设备、工具与材料使用量提升。
+🚀2026 年 <mark>AI</mark> <mark>服务器</mark>与高速网络需求的扩张，正带动台湾 <mark>PCB</mark> 供应链整体成长，同时加速材料与制程设备的技术进步。
+📈此趋势提升了台湾 <mark>PCB</mark> 产业生产总值今年再度创下新高的可能性。
+🔮TPCA 预测，<mark>AI</mark> 应用扩展以及 <mark>AI</mark> 眼镜与卫星通讯等新兴市场成长，将成为 2026 年下半年额外增长动能。
+💰台湾 <mark>PCB</mark> 制造产业 2026 年下半年国内外生产总值预计将增至新台币 6118 亿元（年增 24.5%）。
+💎台湾 2026 年全年 <mark>PCB</mark> 制造生产总值预计首度突破新台币 1 兆元，达新台币 1 兆 1365 亿元（年增 24.2%）。
+🔗<mark>AI</mark> 基础设施需求的扩大，正将成长效益扩散至 <mark>PCB</mark> 制造上游的材料与设备。
+🔄这显示 <mark>AI</mark> 已超越单纯的一次性循环性需求激增，正积极重塑供应链内部的价值分配结构。
+✨随着 <mark>PCB</mark> 技术持续演进，现有机供应商的竞争地位可能发生转变，同时为新进者创造新机会。
+🎯台湾 <mark>PCB</mark> 产业能否强化竞争力，将取决于其能否跟上未来 <mark>AI</mark> 平台升级速度，并将技术变革转化为新产品价值。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">服务器</span><span class="kw-tag">PCB</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425458211544442" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
