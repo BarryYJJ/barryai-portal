@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-09-30 早间 AI 简报</title>
+<style>
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-09-30 08:55:33</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-09-30 早间 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-09-29 20:00</strong> &nbsp;→&nbsp; <strong>2026-09-30 08:55</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">30</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">7 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">23.3%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">12 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">算力</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">4</span></div><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:75%"></div></div><span class="kw-count">3</span></div><div class="hot-kw-row"><span class="kw-name">DeepSeek</span><div class="bar-track"><div class="bar-fill" style="width:25%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">Agent</span><div class="bar-track"><div class="bar-fill" style="width:25%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">智能体</span><div class="bar-track"><div class="bar-fill" style="width:25%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">海光</span><div class="bar-track"><div class="bar-fill" style="width:25%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">TSMC</span><div class="bar-track"><div class="bar-fill" style="width:25%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">AI服务器</span><div class="bar-track"><div class="bar-fill" style="width:25%"></div></div><span class="kw-count">1</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-55521512581254514">DeepSeek Harness v0.2上线桌面端，办公插件叠加定时任务，Agent入口争夺从程序员电脑打到全员工位</a></li><li><a class="tldr-jump" href="#t-55521512581251884">历军同时执掌海光信息、中科曙光，芯片与整机协同有望提速，国产算力奔向“超节点+集群”团战</a></li><li><a class="tldr-jump" href="#t-45548584525541188">电碳算协同运营系统降低算力用电成本达30%，绿电直连有望加速，AI拼完芯片开始拼电费</a></li><li><a class="tldr-jump" href="#t-45548584514821158">科森科技拟定增募资不超11.02亿元，收购展固科技控股权并扩建机器人产能，液冷与机器人两桌都要上菜</a></li><li><a class="tldr-jump" href="#t-45548584521145488">高端PCB产能向AI倾斜，非AI PCB迎来顺价窗口，汽车M7材料升级助推需求，算力抢产能、汽车链争利润</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-55521512581254514">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-29 23:06 · 👁 903</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【中信互联网】<mark>DeepSeek</mark>...</div>
+  <div class="topic-content">【中信互联网】<mark>DeepSeek</mark> Harness：v0.2桌面端发布，插件生态与模型协同进一步强化<mark>Agent</mark>入口价值
+
+事件：9月29日，<mark>DeepSeek</mark>正式发布Harness v0.2预览版，提供开箱即用的macOS和Windows桌面端安装包，优化日常办公、开发及插件管理体验。根据公司披露，在使用<mark>DeepSeek</mark>官方API的用户群体中，Harness按日均活跃用户、日均会话数等口径，已成为最受欢迎的Coding <mark>Agent</mark>产品。桌面端目前已在官网(<mark>DeepSeek</mark> Harness｜共探智能上限)开放下载。
+
+看点一：桌面端降低使用门槛，从Coding进一步拓展至泛办公场景
+
+本次更新预置办公与开发常用功能，用户可提供文档、表格或PDF，让Harness整理资料、分析数据、生成图表及制作演示文稿；生成文件可在侧栏预览、通过对话继续修改，也可用本地应用进一步编辑。内置自动化任务插件支持重复工作按计划执行，并可查看运行记录、调整频率。符合活动条件的用户登录桌面端，还可限时领取6元体验赠金，到账后7天有效、限量发放。我们认为，#安装与试用门槛降低，叠加成果预览及定时任务，有望推动Harness从开发者工具向更广泛的白领工作入口扩张，提升用户覆盖与日常使用频率。
+
+看点二：约60%的用户已使用第三方插件，开放生态已有实际使用基础
+
+按照官方模型API用户口径统计，&lt;e type=&quot;hashtag&quot; hid=&quot;88211148244282&quot; title=&quot;%23%E7%BA%A660%25%E7%9A%84DeepSeek%23&quot; /&gt;   Harness用户使用了第三方插件。本次新增插件管理页面，用户输入插件包名即可安装，并可统一停用、卸载和查看来源；实验性的创造模式支持通过对话编写及修改插件，创建后可即时生效、持久保存。团队后续还计划建设官方插件市场、提升接口兼容性，降低开发者跨版本适配成本。我们认为，#插件生态已经成为产品体验的重要组成部分。随着插件获取和管理更加便利，开发者供给与用户需求有望进一步相互促进，形成“更多插件—更多场景—更多用户”的生态循环。
+
+看点三：明确模型与Harness共同进化，真实任务表现成为协同优化方向
+
+官方明确提出，后续将针对新模型持续优化Harness，并在模型训练中提升其在Harness内的实际表现，同时通过模型研究支持新的产品功能。我们认为，#模型与产品协同优化，有望让基座能力提升更直接地转化为任务完成质量，进一步体现模型厂商自建Harness的价值。产品路线方面，团队计划完善<mark>智能体</mark>团队功能，并加入个性化长期记忆、浏览器及其他GUI软件自动化，支持远程与移动端使用，探索会话分享和多人协作。随着这些规划逐步落地，Harness有望承接更持续、更复杂的工作流程。
+
+💡我们的观点：我们此前强调Harness连接模型与用户的入口级价值，此次v0.2进一步围绕#用户拓展、#插件生态与#模型产品协同展开。官方API用户群体内的活跃表现及第三方插件使用比例，为这一方向提供了初步验证。后续重点关注：#一是桌面端上线后的新增用户、留存与调用增长；#二是官方插件市场建设及垂直场景插件的成熟度；#三是模型与Harness共同迭代后，复杂任务完成率、人工修改成本及泛办公体验的改善。
+
+欢迎联系中信证券互联网团队</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">DeepSeek</span><span class="kw-tag">Agent</span><span class="kw-tag">智能体</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521512581254514" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521512581251884">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-29 23:06 · 👁 897</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">历军同时担任<mark>海光</mark>/曙光董事长 ...</div>
+  <div class="topic-content">历军同时担任<mark>海光</mark>/曙光董事长 
+
+🔥＃历军任<mark>海光</mark>信息董事长
+2026年9月28日，<mark>海光</mark>信息公告，公司第三届董事会第一次会议上选举历军为董事长。
+
+2026年5月7日，曙光信息公告，公司第六届董事会第一次会议选举历军为董事长。
+
+此次出任<mark>海光</mark>信息董事长后，＃其将同时担任两家A股上市公司董事长。
+
+🔥＃<mark>海光</mark>信息长期与中科曙光保持良好的产业协同与合作
+<mark>海光</mark>信息以高端芯片产品为核心，充分发挥产品在功能、性能、生态和安全方面的独特优势，联合包括中科曙光在内的广大产业链上下游企业和其他参与者推进<mark>海光</mark>生态下软硬件优化协同技术研发，建设和巩固“芯片-硬件-软件”的核心技术壁垒，通过多种方式聚集核心优势力量共同投入到<mark>AI</mark>全栈产品及解决方案研发中，拓展<mark>AI</mark>全栈能力，共同促进<mark>海光</mark>芯片计算路线的<mark>算力</mark>生态健康发展。
+
+🔥＃本次任命验证了<mark>海光</mark>信息与中科曙光深度协同发展的基础背景，面向超节点+集群时代，双方协同效应有望进一步显现。＃相关标的：<mark>海光</mark>信息、中科曙光、曙光数创、浪潮信息、紫光股份等。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">算力</span><span class="kw-tag">海光</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521512581251884" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548584514158158">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-29 23:00 · 👁 900</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">#出处未知，注意风险 #出处未...</div>
+  <div class="topic-content">&lt;e type=&quot;hashtag&quot; hid=&quot;28842551244511&quot; title=&quot;%23%E5%87%BA%E5%A4%84%E6%9C%AA%E7%9F%A5%EF%BC%8C%E6%B3%A8%E6%84%8F%E9%A3%8E%E9%99%A9%23&quot; /&gt; &lt;e type=&quot;hashtag&quot; hid=&quot;51585481585524&quot; title=&quot;%23%E5%87%BA%E5%A4%84%E6%9C%AA%E7%9F%A5%EF%BC%8C%E5%BE%88%E5%A4%9A%E7%BE%A4%E5%9C%A8%E5%8F%91%EF%BC%8C%E5%8F%97%E8%BF%AB%E6%80%A7%E8%BD%AC%E5%8F%91%23&quot; /&gt; 
+🧧天承科技：玻璃基板中的味之素，公司电镀液/沉铜液突破国内外核心客户
+
+🚀台湾工商时报消息<mark>TSMC</mark>近期多次拜访友达或系推动COPOS布局，玻璃、陶瓷、金刚石等皆<mark>算力</mark>密度升级下材料选择，下半年设备端陆陆续续有一些采购。国内端京东方全球创新伙伴大会将于9月22日开幕，本届大会专门设置“玻璃基先进封装论坛”，观察龙头行业进展。
+
+🚀玻璃基板产业链核心就是“玻璃原片→TGV成孔→孔壁金属化/深孔填铜→PVD种子层→RDL/mSAP精细线路→增层压合→切割/AOI检测→封装验证”。 其中，玻璃原片决定CTE、平整度、缺陷及后续加工窗口；TGV激光/刻蚀设备负责高深宽比通孔形成，是新增设备价值量最明确的环节之一；PVD+电镀设备及药水决定孔内种子层、深孔填铜、空洞和应力控制，是当前量产良率核心瓶颈；RDL/mSAP、曝光、检测及切割设备进一步决定高密度布线与大尺寸面板良率。随着行业由样品验证进入中试线建设，产业链逻辑正在从单点TGV设备向#原片+成孔+金属化+线路+检测的整线能力扩散。帝尔激光近期也明确表示，当前玻璃基板产业化难点已更多转向后续金属化、膜层复合、微裂纹及整体良率，且TGV激光改质与刻蚀设备已开始出现成套订单。玻璃基板处于#“中试通线→客户验证→量产决策”的产业拐点，短期重点看京东方IPC大会新增合作及客户验证，中期看良率、订单和批量交付。
+
+🚀天承科技卡位玻璃基板TGV金属化核心药水，携手京东方推进产业化。公司已完成TGV金属化电镀液研发及技术储备，产品兼容脉冲和直流电镀，具备良好的填孔性能及低镀层应力，相关技术已获得产业链认可，并与京东方等企业建立深入合作关系。同时，TGV化学镀相关项目已进入中试阶段，载板填通孔电镀铜添加剂进入产线测试验证，持续完善玻璃基板金属化核心材料布局。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">TSMC</span><span class="kw-tag">算力</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548584514158158" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548584514821158">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-29 22:39 · 👁 946</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【ZX制造】科森科技重大事项点...</div>
+  <div class="topic-content">【ZX制造】科森科技重大事项点评及推荐0929
+
+#定增发行、投入<mark>液冷</mark>及机器人领域。公司发行定增，募资上限11.02亿元，发行上限1.66亿股。
+募投分配主要为布局<mark>液冷</mark>、机器人及补流：1）收购惠州展固科技53.26%股权：5.00亿元；2）机器人与智能终端精密结构件及模组制造项目（一期）：4.02亿元；3）补充流动资金：2.00亿元。
+
+#并购展固科技、切入<mark>液冷</mark>领域。公司并购展固科技：1）交易方式：股权转让+增资，总对价上限5亿元；2）交易结果：取得53.26%，展固科技变为控股子公司，纳入合并报表；3）标的业务：惠州展固科技，<mark>AI服务器</mark><mark>液冷</mark>精密结构件；主打<mark>液冷</mark>冷板盖板、 manifold歧管结构件，属于<mark>算力</mark><mark>液冷</mark>金属零部件赛道；4）战略意图：切入<mark>AI</mark><mark>液冷</mark>硬件，和公司既有精密加工能力协同，加强NV产业链布局。
+
+#公司为特斯拉机器人核心结构件供应商、募资为快速放量储备。公司当前为特斯拉机器人身体、关节结构件核心供应商，在北美达拉斯工厂直接供货特斯拉弗里蒙特工厂，且近期获得手部关节新订单。除特斯拉外，公司为1X、Agility、<mark>Meta</mark>等多家机器人公司提供机器人结构件，当前机器人项目募投仅为一期，为未来机器人快速放量提供储备。
+
+#投资建议：公司为特斯拉机器人放量核心供应商、且深度布局<mark>液冷</mark>、<mark>AI</mark>终端、固态电池等领域、与特斯拉、<mark>Meta</mark>、NV、<mark>苹果</mark>深度绑定、今年公司扭亏为盈、我们前瞻、持续、重点推荐！</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI服务器</span><span class="kw-tag">Meta</span><span class="kw-tag">算力</span><span class="kw-tag">苹果</span><span class="kw-tag">液冷</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548584514821158" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548584514445418">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-29 22:24 · 👁 1007</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">“9.29”政策组合影响点评
+...</div>
+  <div class="topic-content">“9.29”政策组合影响点评
+
+政策增量不止于住房贴息，而是财政与结构性货币工具协同支持需求和投资。 今晚首套刚需住房贴息落地，同时科技创新和技术改造再贷款新增2000亿元，支持比例从60%提高至100%，支农支小再贷款同步扩容；PSL利率下调25个基点，“六张网”建设纳入支持范围。我们认为，此次政策兼顾居民购房、企业投资和重大项目建设，为内需板块的跨行业利好。
+
+组合政策的意义在于推动融资支持向实际需求和订单转化。 住房贴息减轻刚需家庭月供负担，科技再贷款增强相关信贷投放的资金保障，PSL降价扩围则为加快项目建设补充融资支持。稳需求与促投资相互配合，有望改善内需板块企业盈利预期。然而，政策额度到实际投放、融资增量到需求增量的传导尚需观察，政策落地效果仍取决于借款意愿、项目回报和执行进度等因素。
+
+此次政策对A股有正面影响，不仅有助于推动科技与价值之间的风格再平衡，还利于盈利预期上修的进一步扩散。 内需投资与科技创新同步获得支持，印证了政策层稳增长与促转型并不对立。短期内，市场可能先反映为风险偏好改善，而回暖的中期持续性仍需住房成交、企业资本开支及项目订单验证。
+
+在盈利趋势向上、宏观风险已被充分交易且情绪已经陷入低迷的情况下，指数出现大幅调整的可能性很小，而新政组合拳有望成为指数修复的契机。9月市场定价了加息、油价、<mark>AI</mark>放缓等担忧，投资者情绪周期已经步入阶段性的低点，9月29日我们构造的投资者情绪指数降至1.9的冰点，为2025年以来最低值，全A成交量仅1.42万亿元。在指数下行空间有限的背景下，新增政策利好或能重聚资金共识，为活跃资金进攻提供土壤。
+
+配置上，我们建议保持乐观，避免“宏大叙事”，坚持均衡布局，注重实际景气度数据验证。对于内需板块， 建议借助政策契机，关注低位、低持仓的投资机会；对于科技板块，建议向量价齐升的核心资产调仓；对于其他板块，建议寻找筹码压力较小、短期产业叙事热度较高且容易形成市场共识的方向。
+
+欢迎联系中信证券A股策略团队：裘翔/高玉森/张铭楷/陈泽平/陈峰/朱立伟/陆天一/许元睿/李世豪</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548584514445418" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548584521145488">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-29 22:17 · 👁 1026</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【非<mark>AI</mark> <mark>PCB</mark> 涨价链】涨价...</div>
+  <div class="topic-content">【非<mark>AI</mark> <mark>PCB</mark> 涨价链】涨价周期及持续性增强，汽车方向有望领涨
+
+一、涨价传导：上下游一体化下顺价顺畅，Q3-Q4为利润反转关键窗口。 <mark>PCB</mark>产业链呈<mark>电子布</mark>→<mark>覆铜板</mark>→<mark>PCB</mark> 的一体化传导，上下游协同性强，顺价基础稳固。传导存在时间差，<mark>PCB</mark> 环节通常在原材料涨价后1-2个季度完成顺价；#Q3起<mark>PCB</mark>进入加速顺价期 ，预计为传统<mark>PCB</mark>业绩释放的首个密集季度，亦是利润拐点确认的关键节点。
+
+二、涨价持续性：供给偏紧叠加格局优化，需求稳健升级，支撑涨价趋势延续。
+
+#供给端： 原材料紧缺下转为配置制，龙头集中度提升。上游<mark>电子布</mark>、<mark>覆铜板</mark>已转为配置制（配给制）行业，<mark>PCB</mark>厂作为制造与上游材料的核心拿货环节，顺价过程中增量利润同时覆盖制造端与分销端，传导顺畅。行业格局同步优化：高端产能加速向 <mark>AI</mark> 倾斜、非 <mark>AI</mark> 需求收缩；Q2 涨价过程中三线小厂 CCL原材料供给份额下降，中端龙头公司集中度提升。
+
+#需求端： 非 <mark>AI</mark> 需求稳健升级，汽车带动高端材料用量。 非 <mark>AI</mark> 类需求整体稳健，汽车行业中高端需求（如智能座舱 <mark>PCB</mark>）已升级至 M7 材料等级，对高端<mark>覆铜板</mark>及<mark>电子布</mark>形成增量拉动。
+
+#涨价持续性。根据当前上游<mark>电子布</mark>及<mark>覆铜板</mark>涨价预期，行业紧缺将持续到27年中，当前<mark>PCB</mark>仅为涨价第一季度，后续加速上行，且<mark>PCB</mark>货值较上游更大，实际涨价幅度有望超过Q2<mark>覆铜板</mark>环节。
+
+三、板块内部演绎：自 8 月起轮动上涨，核心看汽车涨价超预期。
+
+传统 <mark>PCB</mark> 板块自 8 月起内部轮动上涨，第一波为估值修复，后续核心看涨价持续超预期与 <mark>AI</mark> 突破方向。 板块上涨按梯队依次展开：兼具<mark>AI</mark>与传统涨价的【景旺电子、方正科技】等，二线大规模中军【奥士康、崇达技术、超声电子】等，小市值弹性【金禄电子、四会富仕、博敏电子、中京电子、威尔高、满坤科技、伊顿电子、澳弘电子】等；当前第一波上涨仅为估值修复，后续核心看涨价持续超预期与<mark>AI</mark>突破方向。
+
+#涨价超预期方向核心在汽车。 Q3 汽车行业连续涨价，部分料号累计涨幅超 100%。主因汽车对供应链稳定性与产品品质要求高、对价格敏感度相对低；客户资源丰富、上游 CCL 拿货稳定的 <mark>PCB</mark> 企业，本轮涨价议价能力预计持续增强。相较其他行业季度涨价频率，汽车客户已形成月度涨价频率，新供应商认证周期大幅缩短。
+
+#继续推荐中小<mark>PCB</mark>方向： 核心看好汽车占比高【奥士康】，<mark>AI</mark>+涨价【景旺电子、方正科技】，涨价持续超预期的【崇达技术、超声电子、金禄电子、四会富仕、博敏电子、中京电子、威尔高、满坤科技、伊顿电子、澳弘电子】等。
+
+欢迎联系 浙商电子田发祥</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">电子布</span><span class="kw-tag">覆铜板</span><span class="kw-tag">PCB</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548584521145488" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548584525541188">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 09-29 21:36 · 👁 936</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【国盛能源电力】9月29日 ＃...</div>
+  <div class="topic-content">【国盛能源电力】9月29日 ＃算电协同
+
+--------------------------------
+＃行业层面
+
+1、9月28日，国务院新闻办公室举行&quot;开局起步&#x27;十五五&#x27;&quot;系列主题新闻发布会。国务院国资委在会上介绍，电碳算协同运营系统降低<mark>算力</mark>用电成本达30%。在<mark>算力</mark>网建设方面，已在京津冀、上海、内蒙古、黑龙江和广东等地累计建成投产6个国产万卡智算集群，并试点建设算电协同项目。展望&quot;十五五&quot;，国务院国资委将深化算电协同、算网融合，加快落地更多绿电直连项目，推动<mark>人工智能</mark>与能源双向赋能；同时加强<mark>算力</mark>网与新型电网、新一代通信网&quot;三网融合&quot;。
+
+＃公司层面
+
+浙江新能、宁波能源涨停，南网科技上涨6.53%，江苏新能上涨4.34%，中闽能源上涨3.16%。
+
+1、中闽能源：近日，中闽能源控股子公司福建福州闽投海上风电汇流站有限公司作为招标人通过公开招标与福建省亿力建设工程有限公司（牵头方）、福建省送变电工程有限公司、中国电建集团福建省电力勘测设计院有限公司、中国能源建设集团广东省电力设计研究院有限公司、上海振华重工（集团）股份有限公司组成的联合体就长乐外海集中统一送出工程项目正式签订EPC总承包合同，合同签约总价为41.65亿元。#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">人工智能</span><span class="kw-tag">算力</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548584525541188" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
