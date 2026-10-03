@@ -357,7 +357,7 @@
    */
   function canSendNow(s) {
     return !!s && s.unlocked === true && !s.running
-      && !s.submitting && !s.hydrating && !s.pointerPending && !s.pointerBroken;
+      && !s.submitting && !s.hydrating && !s.pointerPending && !s.pointerBroken && !s.archived && !s.stateUpdating && !s.imageLoading;
   }
 
   /** GET /v1/console/sessions → [{sessionId, preview, messageCount, lastActive}]。 */
@@ -372,6 +372,8 @@
       if (!row || typeof row !== 'object') continue;
       if (!isConsoleSessionId(row.session_id)) continue;
       out.push({
+        favorite: row.favorite === true,
+        archived: row.archived === true,
         sessionId: row.session_id,
         currentSessionId: parseCurrentSessionId(row.session_id, row.current_session_id),
         preview: typeof row.preview === 'string' ? row.preview : '',
@@ -402,6 +404,8 @@
       messages.push({ role: m.role, content: text });
     }
     return {
+      favorite: body.favorite === true,
+      archived: body.archived === true,
       sessionId: body.session_id,
       currentSessionId: parseCurrentSessionId(body.session_id, body.current_session_id),
       messages: messages
@@ -563,6 +567,12 @@
     controller: null,   // 当前 run 的 AbortController
     activeRun: null,    // 当前 run 的不可变 generation/controller 捕获对象
     generation: 0,     // 每次认证 / run / 锁定递增，隔离所有迟到回调
+    archived: false,
+    favorite: false,
+    stateUpdating: false,
+    images: [],
+    imageLoading: false,
+    tasksExpanded: false,
     history: [],        // [{role, content}] —— 仅完成 run 的 user+assistant 事务对
     approvalQueue: [],  // Hermes approval 无 request id，只能严格 FIFO
     taskSeq: 0,
@@ -697,6 +707,12 @@
   /** 只清本页内存里的对话视图。服务端 SessionDB 里的历史一条都不动。 */
   function clearLocalHistory() {
     state.history = [];
+    clearDraftImages();
+    state.archived = false;
+    state.favorite = false;
+    state.stateUpdating = false;
+    state.imageLoading = false;
+    updateSessionControls(false);
   }
 
   /* ── 网络层 ── */
@@ -799,11 +815,14 @@
   }
 
   function setEnabled(on) {
-    dom.input.disabled = !on;
+    dom.input.disabled = !on || state.archived;
+    $('image-add').disabled = !on || !canSendNow(state);
+    $('image-input').disabled = !on || !canSendNow(state);
+    updateSessionControls();
     dom.btnSend.disabled = !on || !canSendNow(state);
     dom.btnStop.disabled = !on || !state.running;
     // 「新会话」永远是出路：即使会话指针核对不出来，也必须能重新开一场。
-    dom.btnNew.disabled = !on || state.running;
+    dom.btnNew.disabled = !on || state.running || state.stateUpdating;
     dom.btnHistory.disabled = !on;
     $('btn-research').disabled = !on;
     dom.btnLock.disabled = !on;
@@ -898,6 +917,9 @@
     clear(dom.timeline);
     dom.timelineEmpty.hidden = false;
     clear(dom.taskList);
+    clear($('task-images'));
+    state.tasksExpanded = false;
+    updateTaskCollapse();
     dom.taskEmpty.hidden = false;
     state.taskSeq = 0;
     state.turns = {};
@@ -921,6 +943,7 @@
     renderResearch(turn.researchReceipt ? [turn.researchReceipt] : (turn.researchSources || []),
       turn.researchReceipt ? '真实入库回执' : '找回的历史研究 · 日期与观点需重新核验');
     dom.docTask.textContent = turn.task;
+    renderImages($('task-images'), turn.images || [], false);
     dom.taskMeta.textContent = turn.time;
     dom.outMeta.textContent = turn.outMeta;
     dom.outEmpty.hidden = true;
@@ -1092,6 +1115,126 @@
   }
 
   /* ── 会话轮次：每条任务都建一轮，并自动接管主画布 ── */
+  function updateTaskCollapse() {
+    var items = dom.taskList.children;
+    for (var i = 0; i < items.length; i++) items[i].hidden = !state.tasksExpanded && i >= 3;
+    $('task-expand').hidden = items.length <= 3;
+    $('task-expand').textContent = state.tasksExpanded ? '收起' : '展开全部（' + items.length + ' 轮）';
+    $('task-expand').setAttribute('aria-expanded', state.tasksExpanded ? 'true' : 'false');
+  }
+
+  function renderImages(target, items, removable) {
+    clear(target);
+    items.forEach(function (item, index) {
+      var box = el('div', 'image-preview');
+      var img = document.createElement('img');
+      img.src = item.url;
+      img.alt = '附件图片 ' + (index + 1);
+      box.appendChild(img);
+      if (removable) {
+        var button = el('button', 'btn btn-ghost', '移除图片 ' + (index + 1));
+        button.type = 'button';
+        button.addEventListener('click', function () {
+          state.images.splice(index, 1);
+          renderImages(target, state.images, true);
+        });
+        box.appendChild(button);
+      }
+      target.appendChild(box);
+    });
+  }
+
+  function clearDraftImages() {
+    state.images = [];
+    $('image-input').value = '';
+    clear($('image-previews'));
+    $('image-status').textContent = '可粘贴截图 · 最多 3 张 PNG · 每张 2 MiB';
+  }
+
+  async function addImages(files) {
+    if (!canSendNow(state)) return;
+    files = Array.prototype.slice.call(files);
+    if (!files.length) return;
+    if (files.length + state.images.length > 3 || files.some(function (f) {
+      return f.type !== 'image/png' || !f.size || f.size > 2 * 1024 * 1024;
+    })) {
+      $('image-status').textContent = '仅支持 PNG，最多 3 张，每张不超过 2 MiB。';
+      return;
+    }
+    var generation = state.generation;
+    var logical = state.logicalSessionId;
+    state.imageLoading = true;
+    setEnabled(state.unlocked);
+    try {
+      var images = await Promise.all(files.map(function (file) {
+        return new Promise(function (resolve, reject) {
+          var reader = new FileReader();
+          reader.onerror = function () { reject(new Error('读取图片失败')); };
+          reader.onload = function () {
+            var img = new Image();
+            img.onerror = function () { reject(new Error('图片无法解码')); };
+            img.onload = function () {
+              if (!img.width || !img.height || img.width * img.height > 8000000 || img.width > 8192 || img.height > 8192) reject(new Error('图片像素过大'));
+              else resolve({url: reader.result});
+            };
+            img.src = reader.result;
+          };
+          reader.readAsDataURL(file);
+        });
+      }));
+      if (!isCurrentGeneration(generation) || state.logicalSessionId !== logical) return;
+      state.images = state.images.concat(images);
+      renderImages($('image-previews'), state.images, true);
+      $('image-status').textContent = '已选 ' + state.images.length + ' 张 PNG';
+    } catch (err) {
+      if (isCurrentGeneration(generation)) $('image-status').textContent = err.message;
+    } finally {
+      if (isCurrentGeneration(generation) && state.logicalSessionId === logical) {
+        state.imageLoading = false;
+        setEnabled(state.unlocked);
+      }
+    }
+  }
+
+  function updateSessionControls(show) {
+    if (show !== undefined) $('session-controls').hidden = !show;
+    $('session-favorite').textContent = state.favorite ? '取消收藏' : '收藏会话';
+    $('session-archive').textContent = state.archived ? '恢复会话' : '归档会话';
+    $('session-state').textContent = state.archived ? '这场会话已归档。恢复后可继续发送，也可开启新会话。' : '';
+    $('session-favorite').disabled = !state.unlocked || state.running || state.stateUpdating || state.hydrating;
+    $('session-archive').disabled = $('session-favorite').disabled;
+  }
+
+  function changeSessionState(changes) {
+    if (state.running || state.stateUpdating || state.hydrating || !state.unlocked) return;
+    var generation = state.generation;
+    var root = state.logicalSessionId;
+    var failure = '';
+    state.stateUpdating = true;
+    setEnabled(true);
+    apiFetch('/v1/console/sessions/' + encodeURIComponent(root) + '/state', {
+      method: 'POST', json: changes
+    }).then(function (res) {
+      if (res.status === 401) { handleUnauthorized(generation); return; }
+      if (!res.ok) throw new Error(describeHttpError(res.status));
+      return res.json();
+    }).then(function (body) {
+      if (!body || !isCurrentGeneration(generation) || state.logicalSessionId !== root) return;
+      if (body.session_id !== root || typeof body.favorite !== 'boolean' || typeof body.archived !== 'boolean') throw new Error('会话状态响应无效');
+      state.favorite = body.favorite;
+      state.archived = body.archived;
+      if (state.archived) { clearDraftImages(); dom.input.value = ''; }
+    }).catch(function (err) {
+      failure = err.message;
+    }).finally(function () {
+      if (isCurrentGeneration(generation)) {
+        state.stateUpdating = false;
+        setEnabled(state.unlocked);
+        if (failure) $('session-state').textContent = failure;
+      }
+    });
+  }
+
   function addTask(text) {
     dom.taskEmpty.hidden = true;
     state.taskSeq += 1;
@@ -1106,7 +1249,8 @@
     btn.appendChild(el('span', 't-text', label));
     btn.addEventListener('click', function () { selectTurn(id); });
     li.appendChild(btn);
-    dom.taskList.appendChild(li);
+    dom.taskList.insertBefore(li, dom.taskList.firstChild);
+    updateTaskCollapse();
 
     state.turns[id] = {
       id: id,
@@ -1664,7 +1808,9 @@
     // 按钮的 disabled 只是外观；真正的闸门在这里，「回车 + 点击」也绕不过去。
     if (state.submitting || !canSendNow(state)) return;
     var task = String(text || '').trim();
-    if (!task) return;
+    if (!task && !state.images.length) return;
+    var images = state.images.slice();
+    if (!task) task = '请分析这些图片。';
 
     var controller = new AbortController();
     // run 就是这次运行的身份证：generation + controller 一起决定「它还是不是当前运行」。
@@ -1699,10 +1845,13 @@
 
     // 新的一轮：建记录、进 tasks 列表、自动选中并接管主画布。
     run.turnId = addTask(task);
+    state.turns[run.turnId].images = images;
+    renderTurn(state.turns[run.turnId]);
+    clearDraftImages();
     addEvent('RUN ▸', null, '提交任务', truncate(task, 120));
 
     var payload = {
-      input: task,
+      input: images.length ? [{role: 'user', content: [{type: 'text', text: task}].concat(images.map(function (item) { return {type: 'image_url', image_url: {url: item.url}}; }))}] : task,
       session_id: sessionId(),
       research_session_id: state.logicalSessionId,
       instructions: CFG.instructions,
@@ -1949,7 +2098,7 @@
   }
 
   function historyFocusables() {
-    return dom.historyPanel.querySelectorAll('button:not([disabled])');
+    return dom.historyPanel.querySelectorAll('button:not([disabled]), select:not([disabled])');
   }
 
   function openHistoryDialog() {
@@ -2012,6 +2161,8 @@
       top.appendChild(el('span', 'hs-time', formatSessionTime(row.lastActive) || '—'));
       top.appendChild(el('span', 'hs-count', row.messageCount + ' 条'));
       if (isCurrent) top.appendChild(el('span', 'hs-now', '当前'));
+      if (row.favorite) top.appendChild(el('span', 'hs-now', '收藏'));
+      if (row.archived) top.appendChild(el('span', 'hs-now', '已归档'));
       btn.appendChild(top);
       // 关键：预览来自用户输入与模型输出，只能走文本节点。
       btn.appendChild(el('span', 'hs-preview',
@@ -2028,7 +2179,8 @@
     var generation = state.generation;
     setHistoryState('', '正在读取服务端会话…');
     clear(dom.historyList);
-    return apiFetch('/v1/console/sessions', {
+    var filter = $('history-filter').value;
+    return apiFetch('/v1/console/sessions' + (filter === 'archived' ? '?archived=1' : filter === 'favorite' ? '?favorite=1' : ''), {
       timeout: TIMEOUTS.sessions || 12000
     }).then(function (res) {
       if (!isCurrentGeneration(generation)) return;
@@ -2058,7 +2210,7 @@
     var gone = { ok: false, missing: true };
     var unavailable = { ok: false, missing: false };
     if (!isConsoleSessionId(id) || !state.unlocked) return Promise.resolve(unavailable);
-    if (state.running) {
+    if (state.running || state.stateUpdating) {
       setHistoryState('warn', '当前还有未确认结束的运行；先等它收尾或点「停止」，再切换会话。');
       return Promise.resolve(unavailable);
     }
@@ -2113,7 +2265,11 @@
   /** 用服务端历史重建本地视图：左栏任务列表 + 主画布，全部来自完成的一问一答。 */
   function applyServerSession(detail) {
     clearCanvas();
+    clearDraftImages();
+    state.archived = detail.archived;
+    state.favorite = detail.favorite;
     setSessionId(detail.sessionId, detail.currentSessionId);
+    updateSessionControls(true);
     state.history = capHistory(detail.messages, CFG.history);
     var pairs = historyPairs(detail.messages);
     var lastId = null;
@@ -2409,6 +2565,16 @@
       addEvent('SESSION', null, '已开启新会话', sessionId());
     });
 
+    $('task-expand').addEventListener('click', function () { state.tasksExpanded = !state.tasksExpanded; updateTaskCollapse(); });
+    $('image-add').addEventListener('click', function () { $('image-input').click(); });
+    $('image-input').addEventListener('change', function () { addImages(this.files); this.value = ''; });
+    dom.input.addEventListener('paste', function (event) {
+      var files = event.clipboardData && event.clipboardData.files;
+      if (files && files.length) { event.preventDefault(); addImages(files); }
+    });
+    $('history-filter').addEventListener('change', loadServerSessions);
+    $('session-favorite').addEventListener('click', function () { changeSessionState({favorite: !state.favorite}); });
+    $('session-archive').addEventListener('click', function () { changeSessionState({archived: !state.archived}); });
     global.addEventListener('storage', onDeviceTokenStorageChange);
     $('btn-research').addEventListener('click', listResearch);
     $('research-close').addEventListener('click', function () { $('research-dialog').close(); });
