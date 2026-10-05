@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # scripts/test-publish-subsite.sh
 #
-# publish-subsite.sh 的自包含测试：在 /tmp 里造一个 bare remote + clone，
+# publish-subsite.sh 的自包含测试：在 $TMPDIR 里造一个 bare remote + clone，
 # 全程不碰真实的 barryai-portal 仓库，也不会推送到 GitHub。
 #
 # 用法：bash scripts/test-publish-subsite.sh
@@ -34,12 +34,20 @@ setup_repo() {
   git -C "$PORTAL" config user.email "test@example.invalid"
   git -C "$PORTAL" config user.name  "publish-subsite test"
   git -C "$PORTAL" config commit.gpgsign false
+  # 不让机器级忽略规则掩盖仓库缺失 .DS_Store 规则的回归。
+  git -C "$PORTAL" config core.excludesfile /dev/null
+  # baseline 没有 .gitignore 时保持原样；修复后复制真实仓库规则，不在 fixture 硬编码。
+  if [ -f "$SCRIPT_DIR/../.gitignore" ]; then
+    cp "$SCRIPT_DIR/../.gitignore" "$PORTAL/.gitignore"
+  fi
   : > "$PORTAL/.nojekyll"
   echo "barryai.cn" > "$PORTAL/CNAME"
   echo "<html>portal</html>" > "$PORTAL/index.html"
   git -C "$PORTAL" add -A
   git -C "$PORTAL" commit -q -m "init"
   git -C "$PORTAL" branch -M main
+  # bare remote 的 HEAD 也指向 main，避免依赖宿主机 init.defaultBranch。
+  git -C "$REMOTE" symbolic-ref HEAD refs/heads/main
   git -C "$PORTAL" remote add origin "$REMOTE"
   git -C "$PORTAL" push -q -u origin main
 }
@@ -309,6 +317,107 @@ PORTAL_REPO_DIR="$PORTAL" bash "$HELPER" ai-news "$AINEWS_SRC" >/dev/null 2>&1
 check $? "news.json 变更后发布成功"
 grep -q "morning-20260831-deadbeef" "$PORTAL/ai-news/data/news.json"
 check $? "portal 里的 news.json 已更新为新内容"
+
+# ── 13. .DS_Store 仓库规则：正式发布，不放宽真实 dirty gate ────────
+echo ""
+echo "[13] .DS_Store 回归（仅本机 bare remote）"
+setup_repo; setup_src
+meta_paths=(
+  .DS_Store assets/.DS_Store assets/fonts/.DS_Store
+  research/categories/companies/.DS_Store
+  token-gpu/.DS_Store token-gpu/local/deep/.DS_Store
+  openrouter/reports/.DS_Store
+)
+for rel in "${meta_paths[@]}"; do
+  mkdir -p "$PORTAL/$(dirname "$rel")" "$PORTAL/.git/meta-before/$(dirname "$rel")"
+  printf 'Finder metadata: %s\n' "$rel" > "$PORTAL/$rel"
+  cp "$PORTAL/$rel" "$PORTAL/.git/meta-before/$rel"
+done
+# 目标端 metadata 所在目录在源中也存在，避免 rsync --delete 对受保护目录
+# 打印「cannot delete non-empty directory」；源端 metadata 使用不同路径。
+mkdir -p "$SRC/js/deep" "$SRC/local/deep"
+printf 'source nested metadata\n' > "$SRC/js/deep/.DS_Store"
+printf 'source briefs metadata\n' > "$SRC/briefs/.DS_Store"
+before_local="$(local_head)"; before_remote="$(remote_head)"
+out="$(PORTAL_REPO_DIR="$PORTAL" bash "$HELPER" token-gpu "$SRC" 2>&1)"; rc=$?
+check "$rc" "仅 root 与多层 .DS_Store 时正式发布成功" "$out"
+[ "$(local_head)" != "$before_local" ]; check $? "metadata 不阻断 token-gpu 内容提交"
+[ "$(remote_head)" != "$before_remote" ]; check $? "metadata 不阻断本机 bare remote push"
+[ "$(remote_head)" = "$(local_head)" ]; check $? "正式发布后读取 bare remote 验证 HEAD 一致"
+git -C "$REMOTE" show HEAD:token-gpu/index.html > "$PORTAL/.git/remote-index.html" 2>/dev/null
+cmp -s "$SRC/index.html" "$PORTAL/.git/remote-index.html"; check $? "bare remote 的 token-gpu 内容字节与源一致"
+[ -z "$(git -C "$PORTAL" status --porcelain)" ]; check $? "有 metadata 时发布后仍 clean"
+[ -z "$(git -C "$PORTAL" ls-files | grep -E '(^|/)\.DS_Store$')" ]; check $? "本地 Git 不跟踪任何 .DS_Store"
+[ -z "$(git -C "$REMOTE" ls-tree -r --name-only HEAD | grep -E '(^|/)\.DS_Store$')" ]; check $? "remote 提交树不含 .DS_Store"
+[ ! -e "$PORTAL/token-gpu/js/deep/.DS_Store" ] && [ ! -e "$PORTAL/token-gpu/briefs/.DS_Store" ]
+check $? "源端多层 metadata 不镜像"
+[ -f "$SRC/.DS_Store" ] && [ -f "$SRC/js/deep/.DS_Store" ] && [ -f "$SRC/briefs/.DS_Store" ]
+check $? "源端 metadata 保留，不靠删除修复"
+head_before="$(local_head)"; remote_before="$(remote_head)"
+stdout="$(PORTAL_REPO_DIR="$PORTAL" bash "$HELPER" token-gpu "$SRC" 2>"$PORTAL/.git/repeat.stderr")"; rc=$?
+check "$rc" "metadata 存在时重复正式发布成功"
+[ -z "$stdout" ]; check $? "metadata 存在时无变化 stdout 静默"
+[ "$(local_head)" = "$head_before" ] && [ "$(remote_head)" = "$remote_before" ]
+check $? "重复发布不产生空提交或改变 remote"
+for rel in "${meta_paths[@]}"; do
+  cmp -s "$PORTAL/$rel" "$PORTAL/.git/meta-before/$rel"
+  check $? "两次发布后保留 metadata 原字节：$rel"
+  git -C "$PORTAL" check-ignore -q -- "$rel"
+  check $? "仓库规则忽略精确 basename：$rel"
+done
+
+# 精确 basename 之外均是真实未跟踪文件，必须继续阻断并保留原字节。
+for rel in untracked.txt other/deep/notes.md .DS_Store.backup other/.DS_Store.tmp DS_Store other/metadata.DS_Store other/prefix.DS_Store; do
+  setup_repo; setup_src
+  printf 'Finder metadata\n' > "$PORTAL/.DS_Store"
+  mkdir -p "$PORTAL/$(dirname "$rel")"
+  printf 'user-owned untracked: %s\n' "$rel" > "$PORTAL/$rel"
+  cp "$PORTAL/$rel" "$PORTAL/.git/untracked-before"
+  before_local="$(local_head)"; before_remote="$(remote_head)"
+  out="$(PORTAL_REPO_DIR="$PORTAL" bash "$HELPER" token-gpu "$SRC" 2>&1)"; rc=$?
+  [ "$rc" -ne 0 ]; check $? "真实 untracked/形近文件阻断：$rel"
+  case "$out" in *"portal 工作树不 clean"*) ok "由原始 dirty gate 拒绝：$rel";; *) bad "由原始 dirty gate 拒绝：$rel — $out";; esac
+  [ "$(local_head)" = "$before_local" ] && [ "$(remote_head)" = "$before_remote" ]
+  check $? "拒绝不改变 local/remote HEAD：$rel"
+  cmp -s "$PORTAL/$rel" "$PORTAL/.git/untracked-before"; check $? "拒绝保留真实未跟踪文件字节：$rel"
+  [ ! -e "$PORTAL/token-gpu" ]; check $? "拒绝发生在 rsync 之前：$rel"
+  git -C "$PORTAL" check-ignore -q -- "$rel"; ignored_rc=$?
+  [ "$ignored_rc" -eq 1 ]; check $? "仓库规则不忽略形近/真实文件：$rel"
+done
+
+# tracked/staged 不受 ignore 影响；同时验证 index 和工作树均未被重置。
+for mode in tracked staged tracked-metadata staged-metadata; do
+  setup_repo; setup_src
+  rel=index.html
+  case "$mode" in
+    *metadata)
+      rel=.DS_Store
+      printf 'tracked Finder metadata\n' > "$PORTAL/$rel"
+      git -C "$PORTAL" add -f -- "$rel"
+      git -C "$PORTAL" commit -q -m "fixture: tracked metadata"
+      git -C "$PORTAL" push -q
+      ;;
+    *) printf 'untracked Finder metadata\n' > "$PORTAL/.DS_Store" ;;
+  esac
+  printf 'user edit: %s\n' "$mode" >> "$PORTAL/$rel"
+  case "$mode" in staged*) git -C "$PORTAL" add -- "$rel";; esac
+  cp "$PORTAL/$rel" "$PORTAL/.git/dirty-before"
+  git -C "$PORTAL" diff --binary > "$PORTAL/.git/worktree-before.diff"
+  git -C "$PORTAL" diff --cached --binary > "$PORTAL/.git/index-before.diff"
+  before_local="$(local_head)"; before_remote="$(remote_head)"
+  out="$(PORTAL_REPO_DIR="$PORTAL" bash "$HELPER" token-gpu "$SRC" 2>&1)"; rc=$?
+  [ "$rc" -ne 0 ]; check $? "真实 tracked/staged 改动仍阻断：$mode"
+  case "$out" in *"portal 工作树不 clean"*) ok "tracked/staged 仍由原始 dirty gate 拒绝：$mode";; *) bad "tracked/staged 仍由原始 dirty gate 拒绝：$mode — $out";; esac
+  [ "$(local_head)" = "$before_local" ] && [ "$(remote_head)" = "$before_remote" ]
+  check $? "tracked/staged 拒绝不改变 local/remote HEAD：$mode"
+  cmp -s "$PORTAL/$rel" "$PORTAL/.git/dirty-before"; check $? "tracked/staged 用户文件原字节保留：$mode"
+  git -C "$PORTAL" diff --binary > "$PORTAL/.git/worktree-after.diff"
+  git -C "$PORTAL" diff --cached --binary > "$PORTAL/.git/index-after.diff"
+  cmp -s "$PORTAL/.git/worktree-before.diff" "$PORTAL/.git/worktree-after.diff" \
+    && cmp -s "$PORTAL/.git/index-before.diff" "$PORTAL/.git/index-after.diff"
+  check $? "tracked/staged index 与工作树状态原样保留：$mode"
+  [ ! -e "$PORTAL/token-gpu" ]; check $? "tracked/staged 拒绝发生在 rsync 之前：$mode"
+done
 
 echo ""
 echo "───────────────────────────────"
