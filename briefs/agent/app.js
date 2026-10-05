@@ -401,7 +401,11 @@
       if (typeof m.content !== 'string') continue;
       var text = m.content.trim();
       if (!text) continue;
-      messages.push({ role: m.role, content: text });
+      var message = {role: m.role, content: text};
+      if (m.role === 'user' && Array.isArray(m.images) && m.images.length) message.images = m.images.filter(function (url) {
+        return typeof url === 'string' && url.length <= 2796230 && /^data:image\/(png|jpeg|webp);base64,/.test(url);
+      }).slice(0, 3);
+      messages.push(message);
     }
     return {
       favorite: body.favorite === true,
@@ -421,10 +425,12 @@
       var reply = list[i + 1];
       if (!ask || !reply) continue;
       if (ask.role !== 'user' || reply.role !== 'assistant') continue;
-      out.push({
+      var pair = {
         task: String(ask.content == null ? '' : ask.content),
         output: String(reply.content == null ? '' : reply.content)
-      });
+      };
+      if (ask.images && ask.images.length) pair.images = ask.images.map(function (url) { return {url: url}; });
+      out.push(pair);
       i += 1;   // 一对用掉两条
     }
     return out;
@@ -572,6 +578,8 @@
     stateUpdating: false,
     images: [],
     imageLoading: false,
+    imageSeq: 0,
+    historyListSeq: 0,
     tasksExpanded: false,
     history: [],        // [{role, content}] —— 仅完成 run 的 user+assistant 事务对
     approvalQueue: [],  // Hermes approval 无 request id，只能严格 FIFO
@@ -1145,10 +1153,12 @@
   }
 
   function clearDraftImages() {
+    state.imageSeq += 1;
+    state.imageLoading = false;
     state.images = [];
     $('image-input').value = '';
     clear($('image-previews'));
-    $('image-status').textContent = '可粘贴截图 · 最多 3 张 PNG · 每张 2 MiB';
+    $('image-status').textContent = '可粘贴截图 · 最多 3 张图片 · 每张 2 MiB';
   }
 
   async function addImages(files) {
@@ -1156,13 +1166,14 @@
     files = Array.prototype.slice.call(files);
     if (!files.length) return;
     if (files.length + state.images.length > 3 || files.some(function (f) {
-      return f.type !== 'image/png' || !f.size || f.size > 2 * 1024 * 1024;
+      return ['image/png', 'image/jpeg', 'image/webp'].indexOf(f.type) < 0 || !f.size || f.size > 2 * 1024 * 1024;
     })) {
-      $('image-status').textContent = '仅支持 PNG，最多 3 张，每张不超过 2 MiB。';
+      $('image-status').textContent = '支持 PNG/JPEG/WebP，最多 3 张，每张不超过 2 MiB。';
       return;
     }
     var generation = state.generation;
     var logical = state.logicalSessionId;
+    var imageStamp = ++state.imageSeq;
     state.imageLoading = true;
     setEnabled(state.unlocked);
     try {
@@ -1182,14 +1193,14 @@
           reader.readAsDataURL(file);
         });
       }));
-      if (!isCurrentGeneration(generation) || state.logicalSessionId !== logical) return;
+      if (!isCurrentGeneration(generation) || state.logicalSessionId !== logical || imageStamp !== state.imageSeq) return;
       state.images = state.images.concat(images);
       renderImages($('image-previews'), state.images, true);
-      $('image-status').textContent = '已选 ' + state.images.length + ' 张 PNG';
+      $('image-status').textContent = '已选 ' + state.images.length + ' 张图片';
     } catch (err) {
-      if (isCurrentGeneration(generation)) $('image-status').textContent = err.message;
+      if (isCurrentGeneration(generation) && imageStamp === state.imageSeq) $('image-status').textContent = err.message;
     } finally {
-      if (isCurrentGeneration(generation) && state.logicalSessionId === logical) {
+      if (isCurrentGeneration(generation) && state.logicalSessionId === logical && imageStamp === state.imageSeq) {
         state.imageLoading = false;
         setEnabled(state.unlocked);
       }
@@ -2177,23 +2188,25 @@
 
   function loadServerSessions() {
     var generation = state.generation;
+    var listStamp = ++state.historyListSeq;
     setHistoryState('', '正在读取服务端会话…');
     clear(dom.historyList);
     var filter = $('history-filter').value;
     return apiFetch('/v1/console/sessions' + (filter === 'archived' ? '?archived=1' : filter === 'favorite' ? '?favorite=1' : ''), {
       timeout: TIMEOUTS.sessions || 12000
     }).then(function (res) {
-      if (!isCurrentGeneration(generation)) return;
+      if (!isCurrentGeneration(generation) || listStamp !== state.historyListSeq) return;
       if (res.status === 401) { handleUnauthorized(generation); return; }
       if (!res.ok) { setHistoryState('err', describeHttpError(res.status)); return; }
       return res.json().then(function (body) {
-        if (!isCurrentGeneration(generation)) return;
+        if (!isCurrentGeneration(generation) || listStamp !== state.historyListSeq) return;
         renderSessionList(parseConsoleSessions(body, SESSION_LIMIT));
       }, function () {
+        if (!isCurrentGeneration(generation) || listStamp !== state.historyListSeq) return;
         setHistoryState('err', '会话列表响应无法解析成 JSON。');
       });
     }, function (err) {
-      if (!isCurrentGeneration(generation)) return;
+      if (!isCurrentGeneration(generation) || listStamp !== state.historyListSeq) return;
       setHistoryState('err', describeNetworkError(err, CFG.apiBase));
     });
   }
@@ -2275,6 +2288,7 @@
     var lastId = null;
     for (var i = 0; i < pairs.length; i++) {
       lastId = restoreTurn(pairs[i].task, pairs[i].output);
+      state.turns[lastId].images = pairs[i].images || [];
     }
     if (lastId != null) selectTurn(lastId);
     // 采纳新身份后闸门可能刚被解开（例如上一场的指针核对失败过），按钮要跟上。
@@ -2559,6 +2573,7 @@
       newSessionId();
       closeHistoryDialog();
       clearCanvas();
+      setEnabled(state.unlocked);
       dom.input.value = '';
       dom.input.focus();
       // 新会话要等第一次运行之后才会出现在服务端列表里 —— 这是刻意的。
