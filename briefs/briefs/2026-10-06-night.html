@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-10-06 深夜 AI 简报</title>
+<style>
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-10-06 01:30:42</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-10-06 深夜 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-10-05 20:30</strong> &nbsp;→&nbsp; <strong>2026-10-06 01:30</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">12</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">5 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">41.7%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">5 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">4</span></div><div class="hot-kw-row"><span class="kw-name">服务器</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">PCB</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">TPU</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">谷歌</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">Rubin</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">MiniMax</span><div class="bar-track"><div class="bar-fill" style="width:25%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">大模型</span><div class="bar-track"><div class="bar-fill" style="width:25%"></div></div><span class="kw-count">1</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-82258225548224842">谷歌 TPU 给 PCB/CCL 开“加价外挂”：研报预计未来三至四年模块内含价值增至 5—10 倍，ISU Petasys、EMC 获买入评级</a></li><li><a class="tldr-jump" href="#t-22258225521112581">英伟达 Rubin 还在闯系统验证关，预计到 2026 年四季度或 2027 年一季度才逐步放量，算力盛宴得等上菜</a></li><li><a class="tldr-jump" href="#t-22258225521112581">美国云厂商把存储买成“紧俏货”：DRAM 四季度合约价初步讨论指向大涨，企业级 SSD 预计年内持续供不应求</a></li><li><a class="tldr-jump" href="#t-55521552241554144">智谱股价自 7 月回撤 70%，高盛却上调至买入、将年底 ARR 预测升至 32 亿美元，押注 token 需求把估值跌坑填回来</a></li><li><a class="tldr-jump" href="#t-22258225521112581">ABF 载板进入“缺货收租”模式：预计从 2026 年三季度至 2027 年四季度，价格每季环比上涨 10%—15%</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-55521552241554144">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-06 00:51 · 👁 71</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">GS Sales Note：
+...</div>
+  <div class="topic-content">GS Sales Note：
+
+Ronald Keung 团队今日将<mark>智谱</mark>（Z.<mark>AI</mark>）评级从中性上调至买入，基于 DCF 估值的 12 个月目标价调整为 1,560 港元（此前为 1,610 港元）。上调理由是商业化变现路径更加清晰，我们将 2026 年底 ARR 预测上调至 32 亿美元（此前高盛预测为 27 亿美元）。
+
+<mark>智谱</mark>股价自 7 月以来已回调 70%（目前市值不足 400 亿美元，峰值时为 1,200 亿美元），我们认为当前风险回报比已变得有利——对应 2026 年底 ARR 的 12 倍市收率、2027 财年 ARR 的 10 倍（相比之下 <mark>MiniMax</mark> 为 9 倍/6 倍）。
+
+根据我们的竞争定位框架，<mark>智谱</mark>仍是中国顶级 <mark>AI</mark> 模型公司之一，ARR 运行率在中国同业中排名第一，并且同时交付了前沿<mark>大模型</mark>和低成本高效益的 flash 小模型。
+
+更清晰的变现路径：我们将 2026 年底 ARR 预测从 27 亿美元上调至 32 亿美元（公司最新目标为 30 亿美元），驱动力是强劲的 token 需求，以及与中国及全球超大规模云厂商签订的新商务条款（2026 年 10 月起生效），这将创造一条高利润率的增量收入线。我们认为，<mark>智谱</mark>的数据飞轮和大幅扩张的<mark>算力</mark>储备，将推动 GLM 模型性能向下一代前沿水平提升，支撑其即将推出的 GLM-5.5 和 GLM-6 模型的规模化扩展。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">MiniMax</span><span class="kw-tag">大模型</span><span class="kw-tag">算力</span><span class="kw-tag">智谱</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521552241554144" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258225548224842">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-06 00:51 · 👁 69</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">Advanced Materi...</div>
+  <div class="topic-content">Advanced Materials - <mark>PCB</mark> &amp; CCL
+
+我们重启对 <mark>PCB</mark>/CCL 行业的覆盖，重点聚焦<mark>谷歌</mark> <mark>TPU</mark> 供应链，我们认为该供应链将在 2028 年及以后实现最强劲、可持续的增长。我们预测到 2025 至 2026 年，<mark>TPU</mark> 总出货量将增长两倍以上，超过其他竞争平台。关键在于，我们预计下一代 <mark>TPU</mark> <mark>ASIC</mark> 的单台设备内含价值将提升。随着<mark>谷歌</mark>将更多先进逻辑与 <mark>HBM</mark> 裸芯片集成到单个计算模块中，我们预计未来三到四年 <mark>TPU</mark> 内含价值将提升五至十倍。据此，我们估算仅可触达的 <mark>PCB</mark> 内含价值就可能从 2026 年至 2029 年翻两番。同样重要的是，<mark>谷歌</mark>在超级节点光互联领域长期保持领先，不断提升的交换速率与互联带宽将成为第二重利好，进一步推高 <mark>PCB</mark> 内含价值。因此，我们预计 <mark>PCB</mark>/CCL 市场将迎来持续的定价权上行，并且有可能形成长期协议，复刻存储行业的供应链动态。在主要 <mark>TPU</mark> 供应商矩阵内，我们重启对 ISU Petasys 和 EMC 的买入评级，目标价分别为 27 万韩元、10000 新台币。我们同时启动对 TTM 的覆盖，给出买入评级，目标价 236 美元。风险包含需求、落地执行以及美国针对 <mark>AI</mark> <mark>数据中心</mark>扩张的相关政策。
+
+Why Google’s TPUs?
+
+我们预测 <mark>TPU</mark> 出货量将从 2027 年的 3600 万片，增长至 2028 年的 1.2 亿片，涨幅超两倍，这其中包含内部部署以及通过 <mark>ASIC</mark> 服务分配给第三方 <mark>AI</mark> 实验室的数量。大规模订单的佐证来自 2026 年第二季度<mark>谷歌</mark>高达 520 亿美元的云服务后端资本开支订单。与此同时，<mark>TPU</mark> 预计将在 V9 版本（2028 年中端）对比 V8 版本（2026 年下半年）实现性能翻倍，V10 版本（2029 年）有望再度翻倍，原因是<mark>谷歌</mark>在其 <mark>ASIC</mark> 设计中集成更多裸芯片。<mark>PCB</mark> 设计复杂度提升至 50 层以上或 HDI 方案，CCL 升级至 M8/M9 材料甚至 PTE 材料，代表每一代产品的 ASP 至少提升 50%。此外，随着架构扩容，网络相关的 <mark>PCB</mark>/CCL 也会迎来类似增长，带宽需求从 400Gbps 提升至 800Gbps 乃至 1.6Tbps。
+
+LTA likely becomes new norm under strong demand and supply constraint
+
+我们的供应链调研显示，云服务商正在越来越多地讨论 <mark>PCB</mark> 和 CCL 供应链的长期协议（LTA）。不同供应商的协议条款存在差异，现阶段大部分条款仍在磋商。但这些讨论释放了明确信号：终端客户正在通过预付款以及长期协议锁定高端 <mark>PCB</mark>/CCL 产能，这是未来数年的趋势，因为整个行业大概率持续供给不足。同时我们判断，预付款第一会缓解供应链资本开支与现金流压力；第二会促使供应链厂商加大长期产能投入、保障交付；第三会借助更优的盈利能力改善供应链管理。我们相信如果长期协议落地，供应链的市盈率估值将进一步抬升，获得更长的业绩可见度与稳定订单储备。
+
+We prefer <mark>TPU</mark> supply chain into 2027/28: buy on EMC, ISU and TTM
+
+<mark>TPU</mark> 供应链将成为 2027 至 2028 年最大赢家，具备强劲的单位出货量增长与内含价值升级。我们预计 2026 年 <mark>PCB</mark> 出货量 850 万片，2027 至 2028 年增长至 3600 万片。<mark>PCB</mark> 单台内含价值达到 3 万至 4 万美元，<mark>TPU</mark> V8 版本 CCL 价值 1.2 万至 1.8 万美元，V7 版本 CCL 价值 2000 至 7000 美元。我们预计 V9 版本随着<mark>谷歌</mark>的采用，价值再提升 40%-50%。我们看好 EMC 的领先地位，预计 <mark>TPU</mark> 配套 800Gbps 交换机将成为公司盈利增长引擎。我们给出 EMC 新目标价 10000 新台币，对应 2027 至 2028 财年 30 倍市盈率。ISU 处于有利位置，能够把握这些行业趋势，高度绑定<mark>谷歌</mark>与网络业务。我们给予 ISU 买入评级，目标价 27 万韩元，对应 2027 至 2028 财年 30 倍市盈率。最后，TTM 是美国本土最优标的，能够承接其他 <mark>AI</mark> <mark>服务器</mark>与国防订单，具备更好盈利能力与不可替代性。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">数据中心</span><span class="kw-tag">ASIC</span><span class="kw-tag">服务器</span><span class="kw-tag">PCB</span><span class="kw-tag">TPU</span><span class="kw-tag">HBM</span><span class="kw-tag">谷歌</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258225548224842" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258225548224822">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-06 00:51 · 👁 69</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title"><mark>AI</mark> <mark>服务器</mark> <mark>PCB</mark>/CCL ...</div>
+  <div class="topic-content"><mark>AI</mark> <mark>服务器</mark> <mark>PCB</mark>/CCL 规格及主要供应商
+
+<mark>英伟达</mark>
+
+<mark>GB200</mark>，时间节点：2025 年上半年，<mark>PCB</mark> 规格：22 层 HDI、24 层（交换机板），<mark>PCB</mark> 供应商：VGT、欣兴电子；交换机板供应商为 VGT、TTM、欣兴电子。CCL 规格：M8/M4；交换机板规格 M8/M2。CCL 供应商：斗山、生益科技、EMC（交换机板）。
+
+<mark>GB300</mark>，时间节点：2026 年上半年，<mark>PCB</mark> 规格：22 层 HDI、24 层（交换机板），<mark>PCB</mark> 供应商：VGT、欣兴电子；交换机板供应商 VGT、TTM、欣兴电子。CCL 规格：M8/M4、交换机板 M8/M2、M8/M4。CCL 供应商：斗山、生益科技、EMC（交换机板）。
+
+<mark>Vera</mark> <mark>Rubin</mark>，时间节点：2026 年下半年，<mark>PCB</mark> 规格：26 层 HDI、32 层（交换机板）、44 层（中间背板），<mark>PCB</mark> 供应商：VGT、欣兴电子、ZDT；交换机板供应商 VGT、WUS、TTM、欣兴电子。CCL 规格：M8/M4、交换机板 M8、中间背板 M8。CCL 供应商：斗山、生益科技、EMC、南亚（交换机板）。
+
+<mark>Rubin</mark> Ultra，时间节点：2027 年下半年，<mark>PCB</mark> 规格：30 层 HDI、32 层（交换机板）、44 层（中间背板），<mark>PCB</mark> 供应商：VGT、欣兴电子、ZDT；交换机板供应商 VGT、WUS、TTM、欣兴电子、SCC。CCL 规格：M8/M6、交换机板 M8/M9+PTFE、中间背板 M9。CCL 供应商：斗山、生益科技、EMC / 泰福（交换机板）。
+
+<mark>谷歌</mark>
+
+<mark>TPU</mark> v7 Ironwood，时间节点：2026 年上半年，<mark>PCB</mark> 规格：26 层，<mark>PCB</mark> 供应商：ISU、LCS、WUS、TTM。CCL 规格：M7。CCL 供应商：松下、EMC。
+
+<mark>TPU</mark> v8i Sunfish，时间节点：2026 年第四季度，<mark>PCB</mark> 规格：32 层 M+M，<mark>PCB</mark> 供应商：ISU、LCS、WUS、TTM、Dynamic。CCL 规格：M8/M6。CCL 供应商：松下、EMC、南亚。
+
+<mark>TPU</mark> v8t Zebrafish，时间节点：2027 年第一季度，<mark>PCB</mark> 规格：34 层 N+M，<mark>PCB</mark> 供应商：ISU、LCS、WUS、TTM、GCE、Dynamic。CCL 规格：M8/M6。CCL 供应商：松下、EMC、斗山。
+
+<mark>TPU</mark> v9 Humufish，时间节点：2028 年，<mark>PCB</mark> 规格：HDI，<mark>PCB</mark> 供应商：ISU、LCS、WUS、TTM、欣兴电子、Dynamic。CCL 规格：M9/M8。CCL 供应商：松下、EMC、斗山。
+
+亚马逊
+
+Trainium 2e，时间节点：2026 年上半年，<mark>PCB</mark> 规格：26 层，<mark>PCB</mark> 供应商：GCE、生益科技、FHT。CCL 规格：M8。CCL 供应商：EMC、TUC。
+
+Trainium 3，时间节点：2026 年下半年，<mark>PCB</mark> 规格：26 层 / 40 层、22 层（交换机板），<mark>PCB</mark> 供应商：GCE、生益科技、FHT、WUS、ZDT。CCL 规格：M8。CCL 供应商：EMC、TUC。
+
+Trainium 4，时间节点：2027 年下半年，<mark>PCB</mark> 规格：34 层、30 层（交换机板），<mark>PCB</mark> 供应商：GCE、生益科技、ZDT。CCL 规格：M9（待确认）。CCL 供应商：EMC、TUC、南亚。
+
+<mark>AMD</mark>
+
+MI450，时间节点：2026 年第四季度，<mark>PCB</mark> 规格：48 层，<mark>PCB</mark> 供应商：SCC（主力）、欣兴电子、Dynamic。CCL 规格：M8。CCL 供应商：EMC、斗山。
+
+MI500，时间节点：2027 年第四季度，<mark>PCB</mark> 规格：48-52 层，<mark>PCB</mark> 供应商：SCC（主力）、欣兴电子、Dynamic。CCL 规格：M9。CCL 供应商：EMC、斗山。
+
+<mark>OpenAI</mark>
+
+Jalapeño，时间节点：2026 年第四季度，<mark>PCB</mark> 规格：40 层，<mark>PCB</mark> 供应商：GCE 及其他厂商。CCL 规格：M8（待确认）。CCL 供应商：EMC、斗山。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">OpenAI</span><span class="kw-tag">Rubin</span><span class="kw-tag">GB200</span><span class="kw-tag">GB300</span><span class="kw-tag">Vera</span><span class="kw-tag">英伟达</span><span class="kw-tag">服务器</span><span class="kw-tag">PCB</span><span class="kw-tag">TPU</span><span class="kw-tag">AMD</span><span class="kw-tag">谷歌</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258225548224822" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258225521112581">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-05 21:44 · 👁 328</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">TrendForce：
+Rub...</div>
+  <div class="topic-content">TrendForce：
+<mark>Rubin</mark> 平台
+<mark>Rubin</mark> 平台仍存在系统级测试与验证问题，预计出货量将从 2026 年第四季度或 2027 年第一季度开始逐步提升。
+DRAM
+供应商针对 2026 年第四季度合约价格的早期讨论表明价格将大幅上涨，这意味着需求动能正在增强，特别是来自**美国云端服务提供商（CSP）**的需求。
+NAND（企业级 SSD）
+DRAM 短缺正限制部分 NAND 供应商支持企业级 SSD 解决方案的能力。因此，预计企业级 SSD 的供不应求状态将持续至 2026 年。
+HDD
+尽管东芝宣布了新的产线扩建计划，但投入运营至少需要 12 到 24 个月。因此，交货周期最早要到 2027 年底才可能有所改善。
+ABF 载板
+ABF 载板产能的增长速度不足以跟上需求的激增。供需缺口短期内不太可能弥合，因此市场将保持紧张状态。
+预计 ABF 载板价格将从 2026 年第三季度开始环比上涨 10%-15%，并持续到 2027 年第四季度。
+MLCC
+低端消费级 MLCC 的需求正在放缓，而用于 <mark>AI</mark> 应用的高端 0805 标准件则供应短缺，市场需求的极化现象进一步加剧。
+#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Rubin</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258225521112581" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521518855458144">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-05 20:39 · 👁 407</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">📊#🚀🚀🚀Muse爆红出圈，一...</div>
+  <div class="topic-content">📊#🚀🚀🚀Muse爆红出圈，一张图看懂#Muse全维度数据追踪
+
+[拥抱]如需进一步交流或获取详细解读，欢迎联系华福证券<mark>AI</mark>互联网团队：
+杨晓峰 18519333225 / 谢镕潞 18018606028</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521518855458144" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
