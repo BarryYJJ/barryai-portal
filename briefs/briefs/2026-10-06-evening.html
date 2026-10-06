@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-10-06 晚间 AI 简报</title>
+<style>
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-10-06 20:30:38</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-10-06 晚间 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-10-06 14:30</strong> &nbsp;→&nbsp; <strong>2026-10-06 20:30</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">14</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">10 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">71.4%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">6 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">华为</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">6</span></div><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">6</span></div><div class="hot-kw-row"><span class="kw-name">GPU</span><div class="bar-track"><div class="bar-fill" style="width:67%"></div></div><span class="kw-count">4</span></div><div class="hot-kw-row"><span class="kw-name">英伟达</span><div class="bar-track"><div class="bar-fill" style="width:67%"></div></div><span class="kw-count">4</span></div><div class="hot-kw-row"><span class="kw-name">中芯国际</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">光模块</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">昇腾</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">算力</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="kw-count">2</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-82258225854888852">CPO放量先看交付：专家预计2027年英伟达出货20万台、博通5万台，台积电爬坡或让NPO先来“搭班”</a></li><li><a class="tldr-jump" href="#t-45548554845588858">DeepSeek与华为昇腾950联手冲大模型天花板，已研究向10万亿参数外推，“国模+国芯”从适配走向共建</a></li><li><a class="tldr-jump" href="#t-82258225511124242">智谱GLM-5.3接入AWS Bedrock、按调用量分成，国产大模型出海开始从“秀能力”转向“收流水”</a></li><li><a class="tldr-jump" href="#t-22258225852288221">GPU太热，钻石来救：中科粉研拟投14亿元扩产、规划年产4万片金刚石散热片，散热赛道开始拼产业化</a></li><li><a class="tldr-jump" href="#t-45548554842555418">AI制药热到实验室“排队”：TWST、SDGR等上月涨超40%，Anthropic研究员指向生物学下一站，瓶颈落在实验室与物理基建</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-14425442521444522">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-06 19:26 · 👁 198</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">[红包]浙商机械 邱世梁|王华...</div>
+  <div class="topic-content">[红包]浙商机械 邱世梁|王华君 【金刚石散热】中科粉研扩产项目公示，金刚石散热产业化加速，持续推荐！[福][福][福]
+
+1️⃣中科粉研金刚石散热片扩产项目完成用地规划公示，行业扩产加速推进
+项目计划#年产4万片金刚石散热片（4英寸单晶），可用于<mark>GPU</mark>散热。总投资14亿元，目标三年内达到年产值30亿元。
+
+项目6月签约，8月环评获批，9月底完成用地规划公示，#计划建设工期24个月，目标26年底投产200台MPCVD设备，#达产后MPCVD设备预计将达500台，可生产2-4英寸单晶晶圆。
+
+2️⃣我们预计金刚石和金刚石铜产业化在即
+1）单晶金刚石：#热导率最高，长晶速度快，可用于Chip-to-Wafer键合。
+
+2）多晶金刚石：目前散热片尺寸可达8英寸以上，可用于Wafer-to-Wafer键合。
+
+3）金刚石铜：#相较纯金刚石可加工性更优，成本更低。目前已落地郑州国家超算中心、联想部分型号笔记本等。
+
+3️⃣头部企业产业化进展加速，未来有望“订单为王”，例如：
+①九州一轨：投建金刚石芯片基板建设项目（一期），产品覆盖单晶、多晶金刚石片，&lt;e type=&quot;hashtag&quot; hid=&quot;88455551482442&quot; title=&quot;%23%E9%A1%B9%E7%9B%AE%E9%83%A8%E5%88%86%E5%88%86%E5%8C%85%E5%90%88%E5%90%8C%E5%B7%B2%E7%BB%8F%E8%90%BD%E5%9C%B0%E3%80%82%23&quot; /&gt; 
+
+②国机精工：金刚石铜、单晶、多晶金刚石均已向重点客户送样验证，&lt;e type=&quot;hashtag&quot; hid=&quot;51422228415444&quot; title=&quot;%23%E5%B9%B4%E5%86%85%E6%9C%89%E6%9C%9B%E8%8E%B7%E5%B0%8F%E6%89%B9%E9%87%8F%E8%AE%A2%E5%8D%95%E3%80%82%23&quot; /&gt; 
+
+③斯莱克：#与北科大联合开发的金刚石复合材料热沉样品已进入测试阶段，未来有望在<mark>AI</mark><mark>光模块</mark>领域取得突破。
+
+④杰美特：子公司戴尔蒙德（持股52%）拥有全国最大的CVD纳米金刚石涂层产业化基地，&lt;e type=&quot;hashtag&quot; hid=&quot;28455551482441&quot; title=&quot;%23CVD%E9%87%91%E5%88%9A%E7%9F%B3%E6%B6%82%E5%B1%82%E6%88%90%E6%9C%AC%E3%80%81%E4%BA%A4%E4%BB%98%E4%BC%98%E5%8A%BF%E6%98%BE%E8%91%97%E3%80%82%23&quot; /&gt; 
+
+⑤宏昌科技：拟收购昆吾半导体和尤品新材料各45%股权，&lt;e type=&quot;hashtag&quot; hid=&quot;15122228154182&quot; title=&quot;%23%E6%A0%87%E7%9A%84%E5%85%AC%E5%8F%B8%E6%A0%B8%E5%BF%83%E4%BA%A7%E5%93%81%E5%8C%85%E6%8B%AC%E9%87%91%E5%88%9A%E7%9F%B3%E6%95%A3%E7%83%AD%E6%9D%90%E6%96%99%E3%80%82%23&quot; /&gt; 
+
+⑥沃尔德：投资5.2亿元扩产金刚石散热衬底，#达产后年产能65万片。12英寸多晶已实现高平整度、高良率的稳定生长，#目前处于小批量验证阶段。
+
+⑦黄河旋风：拥有国内首条8英寸金刚石热沉片生产线，#大尺寸热沉片已经通过<mark>华为</mark>、<mark>中芯国际</mark>等头部企业验证。
+
+⑧四方达：#金刚石散热片已取得小批量测试订单，控股子公司天璇半导体（合计持股50.3%）拟投资4.5亿元扩产CVD金刚石散热片，#达产后可实现年产2.5万片4英寸级CVD金刚石散热片。
+
+[太阳]投资建议：推荐九州一轨、国机精工、四方达、斯莱克、杰美特等；关注宏昌科技、沃尔德、黄河旋风、晶盛机电、中兵红箭、力量钻石、惠丰钻石、恒盛能源等
+
+风险提示：市场需求不及预期、技术迭代不及预期、市场竞争加剧
+
+☎【浙商机械 邱世梁/王华君18610723118/蒋逸18158576706/秦乐恒15221680140】</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">中芯国际</span><span class="kw-tag">光模块</span><span class="kw-tag">GPU</span><span class="kw-tag">华为</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425442521444522" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548554842555418">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-06 19:25 · 👁 196</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【天风海外】为什么AI4S成为...</div>
+  <div class="topic-content">【天风海外】为什么AI4S成为国庆内美股瓶颈交易的核心？
+
+上月TWIST DNA SDGR等AI4S核心标的均上涨40%以上，昨日板块再度大涨，TWST+8%, SDGR+8%,TEM+9%,DNA+20%,
+
+周末Anthropioc研究员Call生物为下一个最重要场景，实验室是最大瓶颈：Sholto Douglas &amp; Nicholas Marwellb被 Joe Lonsdale采访。两位<mark>Anthropic</mark>研究员表示：最大下一个场景是生物学。认为在未来 6 到 24 个月会类似软件工程，社会收益更广泛而强大。表观遗传学（epigenetics）与长寿研究等<mark>AI</mark>常见场景将是生命科学领域最重要的技术，甚至可能是史上最重要的技术。实验室为瓶颈担心美国有没有足够的实验室和物理基础设施，明显落后于中国，重建供应链和实验室体系应当成为一项重大的社会基础设施工程。
+
+生物计算“防御能力”能力成为硅谷最紧急的事情：<mark>Anthropic</mark>研究员表示类似网络安全，生物防御能力提升甚至更为紧急，生物防御大致有四根支柱：检测与监测、归因、对策，以及政府层面的威慑。
+
+Radical Numerics CEO Eric Nguyen表示正在用大量湿实验室数据训练生物模型“思维链”。其产品Evo 证明预训练能跨模态，但在人类遗传学上仍落后。Omni 的重点是中训练和后训练，例如给定野生型和突变，标出可能的致病变异。特殊 token 用来告诉模型当前要做预测还是设计。模型预训练在 DNA 上，RNA数据也可以进行后训练。对于定位症状起作用的基因组与抗菌影响巨大。
+
+北美成长型买方机构开始站台：Baillie Gifford 9 月中旬写 Twist 是 “<mark>AI</mark> biology 的物理层”；Altimeter 十月四号发布长文把链条写成 DNA → 蛋白 → assay → 测序 → 自动化 → 临床前，点名 $TWST、金斯瑞、Illumina、10x Genomics 和 CRO。
+
+相关欢迎联系天风海外 <mark>AI</mark> 李泽宇
+请支持天风海外/传媒互联网刘欣团队</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Anthropic</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548554842555418" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548554842888888">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-06 18:55 · 👁 235</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">瑞银：各供应商的 <mark>HBM</mark> 年末...</div>
+  <div class="topic-content">瑞银：各供应商的 <mark>HBM</mark> 年末产能</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">HBM</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548554842888888" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258225854888852">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-06 18:55 · 👁 234</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">据一位专家称，博通预计将在 2...</div>
+  <div class="topic-content">据一位专家称，博通预计将在 2027 年出货 5 万台 <mark>CPO</mark> 交换机，<mark>Meta</mark> 将是其主要客户。
+<mark>英伟达</mark>的出货量将更高，达到 20 万台；其固有优势在于能够将 <mark>CPO</mark> 或 NPO 交换机与 <mark>Rubin</mark> 架构捆绑销售。
+
+Q：博通预计明年（2027 年）<mark>CPO</mark> 交换机出货量是多少，主要客户是谁，交付环节存在哪些挑战？
+A：基于当前订单情况，预计明年（2027 年）<mark>CPO</mark> 交换机出货量约 5 万台，<mark>Meta</mark> 为主要客户；双方正在制定具体落地实施方案。交付层面存在一项挑战：<mark>台积电</mark>产能仍处在爬坡阶段。
+因此，最终交付方案或许不会是 100% 的 <mark>CPO</mark> 方案，会包含部分 NPO 作为过渡方案。<mark>英伟达</mark>与博通向客户交付产品时，都有可能采用这种 <mark>CPO</mark> 与 NPO 混合交付的形式。
+Q：针对明年（2027 年）<mark>CPO</mark> 市场出货量，<mark>英伟达</mark>与博通各自的预期是多少？为什么<mark>英伟达</mark>预期出货量高于博通？
+A：博通明年（2027 年）<mark>CPO</mark> 交换机预期出货量约 5 万台，主要面向横向扩展架构。与之对比，<mark>英伟达</mark>的 <mark>CPO</mark> 预期出货量更高，目标约 20 万台；该预期是伴随 <mark>Rubin</mark> 架构推出而设定，并且<mark>英伟达</mark>已经按照这一目标备货。<mark>英伟达</mark>具备内生优势：因为自身销售 <mark>GPU</mark> 产品，可以将 <mark>CPO</mark> 或 NPO 交换机和 <mark>Rubin</mark> 架构进行捆绑销售，以此推动该架构的大规模落地应用。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Rubin</span><span class="kw-tag">Meta</span><span class="kw-tag">英伟达</span><span class="kw-tag">台积电</span><span class="kw-tag">CPO</span><span class="kw-tag">GPU</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258225854888852" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258225854888542">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-06 18:54 · 👁 234</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">高盛：<mark>AI</mark> <mark>服务器</mark>电源供应链</div>
+  <div class="topic-content">高盛：<mark>AI</mark> <mark>服务器</mark>电源供应链</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">服务器</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258225854888542" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548554845528548">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-06 17:17 · 👁 361</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">徐直军：<mark>华为</mark><mark>昇腾</mark>已超过<mark>英伟达</mark>！</div>
+  <div class="topic-content">&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fmp.weixin.qq.com%2Fs%2FL_fXqRXSBYNy-iu0QC94cg&quot; title=&quot;%E5%BE%90%E7%9B%B4%E5%86%9B%EF%BC%9A%E5%8D%8E%E4%B8%BA%E6%98%87%E8%85%BE%E5%B7%B2%E8%B6%85%E8%BF%87%E8%8B%B1%E4%BC%9F%E8%BE%BE%EF%BC%81&quot; /&gt;</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">英伟达</span><span class="kw-tag">华为</span><span class="kw-tag">昇腾</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548554845528548" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258225852288221">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-06 17:01 · 👁 392</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【金刚石散热】中科粉研扩产项目...</div>
+  <div class="topic-content">【金刚石散热】中科粉研扩产项目公示，金刚石散热产业化加速，持续推荐
+
+一、中科粉研金刚石散热片扩产项目完成用地规划公示，行业扩产加速推进
+
+项目计划年产4万片金刚石散热片（4英寸单晶），可用于<mark>GPU</mark>散热。总投资14亿元，目标三年内达到年产值30亿元。
+
+项目6月签约，8月环评获批，9月底完成用地规划公示，计划建设工期24个月，目标26年底投产200台MPCVD设备，达产后MPCVD设备预计将达500台，可生产2-4英寸单晶晶圆。
+
+二、我们预计金刚石和金刚石铜产业化在即
+
+1）单晶金刚石：热导率最高，长晶速度快，可用于Chip-to-Wafer键合。
+
+2）多晶金刚石：目前散热片尺寸可达8英寸以上，可用于Wafer-to-Wafer键合。
+
+3）金刚石铜：相较纯金刚石可加工性更优，成本更低。目前已落地郑州国家超算中心、联想部分型号笔记本等。
+
+三、头部企业产业化进展加速，未来有望“订单为王”，例如：
+
+一、九州一轨：投建金刚石芯片基板建设项目（一期），产品覆盖单晶、多晶金刚石片，项目部分分包合同已经落地。
+
+二、国机精工：金刚石铜、单晶、多晶金刚石均已向重点客户送样验证，年内有望获小批量订单。
+
+三、斯莱克：与北科大联合开发的金刚石复合材料热沉样品已进入测试阶段，未来有望在<mark>AI</mark><mark>光模块</mark>领域取得突破。
+
+四、杰美特：子公司戴尔蒙德（持股52%）拥有全国最大的CVD纳米金刚石涂层产业化基地，CVD金刚石涂层成本、交付优势显著。
+
+五、宏昌科技：拟收购昆吾半导体和尤品新材料各45%股权，标的公司核心产品包括金刚石散热材料。
+
+六、沃尔德：投资5.2亿元扩产金刚石散热衬底，达产后年产能65万片。12英寸多晶已实现高平整度、高良率的稳定生长，目前处于小批量验证阶段。
+
+⑦黄河旋风：拥有国内首条8英寸金刚石热沉片生产线，大尺寸热沉片已经通过<mark>华为</mark>、<mark>中芯国际</mark>等头部企业验证。
+
+⑧四方达：金刚石散热片已取得小批量测试订单，控股子公司天璇半导体（合计持股50.3%）拟投资4.5亿元扩产CVD金刚石散热片，达产后可实现年产2.5万片4英寸级CVD金刚石散热片。
+
+投资建议：推荐九州一轨、国机精工、四方达、斯莱克、杰美特等；关注宏昌科技、沃尔德、黄河旋风、晶盛机电、中兵红箭、力量钻石、惠丰钻石、恒盛能源等
+
+风险提示：市场需求不及预期、技术迭代不及预期、市场竞争加剧
+
+【浙商机械邱世梁/王华君18610723118/蒋逸18158576706/秦乐恒15221680140】</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">中芯国际</span><span class="kw-tag">光模块</span><span class="kw-tag">GPU</span><span class="kw-tag">华为</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258225852288221" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548554845588858">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-06 17:00 · 👁 395</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【国联】&quot;国模+国芯&quot;伟大机遇...</div>
+  <div class="topic-content">【国联】&quot;国模+国芯&quot;伟大机遇再次迎来新进展：<mark>昇腾</mark>950支撑<mark>DeepSeek</mark>向10万亿参数外推
+
+我们持续强调模算协同是中国<mark>AI</mark>产业的伟大机遇，&quot;国模+国芯&quot;核心主线再迎新进展：
+
+<mark>华为</mark>CANN社区公开的<mark>DeepSeek</mark>预训练技术文件显示，基于<mark>昇腾</mark>950超节点、经<mark>DeepSeek</mark>-V4-Flash训练验证，已分析550B、1.6T模型切分策略，并研究向10万亿参数规模外推的部署权衡，公开技术资料中模型体量触及10万亿参数量级。
+
+剑指10万亿参数：&quot;芯模&quot;深度共建
+
+<mark>华为</mark>联合定义UBL128组网方案（128卡3.2Tbps单层交换网络），<mark>DeepSeek</mark>自研的DeepEP通信库实测Dispatch带宽375GB/s、接近硬件上限，相关成果已同步在CANN社区开源。
+
+软件生态短板到加速补齐，模算协同正从软件栈向超大规模训练延伸
+
+9月30日<mark>DeepSeek</mark>已开源面向<mark>昇腾</mark>的全套基础组件，涵盖编程语言TileLang、计算库与分布式通信库，与此前面向<mark>英伟达</mark>平台的开源组件一一对应；<mark>DeepSeek</mark>训练中用到的每一个TileLang算子，在<mark>昇腾</mark>上都有对应的高性能实现。
+
+风险提示：国产<mark>算力</mark>需求释放节奏、软件生态建设进度不及预期。
+
+联系人：国联民生计算机吕伟/郭新宇</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">DeepSeek</span><span class="kw-tag">英伟达</span><span class="kw-tag">算力</span><span class="kw-tag">华为</span><span class="kw-tag">昇腾</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548554845588858" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425442288885112">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-06 15:15 · 👁 497</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【华西电子卜灿华团队】十一科技...</div>
+  <div class="topic-content">【华西电子卜灿华团队】十一科技热点复盘
+
+十一期间海外科技大涨，纳指再创新高，截止10.6，半导体ETF SMH涨4.09%。据界面新闻，弱非农令加息预期降温，为科技反弹提供催化。
+➠<mark>AI</mark>板块光通信涨幅明显，AAOI、Coherent分别涨22.48%、15.92%。
+➠半导体板块SiC表现突出，Wolfspeed、Onsemi涨19.20%、11.79%。
+
+🤖<mark>AGI</mark>热度持续上行，<mark>GPU</mark>、CPU需求有望继续上行
+<mark>OpenAI</mark>于9月29日发布<mark>GPT</mark>-6.1 Sol；<mark>英伟达</mark>10月5日收盘再创新高。
+<mark>英伟达</mark>此前指出，<mark>智能体</mark>越来越依赖CPU编排工具、执行代码和处理数据。从“回答问题”走向“执行任务”，有望带动CPU需求增加。
+
+🌟我们认为GPT6和Muse的火爆，意味着<mark>AGI</mark>带领<mark>AI</mark>进入2.0时代，#<mark>Agent</mark>带来的便利性将激发更广泛的市场需求，<mark>大模型</mark>将进入新一轮的升级迭代，进而进一步拉动相关需求。
+
+💎逻辑折叠，国产芯片新希望
+据IT之家，麒麟9050 Pro等效晶体管密度较9030 Pro提升超50%，是<mark>华为</mark>韬定律“逻辑折叠”（LogicFolding）技术的首次商业化落地。
+
+🌟我们认为9050 Pro意味着逻辑折叠开启了国产芯片新路径，#通过先进封装能力的演绎打开了国产芯片性能瓶颈，利好先进封装和国产链。
+
+📋受益标的：
+SiC：天岳先进、晶升股份、瀚天天成、芯联集成等；
+CPU：<mark>海光</mark>信息、中电港等；
+<mark>算力</mark>租赁：润泽科技、盛世科技、艾可蓝等；
+专家标注：友邦吊顶、麦迪科技等；
+先进封装：盛合晶微、颀中科技等。
+
+☎️AI2.0：<mark>AGI</mark>时代到来
+⏰10月06日（周二）16:00
+
+☎️十一科技板块复盘
+⏰10月07日（周三）9:00
+
+#接入电话： 400-810-8099
+#参会密码： 677943
+
+外呼请联系对口销售或华西电子团队，卜灿华(SAC：S1120524120006)</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">OpenAI</span><span class="kw-tag">Agent</span><span class="kw-tag">大模型</span><span class="kw-tag">智能体</span><span class="kw-tag">英伟达</span><span class="kw-tag">AGI</span><span class="kw-tag">GPT</span><span class="kw-tag">GPU</span><span class="kw-tag">算力</span><span class="kw-tag">华为</span><span class="kw-tag">海光</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425442288885112" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258225511124242">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-06 15:03 · 👁 496</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【国联民生计算机】<mark>智谱</mark>大涨8%...</div>
+  <div class="topic-content">【国联民生计算机】<mark>智谱</mark>大涨8%：官宣接入AWS Bedrock，海收入增长迎来强劲催化剂
+
+[太阳]亚马逊云科技（AWS）旗下<mark>大模型</mark>服务平台Amazon Bedrock官宣接入<mark>智谱</mark>GLM-5.3，AWS基于模型调用量与<mark>智谱</mark>进行【收入分成】。据产业调研，<mark>智谱</mark>近期与国内云厂商也达成类似协议，公司收入增长迎来强劲催化。
+
+[太阳]参考早先接入AWS Bedrock的<mark>MiniMax</mark>、<mark>Kimi</mark>等厂商，海外收入占比长期稳定在60-70%；<mark>智谱</mark>当前海外收入较低，有较大提升空间。
+
+[太阳]中美<mark>AI</mark>重回合作态势，<mark>华为</mark>对高通的专利授权与<mark>智谱</mark>与AWS的收入分成都在验证该产业趋势，全面看好中国<mark>大模型</mark>全球化机遇，持续推荐<mark>智谱</mark>、<mark>minimax</mark>等。
+
+联系人：国联民生计算机吕伟/白青瑞</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">MiniMax</span><span class="kw-tag">Kimi</span><span class="kw-tag">大模型</span><span class="kw-tag">华为</span><span class="kw-tag">智谱</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258225511124242" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
