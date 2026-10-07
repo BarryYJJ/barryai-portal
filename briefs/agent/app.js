@@ -2234,7 +2234,8 @@
     return apiFetch('/v1/console/sessions/' + encodeURIComponent(id), {
       timeout: TIMEOUTS.sessionDetail || 15000
     }).then(function (res) {
-      if (!isCurrentGeneration(generation) || stamp !== state.hydrationSeq) return unavailable;
+      if (!isCurrentGeneration(generation) || stamp !== state.hydrationSeq
+          || state.running || state.submitting) return unavailable;
       if (res.status === 401) { handleUnauthorized(generation); return unavailable; }
       if (res.status === 404) { setHistoryState('err', describeHttpError(404)); return gone; }
       if (!res.ok) { setHistoryState('err', describeHttpError(res.status)); return unavailable; }
@@ -2251,11 +2252,14 @@
         applyServerSession(detail);
         return { ok: true, missing: false };
       }, function () {
+        if (!isCurrentGeneration(generation) || stamp !== state.hydrationSeq
+            || state.running || state.submitting) return unavailable;
         setHistoryState('err', '会话详情响应无法解析成 JSON。');
         return unavailable;
       });
     }, function (err) {
-      if (!isCurrentGeneration(generation) || stamp !== state.hydrationSeq) return unavailable;
+      if (!isCurrentGeneration(generation) || stamp !== state.hydrationSeq
+          || state.running || state.submitting) return unavailable;
       setHistoryState('err', describeNetworkError(err, CFG.apiBase));
       return unavailable;
     });
