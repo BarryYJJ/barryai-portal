@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-10-09 深夜 AI 简报</title>
+<style>
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-10-09 01:30:46</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-10-09 深夜 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-10-08 20:30</strong> &nbsp;→&nbsp; <strong>2026-10-09 01:30</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">23</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">11 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">47.8%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">5 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">数据中心</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">4</span></div><div class="hot-kw-row"><span class="kw-name">人工智能</span><div class="bar-track"><div class="bar-fill" style="width:75%"></div></div><span class="kw-count">3</span></div><div class="hot-kw-row"><span class="kw-name">AI算力</span><div class="bar-track"><div class="bar-fill" style="width:75%"></div></div><span class="kw-count">3</span></div><div class="hot-kw-row"><span class="kw-name">谷歌</span><div class="bar-track"><div class="bar-fill" style="width:75%"></div></div><span class="kw-count">3</span></div><div class="hot-kw-row"><span class="kw-name">服务器</span><div class="bar-track"><div class="bar-fill" style="width:75%"></div></div><span class="kw-count">3</span></div><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">英伟达</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">Meta</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">2</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-82258225142252512">AI缺电催热“自备电厂”：Bloom Energy年产能有望从5GW翻至10GW，安装周期从90天压至约55天，燃料电池进入交付兑现期</a></li><li><a class="tldr-jump" href="#t-22258225148525481">AI硬件订单比传闻更硬：PCB排单已到明年1月、电子布10月涨价，光互联与铜箔仍是算力扩张的卖铲人</a></li><li><a class="tldr-jump" href="#t-45548554128481548">算力出租开始“收租加价”：行云科技三大客户上调存量租价、首批集群8月起租，前三季度预计盈利2.4亿—2.9亿元、同比扭亏</a></li><li><a class="tldr-jump" href="#t-82258225142258212">AI散热卷到金刚石，英杰电气先卖电源：前9月半导体新签订单同比增近150%，MPCVD微波电源订单加速放量</a></li><li><a class="tldr-jump" href="#t-14425442815125452">AI制药还在闯实验室，资本先抬身价：Isomorphic Labs据报洽谈至少400亿美元估值融资，Biohub联合投入18亿美元建设AI生物数据与模型</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-82258225142252512">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-08 23:36 · 👁 286</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【BloomEnergy】审批...</div>
+  <div class="topic-content">【BloomEnergy】审批、产能、订单、交付四重验证落地，进入“确定性兑现阶段”
+
+审批松动：宾州~1.2GWBE燃料电池供电比弗县2GWAligned<mark>数据中心</mark>（凤凰项目）获州环保署文件证实、9月10日动工；新墨州最高法院解除暂缓令，Oracle2.45GW空气许可恢复推进——SOFC审批路径开始形成“先例效应”，监管不确定性折价有望系统性下修
+
+产能翻倍/安装提速：2026年9月BE新购弗里蒙特158,000平方英尺工厂，叠加现有基地，年额定产能有望5GW→10GW；2026年8月powerConnect预制方案把现场安装从90天压到约55天（-40%）；800V直流方案测算可帮1GWAI<mark>数据中心</mark>省36亿美元非ITCapex（约27%）
+
+订单三层逻辑：<mark>数据中心</mark>主电源（2025年底在手订单200亿美元，新增Oracle最高2.8GW、Nebius328MW）→非<mark>AI</mark>外溢（AEP900MW；BNFE预测2030年28%装机用于工业）→区域扩容（日立合作进入日本市场）
+
+模式升级：与Brookfield合作额度50亿→250亿美元，从卖设备转向“设备+长期服务+融资生态”
+
+按照原产能和部署方案预计26-28年营业利润分别为9.21/39.56/69.72亿美金，yoy+327%/+329%/76%，对应PE为81X/19/10.7X，供给端有望释放更大弹性，下跌即是布局良机。
+
+联系人:初敏/李睿娴</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">数据中心</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258225142252512" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521552845521814">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-08 23:36 · 👁 284</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【浙商医药|郭双喜】金斯瑞与N...</div>
+  <div class="topic-content">【浙商医药|郭双喜】金斯瑞与NVIDIA达成重要合作，湿实验服务进一步拓展
+
+事件：
+
+根据美通社10月8日的报道，金斯瑞将举办金斯瑞与<mark>英伟达</mark>生命科学初创企业创投大赛，这是一场面向将<mark>人工智能</mark>应用于治疗药物研发和生命科学领域初创企业的全球赛事。该项目整合了金斯瑞的湿实验验证和数据生成能力，以及NVIDIA的加速计算平台与初创企业生态系统。
+
+由GenScript主办的路演活动将选拔最多六名决赛选手参加评委小组评审。获奖公司将获得GenScript湿实验室数据积分以及<mark>英伟达</mark>提供的Brev积分，以支持其研发工作。
+
+观点：
+
+1）行业发展逻辑正在从科学家决策到智能化自主决策验证的新阶段，科学研究的范式可能被重塑，早期药物发现从低频验证的范式转向高频、高通量、多轮快速迭代的新范式；
+
+2）金斯瑞与<mark>英伟达</mark>的合作或能够进一步拓展其湿实验服务的对象和范围，加速AIDD相关业务的发展。
+
+风险提示：技术发展不及预期的风险、政策不确定的风险
+
+联系人：郭双喜/安柯</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">人工智能</span><span class="kw-tag">英伟达</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521552845521814" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258225142258212">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-08 23:35 · 👁 284</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">⭕️ 英杰电气更新：9月单月半...</div>
+  <div class="topic-content">⭕️ 英杰电气更新：9月单月半导体订单继续新高，金刚石散热相关电源加速放量
+
+【半导体订单持续高增】# 公司1-9月半导体新签订单同比增长近150%（增速远快于行业），# 9月半导体订单继续创单月新高。
+
+【金刚石散热订单加速放量】# 9月金刚石相关订单放量明显（8月已有明显上量趋势），主要为MPCVD微波电源，随着金刚石散热在<mark>AI算力</mark>及半导体领域应用推进，该类电源已经为公司贡献新的增长动能。
+
+【我们认为，英杰电气的预期差在于半导体平台化能力】公司持续向射频电源、脉冲电源、MFC等半导体核心零部件延伸，传统半导体工艺电源保持较快增长，新兴业务逐步进入订单兑现阶段，产品矩阵持续完善。
+
+【Q3业绩有望迎来拐点】此外，我们预期Q3公司业绩同比有望由负转正（主要是半导体开始进入密集确收期），Q3有望成为公司业绩重回增长通道的重要拐点。
+
+公司26、27年PE分别为58、31X，持续看好。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI算力</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258225142258212" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548554128248558">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-08 22:54 · 👁 456</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">集成电源解决方案驱动长期需求
+...</div>
+  <div class="topic-content">集成电源解决方案驱动长期需求
+
+<mark>人工智能</mark>集群功耗持续走高，同时 BBU（电池备份单元）、CBU（电容储能单元）、800 伏直流、正负 400 伏直流、固态变压器在<mark>人工智能</mark>集群当中逐步落地应用，会抬升行业技术门槛，也会给具备雄厚实力的市场参与者带来成长机遇。
+
+燃料电池同样有望在电力供给受限的大背景下，诞生全新发展机遇。
+
+受<mark>人工智能</mark>资本开支带动，电力相关组件具备长期增长需求：和<mark>人工智能</mark>相关的电力消耗会持续上行，我们判断这会带动电源单元、电池备份单元、电容储能单元、冷却液分配单元等电力相关组件产生持续性需求。
+
+随着行业对能效的要求不断提升，电源机架、电源中心、电源模块配置中，会不可避免采用 800 伏直流以及正负 400 伏直流供电方案。
+
+我们预估该技术从 2026 年末开始小范围落地，2028 年迎来大规模普及；长期来看固态变压器也会逐步投入实际部署，以上发展方向，都指向未来供电架构会进一步走向集中化。
+
+这种供电架构集中化的发展趋势，叠加白空间与灰空间的边界相互融合，会抬升行业技术壁垒，利好技术实力、落地执行能力更强的市场参与者。
+
+综合测算，我们预计<mark>数据中心</mark>电源市场规模三年复合增长率可以达到 75%，2028 年市场规模将达到 330 亿美元。
+
+燃料电池可以提升<mark>人工智能</mark>供电的灵活性与抗风险能力：尽管<mark>人工智能</mark>资本开支前景向好，机构测算 2026、2027 年全球云资本开支同比分别增长 97%、20%，但是电力供给已经成为发展瓶颈。
+
+有机构预测，2026 年将会出现 5 吉瓦的电力缺口，到 2029 年累计缺口规模会扩大至 72 吉瓦。
+
+在各类替代能源当中，燃料电池有希望成为填补电力缺口的优质方案，并且可以通过主动微电网管理提升整体运行效率。
+
+能够提供从电源到完整供电交付全套综合解决方案的市场参与者，市场竞争力会持续增强。
+
+本次分析覆盖的标的包含台达电子与光宝科技。
+
+台达电子（增持评级，目标价新台币 2500 元，目标估值参考 2027‑2028 年 30 倍市盈率）凭借集成化电源及热管理相关解决方案，将继续保持行业优势地位。
+
+长期维度，燃料电池业务还可以为公司带来额外增量成长机会。
+
+我们测算，2025‑2028 年公司盈利复合增速可达 63%，该增速来自 44% 的营收复合增速，同时营业利润率会从 2025 年的 15.1% 扩张至 2028 年的 22.1%，基于上述判断，我们认为给予 30 倍市盈率的目标估值具备合理性。
+
+光宝科技（减持评级，目标价新台币 315 元，目标估值参考 2027‑2028 年 17 倍市盈率）作为<mark>人工智能</mark>电源相关产品领域的全球第二大供应商，虽然在高压直流电源机架、<mark>液冷</mark>解决方案推进节奏偏慢，但同样可以享受行业红利。
+
+我们测算 2025‑2028 年公司盈利复合增速为 47%，营收复合增速 29%，营业利润率将扩张 6.8 个百分点，2028 年达到 16.8%，因此我们认为给予 17 倍市盈率目标估值具备合理性。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">人工智能</span><span class="kw-tag">数据中心</span><span class="kw-tag">液冷</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548554128248558" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425442815125452">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-08 22:54 · 👁 459</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">[红包]<mark>AI</mark>制药值得关注的新闻...</div>
+  <div class="topic-content">[红包]<mark>AI</mark>制药值得关注的新闻（10.08）
+
+[玫瑰]据彭博社报道，由<mark>谷歌</mark>孵化的<mark>AI</mark>制药公司Isomorphic Labs正在筹集新一轮融资，估值至少达400亿美元。其中一位知情人士称，本轮融资对Isomorphic的估值可能高达500亿美元。这些人士还表示，融资尚未完成，细节可能发生变化。由此，其一级市场估值有望继上一轮150-200亿美金进一步提升。
+
+[玫瑰]Mark Zuckerberg所联合创立的Biohub宣布扩大Virtual Biology Initiative，合作阵容包括美国能源部（DOE）、美国国立卫生研究院（NIH）、<mark>谷歌</mark>DeepMind、Isomorphic Labs、<mark>Meta</mark>。Biohub表示，这是迄今为止规模最大的、多方协同的<mark>AI</mark>-ready生物数据建设投入。该项目旨在利用<mark>AI</mark>大规模生成生物数据，预测细胞的活动规律，共同构建生命预测模型所需的技术与<mark>多模态</mark>数据集，再用这些数据训练预测模型，从而缩短药物研发周期。各方在资金、数据、<mark>算力</mark>与技术上的投入合计高达18亿美元。
+
+[玫瑰]播客节目《Cheeky Pint》发布了一期对礼来首席执行官David Ricks的访谈。关于<mark>AI</mark>制药，礼来CEO估计，人类目前可能只理解了10%-15%的生物学知识，人类可能需要把生物学知识的覆盖程度提高到50%以上，<mark>AI</mark>才有望可靠地处理更复杂的生物系统预测任务，因此需要建立能够全天候运行的机器人实验系统，通过大规模自动化实验持续生成生物学数据，这种方式可以主动探索尚未被充分研究的生物过程，并将实验结果用于改进模型。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Meta</span><span class="kw-tag">多模态</span><span class="kw-tag">算力</span><span class="kw-tag">谷歌</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425442815125452" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258225148285842">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-08 22:50 · 👁 480</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【晶晨股份】Q3再创单季历史新...</div>
+  <div class="topic-content">【晶晨股份】Q3再创单季历史新高，业绩持续超预期❗️
+
+事件：公司发布26Q3业绩预告：
+【收入】26.89-27.89亿，中枢27.39亿，yoy+57%，qoq+10%
+【归母净利润】6.49-6.99亿，中枢6.74亿，yoy+235%，qoq+54%
+【扣非净利润】6.40-6.90亿，中枢6.65亿，yoy+284%，qoq+67%
+Q3延续环增趋势，再创单季收入及归母净利润历史双高，业绩强劲增长，利润同环比高增，超预期！
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;51422155415414&quot; title=&quot;%23%E4%BB%BD%E9%A2%9D%E7%A8%B3%E5%A2%9E%E3%80%81%E4%B8%BB%E5%8A%9B%E4%BA%A7%E5%93%81%E9%87%8F%E4%BB%B7%E9%BD%90%E5%8D%87%23&quot; /&gt;   
+1️⃣S系列出货量稳居全球第一，T系列持续导入全球主流终端，业务快速增长，预计26年T系列出货量份额有望达全球市场1/3；
+2️⃣主力产品持续放量，高端T系列新品在多家头部终端品牌客户导入加速，产品结构进一步优化；
+3️⃣受存储成本上涨影响，公司合理调整全线产品售价，实现量价齐增，Q3提价全面落地，带动毛利率及净利率显著提升，26Q3净利率25%，yoy+13pct、qoq+7pct。
+
+[红包]依托多产品线落地及海内外客户持续拓展，叠加深度绑定<mark>谷歌</mark>，公司预计26年营收有望突破100亿元，全年营收及利润将创下历史新高，当前估值低位，重视！
+
+风险提示：行业竞争加剧，下游需求不及预期等。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">谷歌</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258225148285842" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258225148525481">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-08 22:32 · 👁 529</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">每日总结
+
+2026年10月8...</div>
+  <div class="topic-content">每日总结
+
+2026年10月8日
+
+🔥 核心一：<mark>AI算力</mark>硬件——FCC扰动不改产业趋势，光互联/<mark>PCB</mark>/铜箔全线高景气
+
+核心逻辑： 国庆假期美股<mark>AI</mark>硬件龙头集体新高（<mark>英伟达</mark>、Lumentum、戴尔等），验证全球<mark>AI</mark>资本开支趋势不改。节后A股科技板块受大摩FCC报告（3.2T<mark>光模块</mark>BOM 65%美系限制传闻）扰动出现分化，光芯片板块大跌，但多家券商及上市公司紧急澄清该报告无官方依据、对当期业务零影响。产业端<mark>PCB</mark>国庆几乎不停工、订单排到明年1月，<mark>电子布</mark>10月如期涨价，铜箔迎来涨价+升级共振，<mark>算力</mark>硬件景气度仍在加速通道中。FCC传闻本质是3.2T世代的远期博弈，800G/1.6T产品完全不受影响，NPO/<mark>CPO</mark>方向中长期确定性反而增强。
+
+重点关注标的：
+
+光互联/<mark>光模块</mark>：
+- 东山精密（FCC影响被错杀，<mark>光模块</mark>+<mark>PCB</mark>双赛道景气度高，董事长在美催货，产能储备充足）
+- 致尚科技（MPO跳线新签PH客户2027年5亿美元订单，越南+国内同步扩产）
+- 聚辰股份（<mark>AI</mark>存储方向，中信电子10月金股）
+- 优迅股份（<mark>AI算力</mark>芯片，中信Q4金股）
+
+<mark>PCB</mark>/<mark>电子布</mark>/铜箔：
+- 生益科技（<mark>AI算力</mark>CCL龙头，中信Q4金股）
+- 中国巨石/中材科技/国际复材（<mark>电子布</mark>10月如期涨价，G75纱环比+3000元/吨，E225纱环比+20%以上，供不应求格局延续至年底）
+- 德福科技（9月HVLP出货持续增长，四代产品爬坡加快，电子铜箔盈利加速改善）
+- 宏昌电子（CCL+GBF+树脂三轮驱动，无布CCL终极方案）
+
+半导体/芯片：
+- 三环集团（MLCC涨价，<mark>三星</mark>电机再签27年2.1亿美元大单，日韩厂假期继续上涨）
+- 圣邦股份（TI 8英寸稼动率95%，10月开启新一轮全面涨价，模拟芯片国产替代不可逆）
+- 本川智能（前三季度归母净利同比+190%~335%，<mark>AI</mark>电源<mark>PCB</mark>+CIPB双轮驱动）
+
+散热/TIM材料：
+- 九州一轨（激光隐切垄断国内<mark>硅光</mark>切割代工，金刚石散热设备拓展一体化空间）
+
+🔥 核心二：火电/电力/煤炭——供需拐点确认，三维改善驱动困境反转
+
+核心逻辑： 节后首日火电指数涨1.83%，广西能源涨停。火电迎来长协电价补偿煤价上涨、供需宽松期结束、自由现金流转正提升分红的&quot;三维改善&quot;。10月广东、江苏月度电价已接近基准电价（较今年长协上涨约8分、5分），十五五期间可靠容量供需紧平衡。煤炭板块年初至今涨幅22.81%领跑全行业，Q3业绩同环比继续向好，全球能源共振+迎峰度冬在即，煤价企稳上行窗口打开。电力短缺取代<mark>算力</mark>短缺成为<mark>AI</mark>基建第一瓶颈——全球<mark>数据中心</mark>在运IT负载约80GW、在建+已承诺管线约150GW，345kV以上高压变压器交期仍约4年。
+
+重点关注标的：
+
+火电：
+- 国电电力、宝新能源、广西能源、华能蒙电（国金10月金股，率先受益火电三维改善）
+- 华润电力（港股火电弹性标的）
+- 新奥股份（Q3核心利润同比大幅增长，全年54亿有信心，期待27年敞口弹性）
+
+煤炭：
+- 新集能源（煤炭上行+电力放量，煤电一体分红强化）
+
+电力设备/出海：
+- 华通线缆（十月金股，非洲电解铝布局远超预期，三季报有望大幅增长）
+
+🔥 核心三：消费与零售——双节动销分化，零食量贩估值回落至底部配置窗口
+
+核心逻辑： 双节消费整体&quot;量稳价弱&quot;，白酒动销同比下滑高单位数符合预期，茅五韧性最强。零食量贩双寡头门店扩张动能不减，鸣鸣很忙单月净开1600+家、签约破3万家，板块估值回调至26年12倍左右，强势基本面与估值形成错配。乳制品双节动销量稳价略改善，速冻火锅料略超预期。古茗短期交易层面利空（创始股东缴税）预计节后出清，国庆同店增长趋势稳健。红利资产方面，美10年期国债收益率升至5.36%，国内利率低位，红利防御属性凸显，山东高速、皖通高速、招商港口等接连创新高。
+
+重点关注标的：
+
+零食/餐饮：
+- 鸣鸣很忙、万辰集团（零食量贩双寡头，9月单月净开1600+/1200+家，估值回落至配置窗口）
+- 古茗（短期利空出清在即，Q3同店增速环比改善，10月中旬27年开店指引可期）
+- 比音勒芬（抖音9月继续高增并进一步提速，男装品牌中唯一亮点）
+
+白酒/食饮：
+- 茅台（飞天维持1730元，量价/开瓶/渠道利润均良性，α最突出）
+- 今世缘（Q2-3业绩率先回正，区域酒α标的）
+
+红利/防御：
+- 山东高速、皖通高速、粤高速A、宁沪高速H、招商港口、青岛港（红利资产接连创新高，长期底仓配置）
+
+🔥 核心四：宏观与策略——FOMC年内或再加息一次，美债利率上行不改<mark>AI</mark>主线
+
+核心逻辑： FOMC九月纪要显示全体与会者支持加息25bp至3.75%-4%，多数认为年内再次加息&quot;可能合适&quot;但将依赖数据、持开放态度。高盛预计12月实施第二次加息，但也认为FOMC最终判定无需进一步收紧的概率很大。9月PMI重返扩张区间（50.1%），全球制造业PMI进一步回升，韩国9月出口大超预期至83.5%、<mark>AI</mark>链贡献9成增量。美债方面，30年期收益率升至5.7%为2002年以来最高，但纳指仍创新高，5.3%美债收益率未能压制<mark>AI</mark>主线。策略上，&quot;最硬的矛-<mark>AI</mark>+最厚的盾-红利&quot;配置组合延续。
+
+重点关注标的：
+
+策略方向：
+- <mark>AI</mark>硬件龙头（美股<mark>GPU</mark>/<mark>光模块</mark>/<mark>服务器</mark>全线新高，A股科技节后补涨逻辑成立）
+- 低估值+强增长+现金回报（华创&quot;真金组合&quot;筛选集中于有色化工及科技制造）
+- 高股息红利（A股底部4%股息、港股6%左右，加息环境下防御价值凸显）
+
+🔥 核心五：周期资源——猪周期反转临近，染料主升浪启动，集运淡季不淡
+
+核心逻辑： 猪周期方面，消费旺季猪价不涨反跌，养殖行业现金流亏损已持续7个月，三季度以来产能去化明显加速，预计本轮去化延续到明年上半年，能繁母猪累计去化幅度或超10%，养殖大周期反转可期。染料行业进入主升浪，分散染料中间体还原物价格上调至18万，头部企业Q3业绩环比50%以上增长，后续逐季度业绩持续提升（复刻制冷剂路径）。集运方面，Q4淡季运价期货大涨48%-82%，Q3运价同比涨幅从Q2的33%扩大至95%，欧美库存周期上行叠加高油价，需求高增长预计延续到2027年底。SAF（可持续航空燃料）受益油价上涨，越来越多国家强制添加。
+
+重点关注标的：
+
+猪周期：
+- 牧原股份、温氏股份（养殖大龙头，产能去化加速背景下反转逻辑强化）
+
+染料化工：
+- 浙江龙盛、闰土股份（分散染料龙头，中间体格局优化驱动价格破历史新高6万预期）
+
+集运/油运：
+- 中远海控（集运Q4淡季不淡，运价期货大涨验证周期复苏）
+- 招商轮船、中远海能（油运VLCC即期运价全面爆发，大小船运价螺旋上涨）
+
+SAF/绿色能源：
+- 朗坤科技（UCO-SAF高景气，受益油价上涨+欧盟强制添加2%政策）
+
+⏰ 近期催化日历
+
+- 10月中旬：古茗27年开店指引交流、三季报密集披露窗口期开启
+- 10月底-11月初：日韩MLCC厂Q3业绩发布（预计bb ratio创新高）
+- 10月29日：美国FCC投票表决禁止中国实验室测试电子设备（2028年12月生效）
+- 11月3日：美国中期选举
+- 11月18-19日：APEC深圳峰会（可能时隔9年再次举行中美俄最高层会议）
+- 12月（预期）：美联储年内第二次加息窗口
+- Q4：风电海风国内外边际催化密集，德国风能展后续订单落地可期
+- 27年H1：猪周期产能去化延续，养殖大周期反转临近
+
+  策略提示一： 混沌期做简单题——逻辑一听就懂的品种优先，逐步削弱三季报因子（高关注标的预期已price in），增强中期产业趋势品种。成交额没起来之前，边际变化是内部资金腾挪最重要抓手。
+
+  策略提示二： 最硬的矛（<mark>AI</mark>硬件）+最厚的盾（红利）配置组合不变。A股科技自信需要重建——美股光互联龙头假期涨超15%创新高，A股对应标的因FCC传闻大跌，正是&quot;拨乱反正&quot;的布局窗口。
+
+  策略提示三： 关注PMI回升+全球制造业共振信号。9月中国PMI重返扩张区间，韩国出口超预期，欧美PMI共振向上，库存周期上行预计延续至2027年底，周期+出口链弹性可期。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI算力</span><span class="kw-tag">数据中心</span><span class="kw-tag">英伟达</span><span class="kw-tag">光模块</span><span class="kw-tag">服务器</span><span class="kw-tag">电子布</span><span class="kw-tag">CPO</span><span class="kw-tag">PCB</span><span class="kw-tag">GPU</span><span class="kw-tag">三星</span><span class="kw-tag">硅光</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258225148525481" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548554128481548">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-08 22:31 · 👁 549</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【浙商<mark>AI</mark>战队冯翠婷】行云科技...</div>
+  <div class="topic-content">【浙商<mark>AI</mark>战队冯翠婷】行云科技26年前三季度业绩预告快评
+
+公司预计2026年前三季度实现归母净利润2.4亿~2.9亿元（上年同期亏损7,232万元），扣非归母净利润2.45亿~2.95亿元（上年同期亏损7,824万元），同比双双扭亏为盈；以中值计归母净利润约2.65亿元，同比增利约3.4亿元。剔除2026年第一期股权激励费用摊销（约5,800万元）影响后，归母净利润达2.9亿~3.3亿元，<mark>算力</mark>主业真实盈利水平显著高于表观利润。 
+
+业绩变动说明：（1）<mark>算力</mark>业务&quot;销售+租赁&quot;双轮放量，是扭亏核心动力。<mark>AI算力</mark>基础设施需求持续旺盛，<mark>服务器</mark>销售业务爆发式增长；同时V、VB、VC三大头部客户基于<mark>算力</mark>市场行情及服务质量，对存量已签订单协商上调租赁价格，进一步增厚毛利，且三客户首批交付部署的<mark>服务器</mark>集群自8月起正式起租并确认租赁收入，<mark>算力</mark>租赁收入开始放量、运营规模持续攀升。（2）授信资源到位，保障订单交付。报告期内公司及子公司已向金融及非金融机构申请授信总额215.44亿元，已签署融资及授信合同65.89亿元，为<mark>算力</mark>业务持续拓展提供有效资金保障。（3）股权激励摊销短期压制表观利润。本期股权激励费用摊销约5,800万元按准则计入当期损益，剔除后主业盈利显著提升。
+
+风险提示：股权激励费用影响短期利润、受硬件涨价等市场因素影响后续交付存在不确定性等风险。
+
+☎️详询浙商<mark>AI</mark>战队冯翠婷17317141123</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI算力</span><span class="kw-tag">服务器</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548554128481548" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425442812544422">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-08 21:59 · 👁 666</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title"><mark>谷歌</mark>推出面向职场的“通用”Ge...</div>
+  <div class="topic-content"><mark>谷歌</mark>推出面向职场的“通用”<mark>Gemini</mark> <mark>人工智能</mark>代理</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Gemini</span><span class="kw-tag">人工智能</span><span class="kw-tag">谷歌</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425442812544422" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425442812544212">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-08 21:59 · 👁 665</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">据 CNBC 报道，特朗普 8...</div>
+  <div class="topic-content">据 CNBC 报道，特朗普 8 月份斥资高达 2500 万美元购入 <mark>Meta</mark> 股票，并持有 SpaceX 数百万美元的债务。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Meta</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425442812544212" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425442844524442">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-08 20:43 · 👁 866</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">#行云科技：Q3业绩超预期、服...</div>
+  <div class="topic-content">#行云科技：Q3业绩超预期、<mark>服务器</mark>稳定交付
+Q1-Q3归母净利润2.4-2.9亿，扣非2.45-2.95亿，若剔除股权费用影响对应归母为2.9-3.3亿；单Q3归母2.28-2.78亿，扣非2.38-2.88亿，超市场预期。增长来自：1、V+VB+VC客户的存量订单上调租赁价格，首批<mark>服务器</mark>8月起租并确收；2、<mark>服务器</mark>贸易增厚
+资金准备充足：最新授信额度为215亿，已签署合同总额为66亿元；公司此前公告26年采购金额从70亿上调到200亿
+后续催化：关注存量客户涨价，新订单落地，消保解除等，&lt;e type=&quot;hashtag&quot; hid=&quot;15122544458412&quot; title=&quot;%23%E7%BB%A7%E7%BB%AD%E9%87%8D%E7%82%B9%E6%8E%A8%E8%8D%90%23&quot; /&gt;
+
+#盛视科技：预计Q3高增长，此前指引年内交付2000台高端<mark>服务器</mark>，稳步推进当中，H1业绩已有所体现，Q3业绩将加速增长，且主业口岸查验业务或赋能<mark>算力</mark>新业务#新增重点推荐
+
+#杰创智能：预计Q3高增长，<mark>服务器</mark>到货速度较好，且<mark>B200</mark>涨价将逐步体现；后续布局明年超节点业务；阿里云栖大会提到32年<mark>数据中心</mark>到32GW，杰创当前规划2年capex400亿投入；token工厂已上线，从短剧率先切入
+
+#智微智能：预计同环比均有增长，<mark>服务器</mark>贸易转向算租，token工厂在逐步推进和<mark>大模型</mark>合作</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">数据中心</span><span class="kw-tag">B200</span><span class="kw-tag">大模型</span><span class="kw-tag">服务器</span><span class="kw-tag">算力</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425442844524442" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
