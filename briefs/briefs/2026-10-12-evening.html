@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-10-12 晚间 AI 简报</title>
+<style>
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-10-12 20:30:40</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-10-12 晚间 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-10-12 14:30</strong> &nbsp;→&nbsp; <strong>2026-10-12 20:30</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">44</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">16 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">36.4%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">6 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">6</span></div><div class="hot-kw-row"><span class="kw-name">数据中心</span><div class="bar-track"><div class="bar-fill" style="width:83%"></div></div><span class="kw-count">5</span></div><div class="hot-kw-row"><span class="kw-name">算力</span><div class="bar-track"><div class="bar-fill" style="width:67%"></div></div><span class="kw-count">4</span></div><div class="hot-kw-row"><span class="kw-name">Agent</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">3</span></div><div class="hot-kw-row"><span class="kw-name">人工智能</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">生成式</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">大模型</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">智能体</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="kw-count">2</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-45548555818885258">存储扩产把设备订单预期越推越高：拓荆科技今年新签订单被看至150亿—200亿元，明年有望冲350亿元以上</a></li><li><a class="tldr-jump" href="#t-22258222815481841">AI算力越烧越热，冰轮环境卖冷机先收钱：顿汉布什拿下约1.1亿美元海外数据中心订单，2027年交付</a></li><li><a class="tldr-jump" href="#t-14425444585211842">光通信扩容，联讯仪器靠“考试收费”吃红利：Q3净利润预计环比增198%—242%，硅光晶圆测试系统累计出货破100台</a></li><li><a class="tldr-jump" href="#t-22258222818881511">AI应用开始拿合同说话：金蝶国际前三季度AI原生产品签约10.02亿元，Q3净新增ARR同比增46.9%</a></li><li><a class="tldr-jump" href="#t-22258222815425421">芯片设计也要给智能体打工：Synopsys推出AgentEngineer，帖称客户实测验证收敛提速50倍，EDA迎来价值重估预期</a></li><li><a class="tldr-jump" href="#t-22258222815428541">AI漫剧开始按流水线出货：永吉股份26H1完成135部作品，自研Agent平台继续压低内容生产边际成本</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-82258222818258522">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-12 20:20 · 👁 99</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">🎯#冰轮环境   26Q3业绩...</div>
+  <div class="topic-content">🎯&lt;e type=&quot;hashtag&quot; hid=&quot;51584484414244&quot; title=&quot;%23%E5%86%B0%E8%BD%AE%E7%8E%AF%E5%A2%83%23&quot; /&gt;   26Q3业绩预告点评：Q3业绩超预期，<mark>数据中心</mark>冷机确收高增【建投机械】
+
+1️⃣&lt;e type=&quot;hashtag&quot; hid=&quot;48244811842488&quot; title=&quot;%23%E4%B8%9A%E7%BB%A9%E8%B6%85%E9%A2%84%E6%9C%9F%EF%BC%8C%E5%8D%95%E5%AD%A3%E5%88%A9%E6%B6%A6%E5%8A%A0%E9%80%9F%E9%87%8A%E6%94%BE%23&quot; /&gt;  
+26Q1-Q3归母5.56-6.42亿元，同比+30%-50%；扣非5.09-5.95亿元，同比+29%-51%，取中值归母5.99亿元、同比+39.92%；
+26Q3单季归母2.45-3.31亿元，同比+50.96%-103.94%，环比+26.42%-70.80%，单季利润加速释放逻辑明确。
+
+2️⃣#海外<mark>数据中心</mark>冷机为核心驱动，确收与订单双高增
+利润增长主因顿汉布什海外<mark>数据中心</mark>冷源装备业绩较快上升，北美<mark>数据中心</mark>景气高企支撑公司一次侧产品盈利水平上升。昨日公司公布再获4份价值1.1亿美金的冷源装备新增订单，包括一体式风冷磁悬浮机组、风冷螺杆机组及高压离心冷水机组等，预计交付时间为27年，为后续确收提供支撑。
+
+3️⃣#展望：Q4确收节奏有望延续，订单能见度高
+公司卡位<mark>液冷</mark>一次侧冷源装备，北美五大暖通品牌主导格局下，顿汉布什具备本土主体身份+百年口碑+认证壁垒，客户黏性强；随北美订单陆续交付及确收推进，业绩有望逐季度提升，量价齐升可期。
+
+欢迎交流[玫瑰]</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">数据中心</span><span class="kw-tag">液冷</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258222818258522" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258222818881511">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-12 20:17 · 👁 123</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">[太阳]【金蝶国际】：<mark>AI</mark>对业...</div>
+  <div class="topic-content">[太阳]【金蝶国际】：<mark>AI</mark>对业绩拉动效应显现，高度重视！
+
+2026年前3Q公司订阅服务年经常性收入（ARR）约为人民币46.04亿元，同比增长约19.3%；#第三季度单季净新增ARR同比增长约46.9%，主要受益于<mark>AI</mark>在企业管理领域的应用持续深化，带动客户对金蝶<mark>AI</mark>套件及灵基的需求高速增长。
+
+2026前3Q，#公司<mark>AI</mark>原生产品签约合同金额达人民币10.02亿元。此外，<mark>AI</mark>+SaaS产品（金蝶<mark>AI</mark>星瀚、金蝶<mark>AI</mark>星空及金蝶<mark>AI</mark>星辰）净金额续费率（NDR）分别为101%、97%及95%。集团于2026年第三季度中标签约中国中车、长安汽车、中国光大集团、华住集团、阳光智维等知名企业。
+
+#我们认为<mark>AI</mark>对公司业绩拉动效应逐渐显现，且公司估值处于历史低位，建议高度重视！</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258222818881511" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548555818885258">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-12 20:16 · 👁 126</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">强推半导体设备：板块订单有望进...</div>
+  <div class="topic-content">强推半导体设备：板块订单有望进一步上修，存储扩产远超预期，估值罕见低估
+
+【核心标的】：拓荆科技、盛美上海、精测电子、北方华创、华海清科、中微公司等
+
+[太阳]今年以来，伴随着存储扩产超预期，半导体设备公司订单持续上修，从两存的10万片，到12、14，以及晋华的贡献，明年可以继续展望翻倍的扩产动能，28年以后，存储扩产继续，先进制程订单的国产化率将迎来大幅提升，韬定律还将大幅提升先进制程扩产空间，总之，半导体设备订单将迎来一个3-5年的高速增长，今年只是订单提速的第一年。
+
+[太阳]以龙头【拓荆】为例：之前预期新签订单经历了120亿到150亿的上修，本轮我们判断有望上修至150-200亿的中上限，产业跟踪公司上半年订单增速翻倍以上，Q3叠加CC的订单，增长有望加速，公司作为存储敞口最高的设备公司之一，明年随着扩产翻倍，新签有望继续高速增长至350亿以上；另外，清洗设备龙头盛美，26H1新签增速超过100%，截止9月底在手订单170亿+，同比88%增长，也是订单上修的例证！
+
+[太阳]估值角度，美股设备龙头LRCX4000亿美金市值，预期收入持续上修，2027年410亿、2028年470亿美金左右（近期外资上修口径），对应ps 10x、8.5x；再看国内设备公司，市值/明年订单拓荆5x，华创不到4x，历史罕见低估！ 
+
+[太阳]越来越多证据表明，半导体设备将是未来几年<mark>AI</mark>发展的瓶颈，无论是价格再次超预期的存储，还是不断上修的CPU，瓶颈矛头都在指向半导体设备。capex上修、订单超预期、价格上涨的正循环正在形成
+
+🔥优选存储敞口高、弹性大的【拓荆科技】，展望30年国内1200e美金存储+逻辑+封装capex，900e订单空间，200-250e利润空间，叠加HB设备在3D封装时代的爆发力，维持5000亿以上市值空间！另外，看好盛美上海、精测电子、北方华创、华海清科、中微公司等！
+
+详情联系 zxjtdz yk</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548555818885258" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425444585211842">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-12 20:06 · 👁 179</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【tfjx】联讯仪器业绩预告点...</div>
+  <div class="topic-content">【tfjx】联讯仪器业绩预告点评：Q3业绩爆发增长环比+220%，新产品循序渐进，调整即是布局好时机
+
+公司发布公告，预计2026年前三季度归母净利润19.00亿元~21.00亿元，同比增长1866%~2073%。业绩变动主要系受益于<mark>人工智能</mark>技术快速发展及全球<mark>算力</mark>需求持续提升，<mark>数据中心</mark>建设加速推进，高速光通信领域市场需求保持较快增长，带动公司通信测试仪器产品及光电子器件测试设备产品销售增长。
+
+其中，Q3预计实现归母净利润13.33~15.33亿元，同比+3233%~3277%，环比+198%~242%；Q3业绩预期中值实现归母净利润14.3亿元，同比+3483%，环比+220%。Q3业绩持续爆发增长，业绩符合我们之前预期。
+
+光通信及光芯片检测。#以示波器为主的光通信测试设备Q3起逐步放量，核心产品向多家国内外知名用户量产供货，公司市场份额持续扩大，面向高速DAC铜缆测试需求的高速线缆测试仪批量交付。<mark>CPO</mark>等环节有望带来检测环节整体前置，加大在光芯片及光器件检测方面投入。公司CoC光芯片老化测试系统等产品向国际头部用户的出货规模持续增长。#<mark>硅光</mark>晶圆测试系统累计出货量突破100台，实现规模化量产。面向<mark>CPO</mark>/NPO OE芯片裸Die级分选测试需求的OE芯片KGD分选测试系统产品已通过行业一流用户的验证并实现收入。
+
+新产品持续拓展。采样示波器方面，2.4T/3.2T采样示波器自研采样保持芯片已成功流片，预计2026年下半年向行业头部用户送样验证。<mark>CPO</mark>检测方面覆盖<mark>CPO</mark>全环节测试需求。<mark>CPO</mark>/NPO的KGD分选测试系统产品，进一步开展与国内外知名<mark>CPO</mark>厂商的对接合作。同时，公司拟启动高速光电混合测试ATE项目，已初步完成技术预研，将电学测试与光学测试集成到统一的自动化测试平台中，满足<mark>CPO</mark>全环节光电混合量产测试需求。
+
+外延存储芯片检测验证取得突破。加速推进存储芯片测试设备的战略布局。高速存储芯片测试系统方面，公司自研<mark>ASIC</mark>芯片、PE芯片流片成功，已通过国内头部DRAM厂商的ETS工程验证，正在进行整机验证；<mark>HBM</mark>芯片KGD分选测试系统在客户处的送样验证工作有序推进中；中速存储芯片测试系统的研发项目已启动。
+
+我们认为，公司在光通信测试领域卡位优势明显，有望抓住下游扩产及国产替代浪潮，实现规模快速攀升；Q3业绩有望实现环比翻倍以上爆发增长。而行业资本开支高点还远未到来，当前估值明显低位，建议重点关注！</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">人工智能</span><span class="kw-tag">数据中心</span><span class="kw-tag">ASIC</span><span class="kw-tag">CPO</span><span class="kw-tag">HBM</span><span class="kw-tag">算力</span><span class="kw-tag">硅光</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425444585211842" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258222815428541">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-12 19:40 · 👁 303</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">重点关注 |＃永吉股份：<mark>AI</mark> ...</div>
+  <div class="topic-content">重点关注 |＃永吉股份：<mark>AI</mark> 漫剧工业化产能落地，打开成长新空间
+
+[太阳] 公司前瞻布局 <mark>AI</mark> 漫剧，爆款短剧持续验证商业化
+公司 2025 年 12 月合资设立重庆叁圭（公司持股 51%）、2026 年 2 月设立贵州灵伍捌，构建 AIGC 内容生态；26H1 累计完成作品 135 部。2026 年下半年，贵州灵伍捌将继续深化“<mark>AI</mark>+内容”推动产能规模化，利用自研 <mark>Agent</mark> 平台进一步降低边际成本，产能与成本优势突出。公司内容端已产出《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E7%8B%84%E5%85%AC%E8%AF%A1%E6%A1%88%E5%BD%95&quot; title=&quot;%E7%8B%84%E5%85%AC%E8%AF%A1%E6%A1%88%E5%BD%95&quot; style=&quot;book&quot; /&gt;》系列、《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E5%8F%8D%E6%B4%BE%E7%82%AE%E7%81%B0%E5%A6%BB%E5%AD%90%E7%9A%84%E6%B1%82%E7%94%9F%E6%B3%95%E5%88%99&quot; title=&quot;%E5%8F%8D%E6%B4%BE%E7%82%AE%E7%81%B0%E5%A6%BB%E5%AD%90%E7%9A%84%E6%B1%82%E7%94%9F%E6%B3%95%E5%88%99&quot; style=&quot;book&quot; /&gt;》、《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E8%8E%9E%E5%9F%8E%E5%BE%80%E4%BA%8B%201998&quot; title=&quot;%E8%8E%9E%E5%9F%8E%E5%BE%80%E4%BA%8B%201998&quot; style=&quot;book&quot; /&gt;》等爆款，红果热度均超3500万，持续验证商业化跑通。
+
+[太阳] <mark>AI</mark> 漫剧赛道高景气，公司绑定头部平台多元变现
+DataEye 预计 2026 年国内 <mark>AI</mark> 剧及漫剧市场规模破 400 亿元(同比+138%)。公司已与红果、阅文等头部平台签署年框锁定 IP 供给，覆盖广告变现、付费点播、会员分账等多重变现路径，有望受益于行业放量。
+
+风险提示：<mark>AI</mark> 漫剧监管与分账政策退坡风险；作品爆款率不及预期风险。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Agent</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258222815428541" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258222815428521">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-12 19:40 · 👁 304</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">3Q26业绩前瞻：游戏板块景气...</div>
+  <div class="topic-content">3Q26业绩前瞻：游戏板块景气延续，关注<mark>AI</mark>文娱进展
+
+数字媒体后续关注AIGC内容潜力；游戏板块在存量游戏较好持续性下维持高景气度；营销广告受到去年投放高基数影响略有压力；电影三季度大盘含服票房同降3.9%，呈现旺季愈旺淡季愈淡的需求特征；图书出版与有线广电行业相对稳健。2026年建议关注：1）<mark>AI应用</mark>深化，提效+商业化变现；2）“华流”出海，网文/短剧/游戏释放潜力；3）IP需求升级/产业价值重估。
+
+☀️关注要点
+3Q26我们预览A股重点公司31家（详见图表1），总市值7,249亿元，占比传媒（申万）板块总市值48.7%（截止10月9日）。各子板块关注：
+1）数字媒体：我们判断芒果三季度会员受渠道端合作模式调整影响或仍承压，广告收入同比改善，AIGC内容有望在4Q26至27年初陆续上线。
+2）网络游戏：7、8月国内游戏市场实现高单位数增长，出海市场维持双位数增长。我们判断重点A股公司存量游戏流水持续性较好，驱动业绩高景气度延续；3Q26因基数提升增速环比略有收窄。建议关注储备产品上线节奏，存量游戏利润释放节奏及低估值、高股东回报下部分个股的高股息价值。
+3）营销广告：3Q25即时零售在竞争加剧下加大投放力度，预计3Q26主要广告公司收入将受到高基数影响；建议关注宏观环境改善趋势、<mark>AI</mark>办公等垂类应用投放增量。
+4）影视院线：据艺恩，3Q26全国含服务费票房122亿元，同降3.9%；而2026年暑期档（6月至8月）含服票房125亿元，同增4.4%，需求呈现旺季愈旺淡季愈淡的特征，我们建议关注贺岁春节档票房弹性。
+5）图书出版：预计相对稳健，关注头部标的股息价值及国有企业并购重组节奏。
+6）有线广电：根据勾正科技，全国7~8月IPTV和OTT平台竞争格局相对稳定。
+
+☀️估值与建议：综合考虑基本面边际趋势与行业估值水位，我们对部分公司盈利预测与估值做出调整（详见图表2）。A股推荐世纪华通/恺英网络/三七互娱/芒果超媒；港美股推荐网易/快手/阅文集团等。
+
+风险：宏观政治经济波动，监管收紧，内容或产品表现不及预期。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI应用</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258222815428521" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521555182452884">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-12 19:40 · 👁 301</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">东方甄选今日上涨情况更新
+
+今...</div>
+  <div class="topic-content">东方甄选今日上涨情况更新
+
+今日公司行情表现亮眼，核心驱动来自政策利好释放与板块情绪共振，具体如下：
+
+#1）品质电商政策落地，经营基本面确定性强化
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;15122588285542&quot; title=&quot;%23a.%23&quot; /&gt;   低价恶性竞争持续纠治：七部门 “五优” 行动明确整治 “全网最低价”、自动跟价等无序竞争行为，平台流量权重向品质、口碑维度倾斜。公司长期坚持自营严选的品质化经营路线，与政策导向高度契合，无需卷入低价内卷，盈利端压力逐步缓解，行业出清背景下优质商家份额稳步提升；
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;48244811418858&quot; title=&quot;%23b.%23&quot; /&gt;   平台佣金规则进一步规范：政策明确要求规范平台佣金抽成、商家评级等规则，避免挤压品质商家生存空间，公司佣金提价风险降低，成本端稳定性显著增强。
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;88455811518822&quot; title=&quot;%232%EF%BC%89AI%23&quot; /&gt;   电商板块联动催化：近期 <mark>AI</mark> 电商主题活跃，行业加速 <mark>AI</mark> 落地应用，公司同步布局，享受板块行情催化。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521555182452884" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258222815425141">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-12 19:40 · 👁 302</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">光线传媒（300251.SZ）...</div>
+  <div class="topic-content">光线传媒（300251.SZ）：参投动画电影《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E5%85%AB%E4%BB%99%EF%BC%81&quot; title=&quot;%E5%85%AB%E4%BB%99%EF%BC%81&quot; style=&quot;book&quot; /&gt;》累计票房突破20亿元，主投发行《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E6%B4%BB%E8%89%B2%E7%94%9F%E9%A6%99&quot; title=&quot;%E6%B4%BB%E8%89%B2%E7%94%9F%E9%A6%99&quot; style=&quot;book&quot; /&gt;》国庆档上映，《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E5%8E%BB%E4%BD%A0%E7%9A%84%E5%B2%9B&quot; title=&quot;%E5%8E%BB%E4%BD%A0%E7%9A%84%E5%B2%9B&quot; style=&quot;book&quot; /&gt;》探索原创动画及IP衍生变现，丰富片单与动画产能持续推进，<mark>AI</mark>赋能影视制作及IP价值开发有望打开长期成长空间，建议持续关注
+
+点评：
+
+1、国庆档影片上映，动画与真人电影片单持续推进。 公司主投、发行的真人电影《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E6%B4%BB%E8%89%B2%E7%94%9F%E9%A6%99&quot; title=&quot;%E6%B4%BB%E8%89%B2%E7%94%9F%E9%A6%99&quot; style=&quot;book&quot; /&gt;》已于2026年10月1日上映；暑期档期间，《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E6%83%B3%E4%BD%A0%E4%BA%86&quot; title=&quot;%E6%83%B3%E4%BD%A0%E4%BA%86&quot; style=&quot;book&quot; /&gt;》《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E5%8E%BB%E4%BD%A0%E7%9A%84%E5%B2%9B&quot; title=&quot;%E5%8E%BB%E4%BD%A0%E7%9A%84%E5%B2%9B&quot; style=&quot;book&quot; /&gt;》分别于7月17日、8月7日上映，参投动画电影《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E5%85%AB%E4%BB%99%EF%BC%81&quot; title=&quot;%E5%85%AB%E4%BB%99%EF%BC%81&quot; style=&quot;book&quot; /&gt;》于7月18日上映。截至10月7日24时，《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E5%85%AB%E4%BB%99%EF%BC%81&quot; title=&quot;%E5%85%AB%E4%BB%99%EF%BC%81&quot; style=&quot;book&quot; /&gt;》中国大陆累计票房约20.40亿元，公司来源于该影片的营业收入约为1,250万—1,600万元。后续公司真人电影项目的储备有《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E7%AC%AC%E5%8D%81%E4%B8%83%E6%9D%A1&quot; title=&quot;%E7%AC%AC%E5%8D%81%E4%B8%83%E6%9D%A1&quot; style=&quot;book&quot; /&gt;》《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E4%B8%89%E5%BF%83%E4%B8%A4%E6%84%8F&quot; title=&quot;%E4%B8%89%E5%BF%83%E4%B8%A4%E6%84%8F&quot; style=&quot;book&quot; /&gt;》《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E5%9B%9B%E5%8D%81%E5%9B%9B%E4%B8%AA%E6%B6%A9%E6%9F%BF%E5%AD%90&quot; title=&quot;%E5%9B%9B%E5%8D%81%E5%9B%9B%E4%B8%AA%E6%B6%A9%E6%9F%BF%E5%AD%90&quot; style=&quot;book&quot; /&gt;》等，动画方面持续推进《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E7%BD%97%E5%88%B9%E6%B5%B7%E5%B8%82&quot; title=&quot;%E7%BD%97%E5%88%B9%E6%B5%B7%E5%B8%82&quot; style=&quot;book&quot; /&gt;》《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E5%90%8E%E7%BE%BF&quot; title=&quot;%E5%90%8E%E7%BE%BF&quot; style=&quot;book&quot; /&gt;》《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E6%B6%BF%E9%B9%BF&quot; title=&quot;%E6%B6%BF%E9%B9%BF&quot; style=&quot;book&quot; /&gt;》《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E5%A4%A7%E9%B1%BC%E6%B5%B7%E6%A3%A02&quot; title=&quot;%E5%A4%A7%E9%B1%BC%E6%B5%B7%E6%A3%A02&quot; style=&quot;book&quot; /&gt;》《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E7%9B%B8%E6%80%9D&quot; title=&quot;%E7%9B%B8%E6%80%9D&quot; style=&quot;book&quot; /&gt;》《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E6%9C%94%E9%A3%8E&quot; title=&quot;%E6%9C%94%E9%A3%8E&quot; style=&quot;book&quot; /&gt;》《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E8%A5%BF%E6%B8%B8%E8%AE%B0%E4%B9%8B%E5%A4%A7%E5%9C%A3%E9%97%B9%E5%A4%A9%E5%AE%AB&quot; title=&quot;%E8%A5%BF%E6%B8%B8%E8%AE%B0%E4%B9%8B%E5%A4%A7%E5%9C%A3%E9%97%B9%E5%A4%A9%E5%AE%AB&quot; style=&quot;book&quot; /&gt;》《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E8%8C%B6%E5%95%8A%E4%BA%8C%E4%B8%AD2&quot; title=&quot;%E8%8C%B6%E5%95%8A%E4%BA%8C%E4%B8%AD2&quot; style=&quot;book&quot; /&gt;》等项目；同时，原创动画《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E5%8E%BB%E4%BD%A0%E7%9A%84%E5%B2%9B&quot; title=&quot;%E5%8E%BB%E4%BD%A0%E7%9A%84%E5%B2%9B&quot; style=&quot;book&quot; /&gt;》已同步推出IP衍生品，后续动画项目亦在制作过程中。丰富的项目储备有望为公司后续内容供给及IP运营提供支撑。
+
+2、高基数影响下半年报业绩阶段性承压，核心IP及业务结构调整值得关注。 公司2026年上半年实现营业收入3.24亿元，同比下降90.00%；归母净利润0.33亿元，同比下降98.52%；扣非归母净利润0.05亿元，同比下降99.79%，主要受上年同期《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E5%93%AA%E5%90%92%E4%B9%8B%E9%AD%94%E7%AB%A5%E9%97%B9%E6%B5%B7&quot; title=&quot;%E5%93%AA%E5%90%92%E4%B9%8B%E9%AD%94%E7%AB%A5%E9%97%B9%E6%B5%B7&quot; style=&quot;book&quot; /&gt;》现象级票房带来的高基数影响。2026年上半年，公司投资、发行并计入当期票房的影片包括《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E4%B8%8D%E8%BF%87%E6%98%AF%E4%B8%8A%E7%8F%AD&quot; title=&quot;%E4%B8%8D%E8%BF%87%E6%98%AF%E4%B8%8A%E7%8F%AD&quot; style=&quot;book&quot; /&gt;》《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E9%A3%9E%E9%A9%B0%E4%BA%BA%E7%94%9F3&quot; title=&quot;%E9%A3%9E%E9%A9%B0%E4%BA%BA%E7%94%9F3&quot; style=&quot;book&quot; /&gt;》《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E6%83%8A%E8%9B%B0%E6%97%A0%E5%A3%B0&quot; title=&quot;%E6%83%8A%E8%9B%B0%E6%97%A0%E5%A3%B0&quot; style=&quot;book&quot; /&gt;》《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E9%87%8D%E8%BF%94%C2%B7%E7%8B%BC%E7%BE%A4&quot; title=&quot;%E9%87%8D%E8%BF%94%C2%B7%E7%8B%BC%E7%BE%A4&quot; style=&quot;book&quot; /&gt;》（重映）、《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E5%A4%A7%E9%B1%BC%E6%B5%B7%E6%A3%A0&quot; title=&quot;%E5%A4%A7%E9%B1%BC%E6%B5%B7%E6%A3%A0&quot; style=&quot;book&quot; /&gt;》（重映）等，合计票房约58.21亿元，影视剧及相关衍生业务实现收入1.34亿元；经纪业务及其他实现收入1.90亿元，同比增长35.58%。整体来看，单部爆款对业绩仍有较大影响，后续需关注重点影片票房表现、动画项目交付节奏及IP衍生业务变现能力，推动经营表现由单片驱动向多项目、多环节协同逐步拓展。
+
+3、<mark>AI</mark>赋能影视制作，IP价值开发有望打开成长空间。 随着<mark>生成式</mark><mark>AI</mark>在剧本创作、视觉设计及动画制作等环节持续迭代，有望提升影视制作效率、丰富内容供给。公司与七维科技合作开发综合性<mark>生成式</mark><mark>AI</mark>工具集，推动<mark>AI</mark>技术向影视制作流程渗透；同时，公司具备动画制作、影视发行及IP运营等优势，未来有望借助<mark>AI</mark>工具迭代与优质IP储备，进一步提升内容开发效率、拓展IP衍生价值，打开长期成长空间。
+
+风险提示： 影片上映不及预期风险、IP 衍生业务拓展不及预期风险、行业政策变化风险、市场竞争加剧风险等。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">生成式</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258222815425141" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258222815425151">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-12 19:39 · 👁 303</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">传<mark>英特尔</mark>、高通、<mark>AMD</mark>接力调涨...</div>
+  <div class="topic-content">传<mark>英特尔</mark>、高通、<mark>AMD</mark>接力调涨CPU价格
+
+10月12日丨据媒体消息，有供应链称，<mark>英特尔</mark>已自9月起率先调涨多款PC处理器价格，高阶Panther Lake涨幅达15％至20％，Meteor Lake、Arrow Lake调涨约5％至10％。其中，Panther Lake并非全系列同步涨价，本波调整集中在由<mark>台积电</mark>N3E制程代工、搭载高阶<mark>GPU</mark> tile的产品。高通Snapdragon X／X2 Elite等平台10月起调涨约10％。<mark>AMD</mark>亦传出准备调整部分CPU价格，涨幅、范围及生效时间仍待确认。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">英特尔</span><span class="kw-tag">台积电</span><span class="kw-tag">GPU</span><span class="kw-tag">AMD</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258222815425151" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258222815425421">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-12 19:39 · 👁 303</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">[红包]【<mark>AI</mark> EDA】有望迎...</div>
+  <div class="topic-content">[红包]【<mark>AI</mark> EDA】有望迎来&quot;<mark>智能体</mark>时代&quot;价值重估丨中信证券计算机
+
+[礼物]【EDA正从&quot;工具&quot;逐步进化为&quot;<mark>智能体</mark>&quot;】 <mark>AI</mark> EDA的本质，是用<mark>AI</mark><mark>智能体</mark>接管芯片设计中最耗人的&quot;设计—验证—修改&quot;循环：从早期的<mark>AI</mark>辅助PPA优化，到<mark>生成式</mark><mark>Copilot</mark>帮工程师写代码，再到如今的Agentic EDA——多个<mark>AI</mark><mark>智能体</mark>自主编排完整设计流程。Synopsys按自动驾驶逻辑将其划分为L1-L5级，今年已演示L3-L4级多<mark>智能体</mark>工作流，如自然语言生成RTL、自动验证收敛等，实测效率数倍提升。EDA正从点工具变成<mark>Agent</mark>运行底座。
+
+[礼物]【Synopsys等EDA龙头进展密集，<mark>AI</mark> EDA已开始走向验证期】 Synopsys于9月28日发布AgentEngineer七大长周期<mark>智能体</mark>和Autopilot统一平台，客户实测验证收敛提速50倍、设计覆盖率提升20%；10月1日与<mark>OpenAI</mark>签署多年期约束性协议，联合开发芯片设计专用模型<mark>GPT</mark>-Synopsys并建立收益共享机制；10月10日又官宣与亚马逊合作，双方签署一项为期多年、金额超过10亿美元的协议，拓展IP芯片业务。<mark>AI</mark> EDA已开始走向验证期。
+
+[礼物]【带动EDA公司价值提升，商业模式、壁垒、需求三重升级】 1）模式转变：从卖license转向&quot;<mark>Agent</mark>订阅+<mark>算力</mark>消耗&quot;，客单价和粘性双升；2）壁垒提升：<mark>大模型</mark>是通用能力，真正的护城河是EDA公司的工程知识、工艺数据和签核流程；3）需求扩容：设计效率大幅提升，设计项目数量快速增长，全球巨头集体自研芯片，叠加Chiplet/3DIC复杂度跃升，EDA进入新一轮上行周期。
+
+[庆祝]投资结论：<mark>AI</mark> EDA正成为<mark>AI</mark>落地的下一个重要方向，EDA价值有望得以重估。建议关注国产公司EDA公司【华大九天】、【概伦电子】、【广立微】。
+
+[玫瑰]中信证券计算机团队</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Copilot</span><span class="kw-tag">OpenAI</span><span class="kw-tag">Agent</span><span class="kw-tag">大模型</span><span class="kw-tag">智能体</span><span class="kw-tag">生成式</span><span class="kw-tag">GPT</span><span class="kw-tag">算力</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258222815425421" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521555182452584">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-12 19:39 · 👁 302</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【招商机械】新股掘金-鸿富诚：...</div>
+  <div class="topic-content">【招商机械】新股掘金-鸿富诚：TIM材料核心卡位
+
+#公司主营热管理、屏蔽、以及吸波材料，主要产品包括碳基、金属基、硅基高端导热材料等，广泛应用于大功率芯片、IGBT、激光、卫星通信站等应用场景。公司与H客户联合研发导热石墨烯，在25年以前为H客户相关产品独供，后期预计也将维持主导供应地位。公司产能远超同行，拥有稳定的石墨烯压制固态产线，交付能力完全满足大客户需求，同时与上游供应商建立了主导合作关系，无设备和原料“卡脖子”风险。
+
+#近年公司海外业务进展显著，目前给N客户供TIM1.5和TIM2材料，去年前年已送样，今年开始大批量出货。N客户是公司石墨烯导热材料主要客户，今年预计拿到N客户相关产品大比例份额，预计明年维持高比例份额。其余重点客户包括A客户，现正处于小批量验证阶段。
+
+#石墨烯价格约3-4w一平、平均价值量大约100元每芯片。按照一个机柜108片、27年<mark>Vera</mark> <mark>Rubin</mark>出货量10w柜估算，短期仅<mark>Vera</mark> <mark>Rubin</mark>的石墨烯导热材料市场空间已超10亿元。随着高性能<mark>服务器</mark>的加速放量、以及其他应用场景的拓展，碳基等高端导热材料的整体市场空间有望突破千亿。
+
+☎️联系人：郭倩倩/葛小川/郑笑东</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Rubin</span><span class="kw-tag">Vera</span><span class="kw-tag">服务器</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521555182452584" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521555182418514">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-12 19:39 · 👁 288</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">京仪装备——中信电子10月金股...</div>
+  <div class="topic-content">京仪装备——中信电子10月金股，现价持续推荐，强烈看好！
+
+[太阳]核心观点：先进逻辑与高层数存储扩产，持续提升晶圆厂对高精度温控和工艺废气处理设备的需求，我们估计NAND客户订单占比超50%，存储订单占比超70%。我们看好公司受益于“客户扩产＋国产替代＋品类延伸”，真空泵的客户验证进展提供新的中长期看点，持续推荐。
+
+#看点一：受益扩产。我们认为，随着国内存储扩产需求持续增强，制程升级和NAND堆叠层数提升，使刻蚀等工序对控温精度、温区及设备稳定性的要求提高，公司Chiller和Scrubber有望随客户新产线建设及工艺升级获得增量需求。公司和国内头部存储客户合作深入，在客户份额较高，我们认为有望充分受益于下游客户扩产，公司收入业绩有望加速成长。
+
+#看点二：产品&amp;客户强。公司产品已批量应用于14nm逻辑芯片和192层3D NAND产线，温控区间覆盖-120℃至120℃，并具备贴近客户的现场服务能力。公司产品已应用于长江存储、<mark>中芯国际</mark>、华虹集团、长鑫存储等主流晶圆制造客户，并可适配境内外主要前道主设备。
+
+#看点三：产能交付提升。根据公司公告，公司安徽研发生产基地按计划推进，为后续交付提供产能支撑。公司自主开发的爪式和多级罗茨式干式真空泵，已有部分型号送往国内晶圆厂验证，后续关注其批量订单进展。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">中芯国际</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521555182418514" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258222815481841">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-12 19:39 · 👁 289</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">冰轮环境：业绩预告超预期！！
+...</div>
+  <div class="topic-content">冰轮环境：业绩预告超预期！！
+
+今年Q1-3实现归母净利润5.56-6.42亿元，同比增长30%-50%。
+
+其中，Q3单季度归母净利润2.45-3.31亿元，同比增51.2%-104%，环比增26%-71%。
+
+昨日子公司顿汉布什近期收到4份海外<mark>数据中心</mark>冷源装备采购订单，包括一体式风冷磁悬浮机组、风冷螺杆机组及高压离心冷水机组等，合计金额约1.1亿美元，交付时间为 2027年。
+
+预计2026-2027年归母净利润8.9亿元、22.7亿元，PE估值38x、15x。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">数据中心</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258222815481841" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521555144845144">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-12 19:31 · 👁 329</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">20261012今日段子汇总
+...</div>
+  <div class="topic-content">20261012今日段子汇总
+
+1、金丹科技：公司是国内乳酸领域的龙头企业，10月10日公司发布乳酸系列产品涨价函，对公司乳酸系列产品（含乳酸、乳酸盐等）的销售价格在现有基础上统一上调8%
+
+2、果麦文化：1、以互联网驱动的新出版公司；公司拥有海量优质的IP和作家，以“出版 + 互联网”模式为核心，借助<mark>AI</mark>技术赋能短剧业务；2、公司“<mark>AI</mark>校对王”已服务超五十家机构，对应<mark>大模型</mark>“金字塔”获网信办备案，<mark>AI</mark>营销王预计年底或进入产品序列，形成出版全流程<mark>AI</mark>工具链
+
+3、龙版传媒：1、公司首部<mark>AI</mark>漫剧《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D&quot; title=&quot;%E6%9F%A5%E6%89%BE%E5%9B%BE%E4%B9%A6&quot; /&gt;穿越1988》完成170集制作上线，全网播放量突破1.2亿，红果热度值超4000万；2、大型现代化综合性国有文化企业；公司旗下109家新华书店门店实现连锁经营，涵盖包括大中型书城、特色书店、专业书店等多种形式；旗下产品多维边疆知识服务产品数据库暂未实现盈收
+
+4、新华文轩：四川省出版传媒行业龙头，省内义务教育阶段学生教科书唯一供货方
+
+5、吉视传媒：1、吉林有线网络运营商，公司旗下影院公司开有影城，基于吉林台海量广播电视媒资资源及来画公司布局<mark>AI</mark>视频和可视化<mark>AI</mark><mark>智能体</mark>；2、公司一直在开展和谋划数据服务业务，例如为政企客户提供机柜租赁服务、大数据<mark>云计算</mark>服务，政府云（吉林祥云）及多个行业云平台都部署在公司
+
+6、博纳影业：公司首部<mark>AI</mark>超写实院线电影《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D&quot; title=&quot;%E6%9F%A5%E6%89%BE%E5%9B%BE%E4%B9%A6&quot; /&gt;<mark>三星</mark>堆：未来往事》正式定档2026年10月23日登陆全国院线
+
+7、赛力斯：公司与<mark>华为</mark>达成新五年合作，赛力斯与宁德时代签署长期战略合作深化协议，问界将继续全系搭载宁德时代电池，双方推进产能、超充补能及全球化合作
+
+8、德才股份：1、控股孙公司奇想无限作为漫剧制作以及提出AIGC领域<mark>智能体</mark>一站式解决方案的团队，受邀参与火山引擎<mark>大模型</mark>游戏+漫剧 <mark>AI</mark> 工坊”广州企业沙龙；2、公司主营业务涵盖内装装饰工程、建筑幕墙工程、智能化工程、古建筑工程等
+
+9、掌阅科技：1、<mark>字节跳动</mark>参股，数字阅读行业龙头；公司已接入国内<mark>AI</mark>创业公司<mark>月之暗面</mark>旗下<mark>AI</mark>对话助手产品<mark>Kimi</mark>；2、公司推出海外短剧平台iDrama，现已上线数千部短剧作品，英语、日语、韩语、西班牙语、葡萄牙语等多语种版本
+
+10、百洋股份：公司为全球加工规模最大、国内领先的罗非鱼食品综合提供商
+
+11、欢瑞世纪：1、公司与阶跃星辰共建“麟跃”<mark>AI</mark>联合实验室，已上线基于IP《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D&quot; title=&quot;%E6%9F%A5%E6%89%BE%E5%9B%BE%E4%B9%A6&quot; /&gt;十州三境》的首支<mark>AI</mark>短剧先导概念片，并持续推进AIGC在短剧、互动剧、漫剧等场景落地；2、公司通过与明略科技、阶跃星辰合作，用 <mark>AI</mark> 算法优化短剧投流渠道 / 素材 / 出价、社媒智能运营与 AIGC 营销素材生成，聚焦影视内容精准推广与降本增效
+
+12、新经典：公司打造了“bibi 动物园”和“极简史”两大重点IP，推出相关漫画、图书、盲盒手办、日历、文创产品，“bibi 动物园”的礼盒也在国内各电商平台销售
+
+13、上海电影：公司拥有“专业发行+综合院线+高端影院”完整电影发行放映产业链，控股股东上海电影集团已于前期在上海影视乐园启动真人互动剧游项目，相关剧本策划、演员统筹、投资测算正在积极推进中；旗下的大IP开发主体上影元与互影科技、阅文集团等联合出品了首个双人互动影游项目《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D&quot; title=&quot;%E6%9F%A5%E6%89%BE%E5%9B%BE%E4%B9%A6&quot; /&gt;谍影成双》
+
+14、格尔软件：1、公司“格尔<mark>AI</mark><mark>大模型</mark>应用安全护栏系统”成为首个通过中国信通院<mark>大模型</mark>安全围栏能力评估的系统，并前瞻性地为<mark>AI</mark><mark>智能体</mark>构建“数字身份与信任体系”；2、公司已加入上海鲲鹏生态联盟，投资的上海泓格后量子科技有限公司致力于抗量子密码领域技术研究、标准制定、产品研发，在政务、金融、军队等领域开展试点、和应用推广工作
+
+15、慈文传媒：公司核心影视业务主要包括影视剧的投资、制作及发行业务，推动《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D&quot; title=&quot;%E6%9F%A5%E6%89%BE%E5%9B%BE%E4%B9%A6&quot; /&gt;武林外史》《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D&quot; title=&quot;%E6%9F%A5%E6%89%BE%E5%9B%BE%E4%B9%A6&quot; /&gt;圆月弯刀》《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D&quot; title=&quot;%E6%9F%A5%E6%89%BE%E5%9B%BE%E4%B9%A6&quot; /&gt;多情剑客无情剑》等五部微短剧开发制作；互动剧方面，公司已与互影科技签署了战略框架合作协议，双方将利用<mark>AI</mark>联合研发改编经典IP衍生互动剧
+
+16、丽人丽妆：国内领先化妆品网络零售服务商，推出了“千金极光饮”产品，同步搭配白番茄浓缩粉、麦角硫因、胶原三肽等科技成分，养出“千金白”
+
+17、远程股份：1、无锡国资委旗下；公司的电力电缆、控制电缆、防火电缆等产品可应用于<mark>数据中心</mark>领域；2、公司拟与新鼎纪元基金、苏新投资共同投资江苏新纪元半导体有限公司，其中新鼎纪元基金拟投资5.1亿元，苏新投资拟投资1亿元，远程股份拟投资5000万元
+
+18、天顺风能：1、全球最具规模的风力发电塔架制造商之一；2、公司复材事业部中标中国船舶科学研究中心目标无人地效翼船结构建造及总装联调项目
+
+19、宏辉果蔬：果蔬产品产业一体化的专业农产品服务商；公司拟收购施美药业41.128%股份，切入医药赛道
+
+20、长城电工：1.公司目前具备核电开关设备IE级的设计及制造资质，部分产品已应用漳州核电厂；2、西部地区电力设备龙头企业，主要包括低压开关成套设备、高中低压电器元件及关键零部件、智能低压成套配电装置及母线槽等电工电器类产品
+
+21、金自天正：公司在部分工艺模型开发中会用到人工<mark>神经网络</mark>的算法，在冶金工业非标机器人方面已有部分应用
+
+22、多伦科技：1、公司与众擎机器人共同出资1亿元组建江苏擎安机器人，聚焦交警指挥、治安巡逻、政务导服等具身智能机器人二次开发，打造智慧警务产品矩阵；2、公司积极探索无人驾驶领域车辆安全员及无人机飞手培训技术，并推出机场围界无人化智能防控产品
+
+23、松霖科技：公司以松霖机器人科技有限公司为平台，构建护理服务机器人、后勤服务机器人、<mark>AI</mark>陪伴机器人、人形机器人等产品体系，并与达闼公司联合研发设计人形机器人，拓展机器人业务
+
+24、德新科技：公司通过控股子公司安徽汉普斯布局精密行星减速器、电机业务，产品已应用于工业机器人、仓储机器人等领域
+
+25、众业达：1、公司分销的工业电气产品以中低压输配电产品和工业自动化产品为主，机器人及半导体涉及前述需求的均在公司业务布局范围内；2、公司是工业电气产品专业分销商，此前合作建立特斯拉粤东地区第一个超级充电站
+
+26、祥和实业：公司在电子元器件配件方面，紧跟铝电解电容器技术迭代，已成功开发应用于超级电容、锂电池等领域的电容器用橡胶密封塞等产品；国内主要客户包括江海股份、艾华集团等知名电容器公司
+
+27、新华都：1、公司主营业务模式是以数据研究为基础的互联网营销业务，包括全渠道电商销售服务、产品研发及营销服务和数字营销服务等；2、福建公司；公司为白酒电商龙头，电商代运营服务的品牌有金佰利、伊利、美加净、芳芯、碧缇丝、家安等，进行全渠道销售代理的品牌有泸州老窖、汾酒、五粮液、郎酒、水井坊、古井贡酒、青岛啤酒等&quot;
+
+28、盛视科技：1、全资子公司签署《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D&quot; title=&quot;%E6%9F%A5%E6%89%BE%E5%9B%BE%E4%B9%A6&quot; /&gt;<mark>算力</mark>产业合作协议》，围绕算电协同、AIDC智能<mark>算力</mark>中心运营等四大维度开展合作，整体合作业务体量折算合计约60亿元；2、公司参股的苏州亿铸智能科技有限公司是一家将新型存储器ReRAM及存算一体创新计算架构相结合，面向<mark>数据中心</mark>、<mark>云计算</mark>等场景的大<mark>算力</mark><mark>AI芯片</mark>公司；3、<mark>人工智能</mark>智慧口岸应用领域领先企业之一，已建立了机器人产品线，包括室内/外巡检机器人、协作机器人、车底查验机器人、测温机器人、协运机器人等
+
+29、德生科技：公司依托<mark>AI</mark>支撑平台，已在广东、河南、四川构建<mark>AI</mark> <mark>Agent</mark>政务服务网络，实现社保咨询、政策解读、业务经办等全场景“智能触达”
+
+30、东百集团：公司主营以百货零售为主业，拟3.16亿元跨界收购快灵光电52.67%股权，标的主营光探测芯片研发、生产与销售，产品应用于激光雷达、光通信、气体探测等领域
+
+31、通达动力：1、公司生产的伺服电机铁芯可以应用于机器人领域，发电机定转子铁芯可用于制造风力发电机；2、公司专业从事电机定转子冲片和铁心的研产销，与目前市场主流的新能源汽车厂商如比亚迪、吉利、蔚来等均有合作关系
+
+32、内蒙新华：公司是内蒙古规模最大的出版物发行企业，明确以教育服务、文化消费、现代物流为核心，向综合文化服务商转型，提供阅读空间设计、阅读活动策划及阅读课程开发等服务
+
+33、莱美药业：子公司四川瀛瑞纳米炭铁混悬注射液联合放疗已正式进入二期临床阶段，持续推进相关试验
+
+34、海欣股份：旗下江西赣南海欣药业股份有限公司生产的阿奇霉素干混悬剂已通过仿制药一致性评价，并在第九批国家组织药品集中采购中中标
+
+35、博汇科技：1、公司实控人等拟协议转让14.6%股份；2、公司聚焦传媒安全、智慧教育、智能显控三大业务，已掌握视听大数据采集、3、公司分析、可视化核心技术，并推出“学道”教育<mark>大模型</mark>及AIGC数字人方案
+
+36、醋化股份：全球安赛蜜市场双寡头之一；公司生产作为下游染料制造关键原料的乙酰乙酰苯胺类颜料（染料）中间体，该系列产品年产能约为2万吨
+
+37、金冠电气：公司自主研发的交直流充电桩、直流快速充电堆实现批量生产，功率范围覆盖7kW到480kW
+
+38、阿莱德：公司主营通信设备零部件， 为5G应用开发的零部件产品拥有业内领先的性能，提供的产品包括射频与透波防护器件、 EMI及IP防护器件和电子导热散热器件等，可应用于<mark>光模块</mark>
+
+39、广电网络：公司西咸<mark>数据中心</mark>（一期）已建设完成投入使用，部署完成5G核心网、融合云政务云平台等，已支撑省政务服务中心等8个厅局委办20余个重要业务系统
+
+40、首航新能：公司专注于太阳能电力的转换、存储与管理，为工商业用户、家庭用户及地面电站等提供光伏发电与储能系统设备，核心产品涵盖组串式光伏并网逆变器、光伏储能逆变器、储能电池及光伏系统配件等
+
+41、恒大高新：公司钠离子电池正负极材料已完成中试验证，参股匠芯新材千吨级硅碳材料生产线已正式量产
+
+42、农心科技：公司主要产品包括杀虫剂、杀菌剂和除草剂，防治<mark>苹果</mark>树病害（白粉病、褐斑病）的混剂开发项目，解决黄土高原区的主要病害如早期急性炭疽病
+
+43、吉林化纤：全球优质的粘胶长丝供应商之一；公司碳纤维材料可用于机器人制造
+
+44、鼎龙科技：6 - 硝体设计产能 2000 吨 / 年，是 A 股除善水外少数具备 6 - 硝体合规产能的企业；产能规模为善水的 1/10，属于涨价受益的二线标的</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Agent</span><span class="kw-tag">人工智能</span><span class="kw-tag">神经网络</span><span class="kw-tag">AI芯片</span><span class="kw-tag">字节跳动</span><span class="kw-tag">月之暗面</span><span class="kw-tag">数据中心</span><span class="kw-tag">Kimi</span><span class="kw-tag">大模型</span><span class="kw-tag">智能体</span><span class="kw-tag">光模块</span><span class="kw-tag">云计算</span><span class="kw-tag">算力</span><span class="kw-tag">华为</span><span class="kw-tag">苹果</span><span class="kw-tag">三星</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521555144845144" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425444511814522">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-12 19:30 · 👁 322</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【中泰机械】#🧊冰轮环境：预计...</div>
+  <div class="topic-content">【中泰机械】#🧊冰轮环境：预计2026年前三季度净利润同比增长30%-50%
+
+#公司披露业绩预告。预计2026年前三季度归属于上市公司股东的净利润为5.56亿元-6.42亿元，同比增长30%-50%。业绩变动主要系控股子公司#顿汉布什海外<mark>数据中心</mark>冷源装备业绩较快上升。公司Q3净利润中枢预计2.88亿、同比+78%、环比+48%。
+
+#订单外溢、北美一次侧“能进场+能拿单”的稀缺平台。#壁垒 子公司顿汉布什深耕北美IDC冷机，UL/ETL与百年品牌构筑进入门槛；#订单 北美竞对订单高增不减、扩产滞后至28年，订单外溢#是长期趋势，年内订单目标100e+，27H1确收斜率起飞；#产能 26年底/27年中对应产值120e/200e+，ASP仍提升中、产值有望继续上修。
+
+#量价+盈利能力齐升、估值持续修复：冷机有望持续放量、27年订单充足、盈利能力提升。目前在手订单预计结转至27年80亿+，与公司&#x27;&#x27;马来西亚+北美&#x27;&#x27;产能释放节奏相衔接；产品结构“螺杆占比下降、磁悬浮及去板换等高ASP占比提升&#x27;&#x27;，单机价值量与盈利能力有望继续抬升。订单-产能-交付的兑现链条进一步清晰。
+
+⚠️风险提示：下游需求不及预期。
+—————————
+☎联系人：谢校辉 王子杰 杨培梁#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">数据中心</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425444511814522" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258222848241441">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-12 16:04 · 👁 723</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【10月12日ETF资金周度观...</div>
+  <div class="topic-content">【10月12日ETF资金周度观察】
+[太阳]近一周，股票型ETF净流入+773.89亿元。其中，宽基指数净流入+566.53亿元，行业主题净流入+207.49亿元，策略主题净流入-0.14亿元。
+
+✨宽基指数方面，科创50、创业板指、中证1000指数资金净流入居前，分别净流入+201.95亿元、+88.23亿元、+79.99亿元；上证50、MSCI中国A50互联互通指数资金净流出居前，分别净流出-0.89亿元、-0.43亿元。
+
+🎈行业主题方面，科技、周期行业资金净流入居前，分别净流入+173.83亿元、+17.43亿元；新能源、必选消费行业资金净流出居前，分别净流出-5.93亿元、-4.96亿元。
+
+[玫瑰]大类资产方面，利率债ETF近一周净流入+67.99亿元，其中，国债、政金债分别净流入+35.76亿元、+23.03亿元；信用债ETF近一周净流入+158.43亿元，其中短融债、公司债、可转债分别净流入+89.55亿元、+67.71亿元、+1.16亿元。黄金ETF近一周净流入+30.83亿元。
+
+[烟花]跨境指数方面，近一周净流入+28.86亿元，其中香港市场净流入+2.92亿元。恒生科技、纳斯达克100、恒生互联网科技业、标普500指数资金净流入居前，分别净流入+19.39亿元、+13.28亿元、+8.50亿元、+5.47亿元。
+
+[庆祝]近一周，新成立股票型ETF12只，其中行业主题ETF11只，跟踪工程机械主题、中证数据、创业板金融科技、科创创业<mark>AI</mark>、创业板<mark>算力</mark>、国证粮食、机器人、金融科技指数，发行份额合计30.12亿份；策略风格ETF1只，跟踪价值100指数，发行份额3.72亿份。
+
+近一周，新成立跨境ETF2只，跟踪港股通内地金融、港股通互联网指数，发行份额合计4.86亿份。
+#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">算力</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258222848241441" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
