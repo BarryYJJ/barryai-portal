@@ -60,39 +60,93 @@ export function randomSide(cryptoObj) {
 
 export const ROLL_DURATION_MS = 2000;
 
-function flip(side) {
-  return side === 'yang' ? 'yin' : 'yang';
+// 翻转层关键帧上的进度。同面再转一整圈，异面转半圈；相邻角度差小于 180°，避免插值走短路。
+const SPIN_MARKS = [0, 0.28, 0.5, 0.78, 1];
+// 与 styles.css 里 jiao-spin-l / jiao-spin-r 的百分比一致。过了最后一站就保持终态，回弹只平移。
+const SPIN_STOPS = {
+  left: [0, 0.14, 0.24, 0.36, 0.49],
+  right: [0.12, 0.26, 0.36, 0.54, 0.72],
+};
+
+/**
+ * 一次抛掷的翻转角。direction 取左正右负；不抽样、不模拟物理。
+ * @param {'yang'|'yin'} start
+ * @param {'yang'|'yin'} end
+ * @param {number} direction
+ * @returns {{direction:number, travel:number, angles:number[]}}
+ */
+export function tumblePlan(start, end, direction) {
+  if (!SIDES.includes(start) || !SIDES.includes(end)) {
+    throw new RangeError('side must be "yang" or "yin"');
+  }
+  const dir = direction < 0 ? -1 : 1;
+  const travel = start === end ? 360 : 180;
+  const origin = start === 'yin' ? 180 : 0;
+  return {
+    direction: dir,
+    travel,
+    angles: SPIN_MARKS.map((mark) => Math.round((origin + dir * travel * mark) * 10) / 10),
+  };
+}
+
+/** rotateX 的正面：余弦为正是阳面朝上，为负是阴面朝上。 */
+export function faceFromSpin(deg) {
+  return Math.cos(deg * Math.PI / 180) >= 0 ? 'yang' : 'yin';
+}
+
+function spinAngleAt(angles, stops, t) {
+  if (t <= stops[0]) return angles[0];
+  for (let i = 0; i < stops.length - 1; i++) {
+    if (t <= stops[i + 1]) {
+      const span = stops[i + 1] - stops[i];
+      const u = span ? (t - stops[i]) / span : 1;
+      return angles[i] + (angles[i + 1] - angles[i]) * u;
+    }
+  }
+  return angles[angles.length - 1];
 }
 
 /**
- * 由最终朝向反推一条确定性的模拟时间线：抛起 → 多次翻面 → 左筊落定 → 右筊落定并揭示。
- * 中间帧只是演示画面，不是新的随机结果；最终帧与传入的最终朝向严格一致。
+ * 由起止朝向排一条确定性时间线：抛起、在各自转到侧面时换面、左筊先触台、右筊后触台并揭示。
+ * 弧线在 CSS 里只播一次；这里的朝向跟着那次翻转的角度走，不再在固定时刻把两枚一起换色。
  * @param {'yang'|'yin'} finalLeft
  * @param {'yang'|'yin'} finalRight
+ * @param {'yang'|'yin'} [startLeft]
+ * @param {'yang'|'yin'} [startRight]
  * @returns {{durationMs:number, frames:Array<{at:number,phase:string,left:string,right:string,reveal:boolean}>}}
  */
-export function buildRollTimeline(finalLeft, finalRight) {
-  if (!SIDES.includes(finalLeft) || !SIDES.includes(finalRight)) {
+export function buildRollTimeline(finalLeft, finalRight, startLeft = 'yang', startRight = 'yin') {
+  if (![finalLeft, finalRight, startLeft, startRight].every((side) => SIDES.includes(side))) {
     throw new RangeError('side must be "yang" or "yin"');
   }
-  const L = finalLeft;
-  const R = finalRight;
-  const l = flip(L);
-  const r = flip(R);
-  const frame = (at, phase, left, right, reveal = false) => ({ at, phase, left, right, reveal });
+  const leftPlan = tumblePlan(startLeft, finalLeft, 1);
+  const rightPlan = tumblePlan(startRight, finalRight, -1);
+  const frame = (at, phase, reveal = false) => {
+    const t = at / ROLL_DURATION_MS;
+    return {
+      at,
+      phase,
+      left: t >= SPIN_STOPS.left[SPIN_STOPS.left.length - 1]
+        ? finalLeft
+        : faceFromSpin(spinAngleAt(leftPlan.angles, SPIN_STOPS.left, t)),
+      right: t >= SPIN_STOPS.right[SPIN_STOPS.right.length - 1]
+        ? finalRight
+        : faceFromSpin(spinAngleAt(rightPlan.angles, SPIN_STOPS.right, t)),
+      reveal,
+    };
+  };
   return {
     durationMs: ROLL_DURATION_MS,
     frames: [
-      frame(0, 'launch', l, r),
-      frame(260, 'tumble', L, r),
-      frame(480, 'tumble', l, R),
-      frame(700, 'tumble', L, R),
-      frame(900, 'tumble', l, r),
-      frame(1100, 'tumble', L, r),
-      frame(1320, 'land-left', L, R),
-      frame(1540, 'land-left', L, r),
-      frame(1640, 'land-right', L, R),
-      frame(ROLL_DURATION_MS, 'land-right', L, R, true),
+      frame(0, 'launch'),
+      frame(260, 'tumble'),
+      frame(480, 'tumble'),
+      frame(700, 'tumble'),
+      frame(900, 'tumble'),
+      frame(1000, 'land-left'),
+      frame(1240, 'land-left'),
+      frame(1480, 'land-right'),
+      frame(ROLL_DURATION_MS, 'land-right', true),
     ],
   };
 }
@@ -166,6 +220,12 @@ function init(doc) {
     if (desc) desc.textContent = '正在翻转 · 请稍候';
   }
 
+  // 选定这一次的翻转关键帧。必须在加上 .is-rolling 之前，动画名中途不能再改。
+  function armSpin(el, start, end) {
+    el.dataset.spin = `${start}-${end}`;
+  }
+
+  // 阶段只驱动文案和可见面。抛掷轨迹挂在 .is-rolling 上，不能按阶段重启动画。
   function applyFrame(f) {
     stage.dataset.rollPhase = f.phase;
     showFace(blocks.left, f.left);
@@ -193,10 +253,14 @@ function init(doc) {
     // 在改变交互状态前完成所有可能失败的随机数与时间线计算，避免异常时界面卡在「掷筊中」。
     const left = randomSide();
     const right = randomSide();
-    const timeline = buildRollTimeline(left, right);
+    const startLeft = blocks.left.dataset.side;
+    const startRight = blocks.right.dataset.side;
+    const timeline = buildRollTimeline(left, right, startLeft, startRight);
 
     rolling = true;
     triggers.forEach((b) => { b.disabled = true; });
+    armSpin(blocks.left, startLeft, left);
+    armSpin(blocks.right, startRight, right);
     stage.classList.add('is-rolling');
     doc.body.classList.add('is-rolling');
 
@@ -208,6 +272,8 @@ function init(doc) {
       setBlockState(blocks.right, null);
       stage.classList.remove('is-rolling');
       doc.body.classList.remove('is-rolling');
+      delete blocks.left.dataset.spin;
+      delete blocks.right.dataset.spin;
       triggers.forEach((b) => { b.disabled = false; });
       rolling = false;
     };
