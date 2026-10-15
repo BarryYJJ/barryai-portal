@@ -85,6 +85,8 @@ code{font-family:var(--mono);font-size:.875em}
   display:grid;grid-template-columns:minmax(0,1fr);
   margin-top:clamp(28px,3.5vw,44px);
   border:1px solid var(--rule-ink);background:var(--white);
+  /* 空中的筊杯和它虚掉的影子偶尔探出台边几像素：左右在控制台边框处裁掉，不撑出页面；上下照常可见 */
+  overflow-x:clip;
 }
 @media (min-width:860px){
   .console{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}
@@ -96,70 +98,86 @@ code{font-family:var(--mono);font-size:.875em}
   .actions{order:2}
   .readout{order:3}
 }
+/* 俯视台面：网格地面与镜头都不动，筊杯躺在内框里。左右两半各是一枚筊杯的按钮，图例贴在底边。
+   --mat / --mat-foot 是内框缩进与底部图例高度，app.js 按它们取落点；--jw 是筊杯宽。 */
 .table{
-  position:relative;
-  display:flex;justify-content:center;align-items:flex-end;gap:clamp(24px,6vw,72px);
-  padding:clamp(28px,5vw,64px) clamp(16px,4vw,48px);
+  position:relative;isolation:isolate;
   min-height:320px;
+  --jw:clamp(72px,18vw,112px);
+  --mat:12px;--mat-foot:44px;
   background-color:var(--blue-tint);
   background-image:
     repeating-linear-gradient(to right,var(--rule-ink-soft) 0 1px,transparent 1px 44px),
     repeating-linear-gradient(to bottom,var(--rule-ink-soft) 0 1px,transparent 1px 44px);
   background-position:center top;
 }
+@media (min-width:860px){.table{--mat:18px;--mat-foot:52px}}
 .table::after{
-  /* 台面基线：筊杯落定处 */
-  content:"";position:absolute;left:clamp(16px,4vw,48px);right:clamp(16px,4vw,48px);bottom:clamp(20px,3.5vw,44px);
-  height:1px;background:var(--rule-ink);
+  /* 落点区内框：筊杯只停在框里 */
+  content:"";position:absolute;z-index:1;inset:var(--mat) var(--mat) var(--mat-foot);
+  border:1px solid var(--rule-ink);pointer-events:none;
 }
 
-/* 筊杯按钮：本体即触发器，最小 44px 触控 */
+/* 半区按钮：键盘与读屏的入口，触控面积就是半张台面 */
 .block{
   appearance:none;-webkit-appearance:none;
-  position:relative;z-index:1;
-  display:flex;flex-direction:column;align-items:center;gap:10px;
-  min-width:44px;min-height:44px;padding:8px 10px 0;
-  margin:0;border:1px solid transparent;background:transparent;color:var(--blue-ink);
-  font:inherit;cursor:pointer;
-  transition:border-color .2s ease,background-color .2s ease;
+  position:absolute;z-index:0;top:0;bottom:0;width:50%;
+  display:flex;align-items:flex-end;gap:10px;
+  min-width:44px;min-height:44px;padding:0 var(--mat) calc((var(--mat-foot) - 20px) / 2);
+  margin:0;border:0;background:transparent;color:var(--blue-ink);
+  font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  transition:background-color .2s ease;
 }
-.block:hover{border-color:var(--rule-ink);background:rgba(255,255,255,.6)}
+.block[data-block="left"]{left:0}
+.block[data-block="right"]{right:0;justify-content:flex-end}
+.block:hover{background:rgba(255,255,255,.45)}
+.block:focus-visible{outline-offset:-4px}
 .block:disabled{cursor:progress}
 .block-label{color:var(--blue);letter-spacing:.14em}
 .block-side{color:var(--ink-dim);white-space:nowrap}
-
-.table{perspective:900px;perspective-origin:50% 40%}
-.block,.toss,.jiao,.spin{transform-style:preserve-3d}
-.toss{position:relative;display:block;line-height:0}
-.jiao{
-  position:relative;z-index:1;
-  display:block;width:clamp(72px,18vw,112px);aspect-ratio:120/200;
-  transform-origin:50% 88%;
-}
-.spin{position:absolute;inset:0;transform-origin:50% 50%}
-/* 台面接触影：留在杯位下方，不跟着筊杯升空。左右圆心对准各自杯身。 */
-.jiao-shadow{
-  position:absolute;z-index:0;left:50%;bottom:-3px;
-  width:68%;height:8px;border-radius:50%;pointer-events:none;
-  background:radial-gradient(closest-side,rgba(27,52,232,.42),rgba(27,52,232,0) 72%);
-  opacity:.92;transform:translateX(-50%);
-}
-.block[data-block="left"] .jiao-shadow{left:40%}
-.block[data-block="right"] .jiao-shadow{left:60%}
-.block-label,.block-side{position:relative;z-index:2}
-/* 翻转中：标签与文案切换为进行态 */
+/* 翻转中：图例切换为进行态 */
 .block[data-roll-state="launch"] .block-side,
-.block[data-roll-state="tumble"] .block-side{color:var(--blue)}
-/* 两面叠在翻转层上。阳面朝外，阴面先转 180° 贴在背面；转到侧面时正面换过去，不再按 data-side 改透明度。 */
+.block[data-roll-state="tumble"] .block-side,
+.block[data-roll-state="landing"] .block-side{color:var(--blue)}
+
+/* 一枚筊杯分四层：.toss 是它在台面上的位置；.jiao 转 Z 角、按离地高度放大；.spin 翻滚；影子贴着地面。
+   静止姿态全在变量里：--u/--v 台面相对位置，--yaw Z 角，--rx/--ry 翻面（0 或 180°）。落定后 app.js 写回行内变量。
+   旋转中心是半月形杯身的中心（viewBox 120×200 里的 (48,100)，右筊镜像）。 */
+.toss{
+  position:absolute;z-index:2;
+  left:calc(var(--u) * 100%);top:calc(var(--v) * 100%);
+  width:var(--jw);aspect-ratio:120/200;
+  margin:calc(var(--jw) * -5 / 6) 0 0 calc(var(--jw) * var(--ox) * -1);
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.toss[data-cup="left"]{--ox:.4;--u:.3;--v:.42;--yaw:-14deg;--rx:0deg;--ry:0deg}
+.toss[data-cup="right"]{--ox:.6;--u:.68;--v:.55;--yaw:23deg;--rx:180deg;--ry:0deg}
+.is-rolling .toss{cursor:progress}
+.jiao,.spin,.jiao-shadow,.face,.rim{position:absolute;inset:0;display:block;width:100%;height:100%}
+.jiao,.spin,.jiao-shadow{transform-origin:calc(var(--ox) * 100%) 50%}
+.jiao{
+  rotate:var(--yaw);
+  perspective:calc(var(--jw) * 5);perspective-origin:calc(var(--ox) * 100%) 50%;
+}
+.spin{transform-style:preserve-3d;transform:rotateX(var(--rx)) rotateY(var(--ry));--t:calc(var(--jw) * .08)}
+/* 地面影子：与杯身同形、同 Z 角，按翻面投影到地面；离地越高越偏、越大、越淡、越虚 */
+.jiao-shadow{
+  overflow:visible;fill:var(--blue-ink);pointer-events:none;
+  rotate:var(--yaw);translate:calc(var(--jw) * .02) calc(var(--jw) * .045);
+  transform:rotateX(var(--rx)) rotateY(var(--ry));
+  opacity:.34;filter:blur(calc(var(--jw) * .012));
+}
+/* 杯身有厚度 --t：阳面在上表面朝外，阴面翻 180° 贴在下表面，转过侧面才露出另一面；
+   中间两层杯身剖面双面可见，翻到侧面时是一道实心的边，不会细成一条线 */
 .face{
-  position:absolute;inset:0;display:block;width:100%;height:100%;
   transform-origin:50% 50%;
   backface-visibility:hidden;-webkit-backface-visibility:hidden;
 }
-.face-yang{transform:rotateX(0deg)}
-.face-yin{transform:rotateX(180deg)}
-.block[data-side="yang"] .spin{transform:rotateX(0deg)}
-.block[data-side="yin"] .spin{transform:rotateX(180deg)}
+.face-yang{transform:translateZ(calc(var(--t) / 2))}
+.face-yin{transform:translateZ(calc(var(--t) / -2)) rotateX(180deg)}
+.rim{fill:#7A1612}
+.rim-front{transform:translateZ(calc(var(--t) / 6))}
+.rim-back{transform:translateZ(calc(var(--t) / -6))}
 
 /* 读数区：aria-live 宣告结果 */
 .readout{
@@ -173,7 +191,8 @@ code{font-family:var(--mono);font-size:.875em}
   font-size:clamp(2.25rem,3vw + 1.25rem,3.5rem);
   line-height:1.05;letter-spacing:-.03em;font-weight:600;color:var(--blue);
 }
-.readout-desc{font-size:.9375rem;line-height:1.65;color:var(--ink-dim);max-width:30em}
+/* 说明固定占两行：桌面端台面跨两行网格，说明行数一变台面就变高，躺着的筊杯会跟着跳 */
+.readout-desc{font-size:.9375rem;line-height:1.65;color:var(--ink-dim);max-width:30em;min-height:3.3em}
 .readout-count{
   display:flex;gap:8px;align-items:baseline;
   margin-top:auto;padding-top:14px;border-top:1px dashed var(--rule-ink);color:var(--ink-dim);
@@ -244,77 +263,7 @@ code{font-family:var(--mono);font-size:.875em}
 /* ---------- motion ---------- */
 @media (prefers-reduced-motion: no-preference){
   html{scroll-behavior:smooth}
-
-  /* 一次抛掷，一段动画，中途不换 animation-name（换段会让 transform 跳回关键帧起点）。
-     杯身只走弧线。翻转层按这一次的起止面选一段 rotateX：同面一整圈，异面半圈，左正右负。
-     角度写死在关键帧里，转到侧面才露出另一面。触台时已经转平，随后只做一次衰减回弹。
-     每帧 transform 函数列表保持一致，否则浏览器会在中途跳变。影子留在台面上。 */
-  .is-rolling .block[data-block="left"] .jiao{animation:jiao-throw-l var(--roll-ms) linear both}
-  .is-rolling .block[data-block="right"] .jiao{animation:jiao-throw-r var(--roll-ms) linear both}
-  .is-rolling .block[data-block="left"][data-spin="yang-yang"] .spin{animation:jiao-spin-l-yy var(--roll-ms) linear both}
-  .is-rolling .block[data-block="left"][data-spin="yang-yin"] .spin{animation:jiao-spin-l-yn var(--roll-ms) linear both}
-  .is-rolling .block[data-block="left"][data-spin="yin-yang"] .spin{animation:jiao-spin-l-ny var(--roll-ms) linear both}
-  .is-rolling .block[data-block="left"][data-spin="yin-yin"] .spin{animation:jiao-spin-l-nn var(--roll-ms) linear both}
-  .is-rolling .block[data-block="right"][data-spin="yang-yang"] .spin{animation:jiao-spin-r-yy var(--roll-ms) linear both}
-  .is-rolling .block[data-block="right"][data-spin="yang-yin"] .spin{animation:jiao-spin-r-yn var(--roll-ms) linear both}
-  .is-rolling .block[data-block="right"][data-spin="yin-yang"] .spin{animation:jiao-spin-r-ny var(--roll-ms) linear both}
-  .is-rolling .block[data-block="right"][data-spin="yin-yin"] .spin{animation:jiao-spin-r-nn var(--roll-ms) linear both}
-  .is-rolling .block[data-block="left"] .jiao-shadow{animation:jiao-shadow-l var(--roll-ms) linear both}
-  .is-rolling .block[data-block="right"] .jiao-shadow{animation:jiao-shadow-r var(--roll-ms) linear both}
-  @keyframes jiao-spin-l-yy{0%{transform:rotateX(0deg)}14%{transform:rotateX(100.8deg)}24%{transform:rotateX(180deg)}36%{transform:rotateX(280.8deg)}49%,100%{transform:rotateX(360deg)}}
-  @keyframes jiao-spin-l-yn{0%{transform:rotateX(0deg)}14%{transform:rotateX(50.4deg)}24%{transform:rotateX(90deg)}36%{transform:rotateX(140.4deg)}49%,100%{transform:rotateX(180deg)}}
-  @keyframes jiao-spin-l-ny{0%{transform:rotateX(180deg)}14%{transform:rotateX(230.4deg)}24%{transform:rotateX(270deg)}36%{transform:rotateX(320.4deg)}49%,100%{transform:rotateX(360deg)}}
-  @keyframes jiao-spin-l-nn{0%{transform:rotateX(180deg)}14%{transform:rotateX(280.8deg)}24%{transform:rotateX(360deg)}36%{transform:rotateX(460.8deg)}49%,100%{transform:rotateX(540deg)}}
-  @keyframes jiao-spin-r-yy{0%,12%{transform:rotateX(0deg)}26%{transform:rotateX(-100.8deg)}36%{transform:rotateX(-180deg)}54%{transform:rotateX(-280.8deg)}72%,100%{transform:rotateX(-360deg)}}
-  @keyframes jiao-spin-r-yn{0%,12%{transform:rotateX(0deg)}26%{transform:rotateX(-50.4deg)}36%{transform:rotateX(-90deg)}54%{transform:rotateX(-140.4deg)}72%,100%{transform:rotateX(-180deg)}}
-  @keyframes jiao-spin-r-ny{0%,12%{transform:rotateX(180deg)}26%{transform:rotateX(129.6deg)}36%{transform:rotateX(90deg)}54%{transform:rotateX(39.6deg)}72%,100%{transform:rotateX(0deg)}}
-  @keyframes jiao-spin-r-nn{0%,12%{transform:rotateX(180deg)}26%{transform:rotateX(79.2deg)}36%{transform:rotateX(0deg)}54%{transform:rotateX(-100.8deg)}72%,100%{transform:rotateX(-180deg)}}
-  @keyframes jiao-throw-l{
-    0%{transform:translate3d(0,0,0) rotateZ(0) scaleY(1);animation-timing-function:cubic-bezier(.16,.74,.22,1)}
-    14%{transform:translate3d(-6px,-32px,0) rotateZ(-8deg) scaleY(1);animation-timing-function:cubic-bezier(.2,.55,.28,1)}
-    28%{transform:translate3d(-11px,-58px,0) rotateZ(-14deg) scaleY(1);animation-timing-function:cubic-bezier(.33,.2,.55,1)}
-    42%{transform:translate3d(-5px,-16px,0) rotateZ(-5deg) scaleY(1);animation-timing-function:cubic-bezier(.45,.06,.8,.55)}
-    49%{transform:translate3d(-1px,0,0) rotateZ(0) scaleY(.94);animation-timing-function:linear}
-    55%{transform:translate3d(0,0,0) rotateZ(0) scaleY(.98);animation-timing-function:cubic-bezier(.2,.75,.3,1)}
-    61%{transform:translate3d(0,-8px,0) rotateZ(1.5deg) scaleY(1);animation-timing-function:linear}
-    67%{transform:translate3d(0,-7px,0) rotateZ(.5deg) scaleY(1);animation-timing-function:cubic-bezier(.25,.15,.45,1)}
-    75%{transform:translate3d(0,0,0) rotateZ(0) scaleY(1);animation-timing-function:linear}
-    84%,100%{transform:translate3d(0,0,0) rotateZ(0) scaleY(1)}
-  }
-  @keyframes jiao-throw-r{
-    0%,12%{transform:translate3d(0,0,0) rotateZ(0) scaleY(1);animation-timing-function:cubic-bezier(.16,.74,.22,1)}
-    28%{transform:translate3d(6px,-26px,0) rotateZ(8deg) scaleY(1);animation-timing-function:cubic-bezier(.22,.5,.3,1)}
-    42%{transform:translate3d(12px,-54px,0) rotateZ(14deg) scaleY(1);animation-timing-function:cubic-bezier(.55,.04,.8,.42)}
-    58%{transform:translate3d(6px,-20px,0) rotateZ(5deg) scaleY(1);animation-timing-function:cubic-bezier(.45,.05,.82,.5)}
-    72%{transform:translate3d(1px,0,0) rotateZ(0) scaleY(.94);animation-timing-function:linear}
-    77%{transform:translate3d(0,0,0) rotateZ(0) scaleY(.98);animation-timing-function:cubic-bezier(.2,.75,.3,1)}
-    81%{transform:translate3d(0,-8px,0) rotateZ(-1.5deg) scaleY(1);animation-timing-function:linear}
-    85%{transform:translate3d(0,-7px,0) rotateZ(-.5deg) scaleY(1);animation-timing-function:linear}
-    90%,100%{transform:translate3d(0,0,0) rotateZ(0) scaleY(1)}
-  }
-  @keyframes jiao-shadow-l{
-    0%{opacity:.92;transform:translateX(-50%) scale(1,1);animation-timing-function:cubic-bezier(.16,.74,.22,1)}
-    14%{opacity:.58;transform:translateX(calc(-50% - 5px)) scale(1.22,.9);animation-timing-function:cubic-bezier(.2,.55,.28,1)}
-    28%{opacity:.28;transform:translateX(calc(-50% - 9px)) scale(1.64,.7);animation-timing-function:cubic-bezier(.33,.2,.55,1)}
-    42%{opacity:.5;transform:translateX(calc(-50% - 4px)) scale(1.2,.86);animation-timing-function:cubic-bezier(.45,.06,.8,.55)}
-    49%{opacity:1;transform:translateX(calc(-50% - 1px)) scale(.78,1.08);animation-timing-function:linear}
-    55%{opacity:.94;transform:translateX(-50%) scale(.9,1.02);animation-timing-function:cubic-bezier(.2,.75,.3,1)}
-    61%{opacity:.48;transform:translateX(-50%) scale(1.16,.84);animation-timing-function:linear}
-    67%{opacity:.55;transform:translateX(-50%) scale(1.1,.88);animation-timing-function:cubic-bezier(.25,.15,.45,1)}
-    75%{opacity:.9;transform:translateX(-50%) scale(1,1);animation-timing-function:linear}
-    84%,100%{opacity:.92;transform:translateX(-50%) scale(1,1)}
-  }
-  @keyframes jiao-shadow-r{
-    0%,12%{opacity:.92;transform:translateX(-50%) scale(1,1);animation-timing-function:cubic-bezier(.16,.74,.22,1)}
-    28%{opacity:.6;transform:translateX(calc(-50% + 5px)) scale(1.18,.9);animation-timing-function:cubic-bezier(.22,.5,.3,1)}
-    42%{opacity:.3;transform:translateX(calc(-50% + 10px)) scale(1.6,.72);animation-timing-function:cubic-bezier(.55,.04,.8,.42)}
-    58%{opacity:.5;transform:translateX(calc(-50% + 5px)) scale(1.16,.86);animation-timing-function:cubic-bezier(.45,.05,.82,.5)}
-    72%{opacity:1;transform:translateX(calc(-50% + 1px)) scale(.8,1.06);animation-timing-function:linear}
-    77%{opacity:.94;transform:translateX(-50%) scale(.92,1);animation-timing-function:cubic-bezier(.2,.75,.3,1)}
-    81%{opacity:.5;transform:translateX(-50%) scale(1.14,.84);animation-timing-function:linear}
-    85%{opacity:.58;transform:translateX(-50%) scale(1.08,.9);animation-timing-function:linear}
-    90%,100%{opacity:.92;transform:translateX(-50%) scale(1,1)}
-  }
+  /* 抛掷由 app.js 按这一次的规划生成关键帧（WAAPI），每层只播一遍；样式表只管静止姿态。减弱动效时直接落定。 */
   .is-rolling .readout h3,.is-rolling .readout-desc{opacity:.55;transition:opacity .2s ease}
   .readout h3,.readout-desc{transition:opacity .25s ease}
 }
