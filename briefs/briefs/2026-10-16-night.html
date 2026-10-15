@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-10-16 深夜 AI 简报</title>
+<style>
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-10-16 01:30:38</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-10-16 深夜 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-10-15 20:30</strong> &nbsp;→&nbsp; <strong>2026-10-16 01:30</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">19</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">12 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">63.2%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">5 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">5</span></div><div class="hot-kw-row"><span class="kw-name">PCB</span><div class="bar-track"><div class="bar-fill" style="width:80%"></div></div><span class="kw-count">4</span></div><div class="hot-kw-row"><span class="kw-name">AI算力</span><div class="bar-track"><div class="bar-fill" style="width:40%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">光模块</span><div class="bar-track"><div class="bar-fill" style="width:40%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">算力</span><div class="bar-track"><div class="bar-fill" style="width:40%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">人工智能</span><div class="bar-track"><div class="bar-fill" style="width:40%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">大模型</span><div class="bar-track"><div class="bar-fill" style="width:20%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">AMD</span><div class="bar-track"><div class="bar-fill" style="width:20%"></div></div><span class="kw-count">1</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-14425441155588452">中科曙光Q3归母净利润同比增216%，国产算力需求叠加高毛利软件放量，集群生意开始秀肌肉</a></li><li><a class="tldr-jump" href="#t-82258224181122182">光迅科技Q3归母净利润预计同比增75%—110%、环比增77%—113%，AI数据中心的光模块需求直接点亮利润表</a></li><li><a class="tldr-jump" href="#t-55521554411248214">深南电路Q3归母净利润预计18亿—19亿元、创单季新高，AI PCB与封装载板双引擎拉满</a></li><li><a class="tldr-jump" href="#t-14425441858112482">PCB高端产能向AI倾斜、传统板供给被挤，高价订单接力交付，卖方看涨价兑现延续至2027年上半年</a></li><li><a class="tldr-jump" href="#t-45548552288811858">海光信息CPU+DCU双轮驱动，Q3剔除股份支付后归母净利润预计增51%—85%，国产替代正从政策推着走变成市场追着买</a></li><li><a class="tldr-jump" href="#t-14425441858841512">物理AI的真功夫落在工厂：中控技术TPT落地后定员从260人降至80人，工业大模型开始交效率答卷</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-14425441858841512">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-15 23:55 · 👁 232</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">物理<mark>AI</mark>：板块随市场调整，但产...</div>
+  <div class="topic-content">物理<mark>AI</mark>：板块随市场调整，但产业投入并未减速
+
+<mark>AI</mark>正从语言智能迈向物理智能，物理<mark>AI</mark>依托我国完备的工业体系与场景数据优势，正从试点验证迈向规模化落地，是最具成长潜力的<mark>AI</mark>细分方向。
+
+板块近期随市场调整，但产业投入并未减速。
+
+上半年国内具身智能融资约438亿元，其中具身大脑占比50.8%。最核心的是智力、是软件、是世界模型，本体只是躯壳。
+
+海外投入进入平台竞争阶段。<mark>AMD</mark>拟以约82亿美元全股票收购李飞飞创立的WorldLabs；特斯拉Fremont已建成第一代Optimus产线，周产量升至数百台，年底目标周产逾千台。
+
+催化较为密集：宇树10月22日在杭州举办世界物理<mark>AI</mark>大会，三季报进入密集披露期。
+
+中控技术：工业<mark>AI</mark>最核心卡位。TPT时序<mark>大模型</mark>已在兴发集团湖北兴瑞工厂落地，定员由260人降至80人，日干预次数由2.5万次降至1471次。
+
+重点推荐：中控技术、敏芯股份；
+
+建议关注：索辰科技、能科科技、东土科技、<mark>海康</mark>威视、品茗科技等。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">大模型</span><span class="kw-tag">AMD</span><span class="kw-tag">海康</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425441858841512" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258224181122182">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-15 23:54 · 👁 232</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【国海通信】光迅科技：2026...</div>
+  <div class="topic-content">【国海通信】光迅科技：2026年三季度业绩预告表现亮眼，Q3单季度净利润预期高增
+
+10月15日，公司发布2026年前三季度业绩预告，2026Q1-Q3公司预计实现归母净利润11.89-13.10亿元，同比增长65.37%-82.26%；实现扣非归母净利润11.76-12.96亿元，同比增长73.38%-91.09%。
+
+2026Q3公司净利润呈现高增态势，主要受益于<mark>数据中心</mark>建设带动数通<mark>光模块</mark>增长
+
+2026Q3公司预计实现归母净利润6.07-7.28亿元，同比增长74.92%-109.92%，环比增长77.48%-112.99%；预计实现扣非归母净利润6.08-7.28亿元，同比增长91.29%-129.07%，环比增长78.91%-114.25%。主要受益于全球<mark>AI算力</mark>资本开支浪潮带动数通<mark>光模块</mark>需求快速增长，同时国内云服务商持续加大<mark>数据中心</mark>建设投入，公司依托覆盖<mark>数据中心</mark>、通信网络全场景的完备产品体系，有力支撑经营业绩稳步提升。
+
+公司持续推进数通<mark>光模块</mark>产品研发，并全方位拓展海外市场
+
+在数通<mark>光模块</mark>领域，公司相继完成多款高速率、低功耗<mark>光模块</mark>的研发与量产，有效满足<mark>数据中心</mark>高密度、大带宽、低时延的互联需求，产品竞争力获得国内外客户广泛认可。同时，公司加速海外产能落地，推进东南亚生产基地建设，保障海外订单高效交付，贴近海外主流客户。
+
+风险提示：市场拓展进展不及预期的风险、技术迭代与竞争加剧风险、宏观政策影响公司业务发展的风险。
+
+资料来源：公司公告
+
+【重要提示】以上信息为公开资料整理，不涉及投资建议及研究观点，仅供参考，本公司不保证其准确性、完整性与时效性；市场有风险，投资需谨慎！</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI算力</span><span class="kw-tag">数据中心</span><span class="kw-tag">光模块</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258224181122182" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425441858112482">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-15 23:43 · 👁 277</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【涨价链<mark>PCB</mark>】Q3盈利加速释...</div>
+  <div class="topic-content">【涨价链<mark>PCB</mark>】Q3盈利加速释放，涨价持续性看至明年上半年
+
+#涨价链<mark>PCB</mark>进入业绩加速兑现期，Q3利润环比高增强化板块逻辑。近期已披露预告的企业呈现利润环比高速增长，产品调价、产能利用率提升与订单结构优化共同释放盈利弹性。我们认为，传统<mark>PCB</mark>本轮景气正在由成本传导走向量价与利润共振，Q3是业绩拐点的集中验证，Q4及明年上半年仍有持续兑现空间。
+
+#继续看好涨价持续性，当前逻辑至少可看到2027年上半年。<mark>PCB</mark>接单至交付存在周期，当月出货均价体现的是前期不同批次订单的组合。根据近期调研，8—10月连续调价后，新接订单价格仍高于当期出货均价，高价订单逐步交付将继续推动Q4均价上行。同时，上游<mark>电子布</mark>、<mark>覆铜板</mark>仍有进一步涨价空间，为板厂后续顺价提供支撑。#新增订单提价与存量订单兑现接续，即使调价频率阶段性放缓，出货均价和利润仍有望继续向上。
+
+#供给约束正在转化为优质板厂的议价权，行业利润有望向稳定交付的企业集中。高端产能向<mark>AI</mark>倾斜，部分传统产品供给受到挤压；材料供应偏紧又进一步放大上市板厂在采购、资金和交付方面的优势。拿得到材料、交得出产品的企业，更有条件筛选客户、优化订单，将有限产能配置给高价值业务。本轮盈利改善既来自产品顺价，也来自客户结构升级、产能利用率和制造效率提升；后续若材料涨幅趋缓、板厂售价保持韧性，利润空间有望进一步打开。
+
+#汽车与电源<mark>PCB</mark>是重点方向，尤其重视<mark>AI</mark>电源板的涨价弹性。汽车客户重视品质和供应链稳定性，具备客户基础与稳定供货能力的板厂更有机会实现顺价。电源<mark>PCB</mark>则同时受益于<mark>AI</mark>电源需求增长和传统FR-4产能约束：相关板材及部分制造产能与普通FR-4产品共用，下游<mark>AI</mark>客户更重视可靠性与交付，对<mark>PCB</mark>环节价格的敏感度相对较低。在订单增长、供给偏紧与顺价能力共同作用下，我们看好电源<mark>PCB</mark>较强的涨价弹性与兑现确定性。
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;28455281552521&quot; title=&quot;%23%E7%BB%A7%E7%BB%AD%E6%8E%A8%E8%8D%90%E4%B8%AD%E5%B0%8FPCB%E6%96%B9%E5%90%91%EF%BC%9A%23&quot; /&gt; 核心看好汽车占比高【奥士康】，电源链+涨价【威尔高、四会富仕】，<mark>AI</mark>+涨价【景旺电子、方正科技】，涨价持续超预期的【崇达技术、超声电子、金禄电子、博敏电子、中京电子、满坤科技、伊顿电子、澳弘电子】等。
+
+风险提示：产品调价、订单交付不及预期，原材料成本上涨超预期。
+
+欢迎联系 浙商电子田发祥17317150564</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">电子布</span><span class="kw-tag">覆铜板</span><span class="kw-tag">PCB</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425441858112482" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548552285555518">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-15 23:12 · 👁 378</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【中泰电子|瑞芯微】订单del...</div>
+  <div class="topic-content">【中泰电子|瑞芯微】订单delay短期影响Q3业绩，新品持续放量贡献稳定增长
+
+📖事件：瑞芯微发布2026年前三季度业绩预告，前三季度实现收入44.5亿，yoy+42%，归母净利润13.1-13.5亿，yoy+68%-73%，扣非归母12.8-13.2亿，yoy+69%-75%。
+
+#<mark>PCB</mark>紧缺短期影响Q3交付、预计Q4恢复
+按预告中枢算，公司Q3实现收入15.7亿，yoy+43%，qoq-6%，归母利润4.7亿，yoy+90%，qoq-11%，扣非归母4.6亿，yoy+92%，qoq-12%。
+➠一方面，26H1存储、阻容等价格上涨抑制了Q3终端市场需求，但公司产品结构中内置存储（KGD）比例很小，因此影响相对有限。
+➠另一方面，Q3 <mark>PCB</mark>原材料供应短缺、交期拉长，导致终端产品生产和芯片订单delay，预计Q4会恢复。
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;28455228454811&quot; title=&quot;%23%E4%BB%8D%E7%9C%8B%E5%A5%BD%E8%87%AA%E8%BA%AB%CE%B1%E5%B8%A6%E6%9D%A5%E9%95%BF%E6%9C%9F%E5%A2%9E%E9%95%BF%23&quot; /&gt;
+➠公司前三季度RK3576、3588等新品持续放量，机器人、机器视觉、汽车电子、割草机等AIoT需求场景高速增长，协处理器RK182X多产品线进入产品发布、项目量产；RK3572等新品Q3量产，公司AIoT龙头地位进一步加强。
+➠展望Q4，RK182X放量、RK3572大规模出货，将形成全新增量，进一步增厚公司收入利润；同时新一代协处理器将在年内发布，下一代旗舰新品RK3668马上投产、3688随后出品，产品矩阵持续丰富，高端新品打造高毛利平台，持续看好AIoT端侧龙头！
+
+风险提示：行业景气不及预期；新品渗透迭代不及预期。
+
+☎派点请支持中泰电子：王芳/杨旭/李雪峰/禹露</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">PCB</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548552285555518" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258224482811482">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-15 23:03 · 👁 417</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">彭博行业研究：传统<mark>云计算</mark>与 A...</div>
+  <div class="topic-content">彭博行业研究：传统<mark>云计算</mark>与 <mark>AI</mark> 投资资本回报率（ROIC）
+
+预计到 2030 年，SpaceX 的 ROIC 将高达 ~25%。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">云计算</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258224482811482" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258224482518521">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-15 22:54 · 👁 466</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">🍬#期待mlcc国内原厂和海外...</div>
+  <div class="topic-content">🍬#期待mlcc国内原厂和海外原厂的q3业绩
+
+🍬mlcc国内原厂来自扩产以及价增（原厂长协价一直没掉过，持续攀升，经销的那部分q3不是主要利润来源）
+海外原厂：日本和韩国mlcc7-8月出口数据来到峰值，村田和太诱对q3指引非常好
+
+🍬mlcc属于成于现货市场，败于现货市场，现在市场仍然盯着现货价格交易，其实忽略原厂大部分长协少部分直销，现货价格短期是锚点，长期看市场会回归原厂出货价来交易，从第一性原理出发，产业反馈缺货景气每次都是缺完<mark>pcb</mark>开始缺元器件，或者说硬件本质是一个beta；不存在<mark>pcb</mark>景气好，mlcc就不行。如果拿掉现货市场，大家可能就会把mlcc视为<mark>pcb</mark>一个交易思路；
+
+🍬我们继续看行业龙头回购的决心就知道产业是怎么看待自己的景气，如果我们放长远一点，回过头或许会感慨这里是绝对的底部
+&lt;e type=&quot;hashtag&quot; hid=&quot;51422551421214&quot; title=&quot;%23%E4%B8%89%E7%8E%AF%E4%B9%8B%E5%89%8D%E5%9B%9E%E8%B4%AD%E7%9A%84%E6%89%BF%E8%AF%BA%E5%85%91%E7%8E%B0%EF%BC%9A10e%E5%B7%B2%E5%AE%8C%E6%88%90%23&quot; /&gt;  
+10月14日，三环发布公告，公司已完成股份回购869万股，占总股本的0.44%，回购资金总额为10亿元，回购价格区间为101.75元/股至124.99元/股。
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;28455228458581&quot; title=&quot;%23%E6%98%A8%E5%A4%A9%E5%88%9A%E5%8F%91%E7%9A%84%E5%9B%9E%E8%B4%AD%E5%85%AC%E5%91%8A%E4%BB%8A%E5%A4%A9%E5%B0%B1%E5%BC%80%E5%A7%8B%E4%B9%B0%E4%BA%86%23&quot; /&gt;  
+10月15日，三环集团发布公告，公司首次回购公司A股股份13万股，占总股本的0.0065%，回购金额为1250万元，回购价格区间为94.95元/股至96.24元/股。
+
+🍬此处看底部区间，仍然看三环合理3000-4000e
+
+by ty</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">PCB</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258224482518521" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425441155588452">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-15 22:13 · 👁 595</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">[太阳]【国金计算机&amp;科技】中...</div>
+  <div class="topic-content">[太阳]【国金计算机&amp;科技】中科曙光：大超预期，需求旺盛，集群能力有望加速显现
+
+#26Q3收入同增61%、利润同增216%。公司发布26年前三季度业绩快报，实现营业总收入122.4亿元，同增39%；归母净利润17.2亿元，同增78%；扣非归母15.5亿元，同增105%。单三季度来看，实现收入47.7亿元，同增61%；归母净利润7.49亿元，同增216%，大超市场预期。
+
+#国内<mark>算力</mark>需求旺盛、配套高毛利产品销售增加。主要系当期国内<mark>算力</mark>领域市场需求向好，公司高端计算机等IT设备产品销量同比增加。公司紧抓市场机遇，持续推进技术迭代，完善产品布局，核心产品在重点客户实现落地。同时，配套软件等高毛利产品销售同步增加，推动公司综合毛利率较上年同期有所提升。
+
+#集群能力会加速显现。超节点及大型智算集群，从2026下半年开始加快建设，我们认为曙光多年积淀的能力将加速释放。
+
+风险提示：<mark>AI</mark>产业发展不及预期、<mark>算力</mark>业务推进不及预期、行业竞争加剧等。
+
+☎️联系人：陈芷婧/鲍淑娴/刘高畅</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">算力</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425441155588452" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548552288811858">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-15 22:13 · 👁 595</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">[太阳]【国金计算机&amp;科技】海...</div>
+  <div class="topic-content">[太阳]【国金计算机&amp;科技】<mark>海光</mark>信息：业绩符合预期，CPU+DCU双轮驱动，国产<mark>算力</mark>生态加速拓展
+
+#26Q3剔除股份支付后利润高增、业绩符合预期
+公司发布26年前三季度业绩预告，预计实现营业收入142.8-155.8亿元，同增50%-64%；归母净利润27.1-29.8亿元，同增38%-52%；剔除股份支付影响后归母净利润34.5-37.2亿元，同增70%-84%。单三季度来看，预计实现收入51.8-64.8亿元，同增29%-61%；归母净利润9.1-11.8亿元，同增20%-55%；剔除股份支付影响后归母净利润11.8-14.5亿元，同增51%-85%，整体业绩符合预期。
+
+#国产高端芯片需求旺盛、CPU+DCU双轮驱动持续兑现
+公司业绩增长主要系<mark>人工智能</mark>产业快速发展、国产化进程由政策驱动向市场驱动转变，国内高端芯片需求持续攀升。公司持续优化CPU+DCU业务布局，围绕通用计算和<mark>人工智能</mark>计算市场加大研发投入，加快产品迭代、提升产品性能及市场竞争力，推动经营业绩保持较快增长。
+
+#联合产业链龙头布局太空计算、国产<mark>算力</mark>应用边界持续拓展
+中科曙光公告拟联合<mark>海光</mark>信息、中科星图等共16家主体发起设立合资公司，注册资本15亿元，其中<mark>海光</mark>信息拟出资0.7亿元、持股4.67%，中科曙光及曙光数创合计持股6%。本次合作将整合高端计算、<mark>算力</mark>基础设施及空天信息等领域的产业资源，推动太空计算相关技术验证与生态建设。我们认为，<mark>海光</mark>有望依托CPU+DCU产品能力及产业链协同优势，进一步拓展国产<mark>算力</mark>在空天计算等新兴领域的应用空间。
+
+风险提示：<mark>AI</mark>产业发展不及预期、<mark>算力</mark>业务推进不及预期、行业竞争加剧等。
+
+☎️联系人：陈芷婧/鲍淑娴/刘高畅</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">人工智能</span><span class="kw-tag">算力</span><span class="kw-tag">海光</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548552288811858" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258224488541882">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-15 22:03 · 👁 636</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">纽约市审计长呼吁 Anthro...</div>
+  <div class="topic-content">纽约市审计长呼吁 <mark>Anthropic</mark> 暂停 IPO，以保障<mark>人工智能</mark>安全。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Anthropic</span><span class="kw-tag">人工智能</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258224488541882" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521554411248214">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-15 22:03 · 👁 635</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">[烟花]【中信电子】深南电路业...</div>
+  <div class="topic-content">[烟花]【中信电子】深南电路业绩预告点评：<mark>AI</mark> <mark>PCB</mark>/载板共振，业绩延续高速增长，持续推荐
+
+[礼物] 业绩表现：10月15日深南电路发布 2026 年前三季度业绩预告，预计实现归母净利润 40.5~41.5 亿元，同比 +74.1%~78.4%，扣非净利润 40.2~41.2 亿元，同比 +84.2%~88.7%；其中 26Q3 预计实现归母净利润 18.0~19.0 亿元，同比 +86%~97%，环比 +29%~36%，扣非净利润 17.8~18.8 亿元，同比 +94%~105%，环比 +28%~35%，公司业绩符合预期，单季归母净利润创历史新高。
+
+[礼物] 我们认为公司业绩高增主要系：需求侧 <mark>AI</mark> <mark>服务器</mark>、高速交换机、<mark>光模块</mark>、封装基板等市场需求维持高景气；产能端南通/泰国新工厂爬坡，既有工厂技改扩产持续落地，广州封装基板工厂产能稳步释放；经营端公司稼动维持高位，产品结构持续优化，推动公司业绩延续高增。
+
+[礼物]公司充分受益未来<mark>PCB</mark>高端化、载板化的产业趋势：
+1）<mark>AI</mark> <mark>PCB</mark>：45亿无锡<mark>AI算力</mark>项目目前正在产能建设中，支撑后续业绩增长，高阶<mark>算力</mark>订单饱满，高价值客户矩阵持续拓展
+2）mSAP/BT载板：<mark>光模块</mark><mark>PCB</mark>龙头地位稳固，广州BT载板持续扩产，行业缺货提价进一步推升盈利能力
+3）ABF载板：已实现22层及以下产品量产，24层及以上产品顺利推进中，多款高端产品实现批量出货，公司ABF载板业务有望迎来全面起量
+
+[礼物]投资观点：公司作为<mark>AI</mark> <mark>PCB</mark>+封装基板综合布局平台型龙头，产品结构升级与产能释放共振下，业绩增长动能有望进一步释放，我们持续看好后续增长潜力，维持重点推荐！</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI算力</span><span class="kw-tag">光模块</span><span class="kw-tag">服务器</span><span class="kw-tag">PCB</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521554411248214" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425441121544182">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-15 20:52 · 👁 853</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">A股增持潮来了
+
+1、<mark>新易盛</mark>：...</div>
+  <div class="topic-content">A股增持潮来了
+
+1、<mark>新易盛</mark>：控股股东提议回购8亿至10亿元A股股份 股权激励或员工持股计划
+
+2、<mark>天孚通信</mark>：控股股东提议1亿元至1.5亿元回购A股股份
+
+3、佰维存储：控股股东提议回购2亿元至2.5亿元A股股份用于注销并减少注册资本
+
+4、沪电股份：控股股东提议2026年度现金分红不低于22亿元
+
+5、温氏股份：董事长提议回购5000万至1亿元股份用于股权激励。
+
+#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">天孚通信</span><span class="kw-tag">新易盛</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425441121544182" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258224454858521">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-15 20:43 · 👁 853</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【国泰海通通信】光库科技：发布...</div>
+  <div class="topic-content">【国泰海通通信】光库科技：发布上会稿和Q3预告，数通高速增长1015
+
+事件点评：公司近日发布三季度业绩预告，前三季度实现归母净利润2.79-3.02亿元，同比增长142%-162%；扣非实现归母净利润2.56-2.73亿元，同比增长202%-222%。单看Q3，公司归母大致在1.31-1.54亿元；扣非归母大致在1.25-1.42亿元。Q2单季度分别为1.04/0.95亿元，中位数环比大致有36%/40%。同时发布发行证券购买资产并募集资金及关联交易报告上会稿，有望近期上会。我们推荐点评如下：
+
+[玫瑰]业绩整体符合预期。市场整体预期普遍在1.4-1.5亿左右，整体符合预期。我们预测数通（加华微接）环比高速增长，工业激光领域稳定增长，但米兰方向预计前期研发资本化下开始释放，Q3亏损可能影响有3000多万元。若不考虑米兰在Q2和Q3的影响，公司Q2/Q3其他业务利润预计在1.1/1.6-1.8亿，综合增长环比预计在50%，呈现出较好的经营态势。我们预计其他业务在Q4也有望延续出类似的增长态势。
+
+[玫瑰]上会稿发布，标的增长趋势良好。公司同步发布上会稿情况。安捷讯2024-2026H1收入分别为5.08/7.86/7.45亿元，净利润为1.09/1.78/2.05亿元，主营业务毛利率35.87%/36.82%/41.96%，呈现快速抬升的态势。公司主要生产基地在苏州（总部研发）、河南鹤壁（量产基地）、商丘（新投产基地），海外泰国安捷讯也在2025年投产来保证海外客户交付。
+
+[玫瑰]新技术看点较多，27-28年趋势明确。公司具备领先的<mark>CPO</mark> 高密度FAU生产能力，主要直接和间接服务于主要的<mark>CPO</mark>方案商，2027年<mark>CPO</mark>开始规模量产，公司有望受益；安捷讯主要面向国内龙头模块厂商，2027年NPO等领域的高密度FAU需求也有望快速从Q2Q3上量，也将给公司带来较好增长。此外，公司还拥有国内少有的OCS量产工厂，OCS供应远不能满足全球用户的需求。
+
+欢迎交流  余伟民/王彦龙/黎明聪 18819251936</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">CPO</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258224454858521" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
