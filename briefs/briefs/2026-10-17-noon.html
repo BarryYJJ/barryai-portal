@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-10-17 午间 AI 简报</title>
+<style>
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-10-18 16:49:31</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-10-17 午间 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-10-17 10:00</strong> &nbsp;→&nbsp; <strong>2026-10-17 14:30</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">38</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">15 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">39.5%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">4 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">6</span></div><div class="hot-kw-row"><span class="kw-name">PCB</span><div class="bar-track"><div class="bar-fill" style="width:67%"></div></div><span class="kw-count">4</span></div><div class="hot-kw-row"><span class="kw-name">Anthropic</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">3</span></div><div class="hot-kw-row"><span class="kw-name">光模块</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">CPO</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">谷歌</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">液冷</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">AI芯片</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="kw-count">2</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-82258221511225122">OpenAI、CoreWeave引发融资与回报担忧，AI行情从“算力够不够”转向“谁买单、多久回本”</a></li><li><a class="tldr-jump" href="#t-22258221511228251">科翔股份Q3净利3.11亿元、毛利率升至30.07%，高端PCB先交成绩单，陶瓷PCB量产接棒仍待兑现</a></li><li><a class="tldr-jump" href="#t-14425448288441842">谷歌签下20年购电协议、支撑Bloom 702MW SOFC项目，AI算力的尽头先是找电</a></li><li><a class="tldr-jump" href="#t-55521558288542424">腾景科技Q3营收预增85%—97%，高速光模块组件与OCS拉动增长，“卖光学铲子”开始逐季收钱</a></li><li><a class="tldr-jump" href="#t-14425448288441442">快手可灵4.0支持原生30秒视频、最长2分钟续拍，AI视频从“炫技几秒”卷向专业生产</a></li><li><a class="tldr-jump" href="#t-14425448288441882">阿斯利康与Insitro合作给出4000万美元首付款、最高约14.6亿美元里程碑款，AI制药拿到真金白银，后续大钱还得凭本事解锁</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-55521558288542424">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-17 14:10 · 👁 1045</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">[太阳]【腾景科技】光通信继续...</div>
+  <div class="topic-content">[太阳]【腾景科技】光通信继续放量，成长空间逐步打开
+
+[庆祝]公司预告Q3营收3-3.2亿元，同比增长84.9%-97.22%、环比增长16.3%-24%，归母净利润4400-4800万元，同比增长61.68%-76.38%（剔除股权激励费用同比增长101%-115.7%）、环比增长23.4%-34.6%，扣非后归母净利润4300-4700万元，同比增长61.37%-76.38%、环比增长20.5%-31.8%。
+
+[玫瑰]光通信继续引领增长。我们判断Q3高速<mark>光模块</mark>无源组件继续保持快速增长，同时OCS中钒酸钇晶体二期新增产能带来产量交付增加；同时在光通信产线大规模扩张下今年公司光测试仪器订单迎来爆发，对光通信业务贡献重要增量。展望Q4，上述增长动力有望延续之外，预计OCS准直器等新产品也将逐步量产，除交付液晶方案已有的准直器订单外，新方案如DBS所用的准直产品等预计也有望开启交付，带来新增亮点。
+
+[拳头]公司受益光通信业务高增业绩已步入逐季向上明确趋势，公司也通过科创债等工具加速产能扩张，模块所用组件、光测试业务将持续受益，且展望光互联新技术，一方面OCS业务有望受益<mark>谷歌</mark>架构升级用量配比大幅提升、新增客户/新增场景部署，另一方面<mark>CPO</mark>领域也有望实现突破，公司有望持续打开成长空间#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">光模块</span><span class="kw-tag">CPO</span><span class="kw-tag">谷歌</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521558288542424" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548551411524818">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-17 14:09 · 👁 985</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">1017生益科技业绩超预期&amp;金...</div>
+  <div class="topic-content">1017生益科技业绩超预期&amp;金洲管道Q3落地，<mark>液冷</mark>积极表现🌞
+
+1️⃣#<mark>PCB</mark>产业链业绩持续喜人，#生益科技超预期，中枢利润33.78e，叠加Q4 M8-9放量加速&amp;明年PTFE重新回归，公司Q4-明年业绩有望持续高增，继续看好<mark>PCB</mark>业绩确定性&amp;技术升级确定性；同时生益科技产业链机会值得持续期待，生益放量加速@产业链相关HVLP—【德福科技】，碳氢树脂—【东材科技】【瑞丰高材】【呈和科技】，化学法硅微粉—【凌玮科技】【联瑞新材】，同时继续关注【华正新材】Q3确定性。
+
+2️⃣#金洲管道<mark>液冷</mark>订单开始释放，截至Q3，公司项目一期建设进度优于预期，现已实现产品出货并进入产能爬坡阶段；一期投入设备基本已完成采购、安装及调试，二期、三期建设将结合市场订单情况分步实施。公司<mark>液冷</mark>业务采用 ODM/OEM 代工模式，已与行业优质<mark>液冷</mark>零部件客户（含台资<mark>液冷</mark> T1 厂商）建立合作并实现批量供货。截至今日，<mark>液冷</mark>业务累计承接订单规模约 4900 万元，2026 年 9 月开票金额约 2261 万元，客户根据产能情况滚动追加订单。#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">PCB</span><span class="kw-tag">液冷</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548551411524818" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521558288542224">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-17 14:08 · 👁 976</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">🇨🇳为何这个位置应重视#睿创微...</div>
+  <div class="topic-content">🇨🇳为何这个位置应重视#睿创微纳？ 
+
+🔥继续首推，积极增配！
+
+🚀近期J贸关注度显著提升，睿创微纳系非北美、非<mark>AI</mark>资本开支，且明年估值十几倍的标的，#业绩高增、强现实品种的稀缺性高！ 
+
+🚀#营收高增的预期差仍大，很多领导忽略了8u技术迭代进而推动非制冷红外性价比显著抬升，系本轮营收快速增长的核心驱动力，多场景、多领域的应用都在快速增长！
+
+🚀#年底潜在催化认知不够，年底<mark>Anthropic</mark>预期上市或成为重要催化，类比SpaceX上市过程商业航天板块的表现，#物理<mark>AI</mark>或成为年底重要潜在主线，睿创微纳系物理<mark>AI</mark>端侧多维感知芯片龙头，具体可以看下图公司官网定位。#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Anthropic</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521558288542224" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258221511221552">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-17 14:08 · 👁 967</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">美年健康：<mark>AI</mark>医疗与数据资产核...</div>
+  <div class="topic-content">美年健康：<mark>AI</mark>医疗与数据资产核心标的1016
+
+1️⃣医疗数据为什么重要？
+
+通用互联网数据极易被替代，#而医疗临床与人体健康数据具备极高的专业门槛与法规壁垒，不可伪造无法复制。海外巨头 <mark>Anthropic</mark> 亲自下场绑定 OpenEvidence 数据平台，证明了医疗数据是 <mark>AI</mark> 落地最重要的底层土壤。
+
+2️⃣为什么需求和变现拐点就在今年？
+
+#数据的价值都是今年<mark>大模型</mark>能力起来之后开始兑现的。<mark>大模型</mark>从通用聊天进化到专业闭环，必须依赖大量高纯度的真实数据进行强化训练。而随着今年<mark>大模型</mark>能力的爆发，数据的商业变现通道被彻底打通。
+
+🔥核心标的：美年健康
+
+#美年拥有全球最大规模、连续多年的人体健康画像与体检数据。<mark>大模型</mark>时代，美年的数据价值有望从多维兑现：
+ 1）<mark>大模型</mark>厂合作：训练医疗垂类模型，构建专业能力；
+ 2）与 <mark>AI</mark> 药厂合作：赋能靶点筛选与药物发现；
+ 3）与医院/患者合作：通过 <mark>AI</mark> 健管工具提升客单价与二次变现。
+
+☎️llq 13162802666#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Anthropic</span><span class="kw-tag">大模型</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258221511221552" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425448288441882">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-17 14:08 · 👁 929</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">阿斯利康与<mark>AI</mark>公司Insitr...</div>
+  <div class="topic-content">阿斯利康与<mark>AI</mark>公司Insitro达成合作，探索心血管代谢疾病新疗法
+
+[玫瑰]10月15日，阿斯利康宣布与<mark>AI</mark>公司Insitro达成合作，利用<mark>AI</mark>平台在MASH和心肌疾病领域开发创新疗法。协议表明，Insitro将获得4000万美金首付款，并有资格获得最高约14.6亿美元里程碑款及个位数百分比的销售分成。
+
+[玫瑰]Insitro是一家<mark>AI</mark>公司，致力于揭示人体生物学机制，系统性地推进高价值疗法开发，以解决临床上未满足的需求。
+
+[玫瑰]自2018年以来，Insitro已构建起全球最大的人体与细胞数据一体化<mark>多模态</mark>数据库，并开发了两大平台：1️⃣ Virtual Human平台以遗传学为基础的<mark>AI</mark>引擎，揭示疾病的发生、发展，以及如何干预和逆转；2️⃣ TherML平台针对上述平台识别出的疾病驱动因素开展药物设计。
+
+[玫瑰]管线与估值：Insitro公司正在推进包含9条管线，公司在2021年完成4亿美元的C轮融资，投后估值24.4亿美元，本轮投资人包括a16z、淡马锡、Google Ventures等。
+
+[太阳]以上内容仅根据公开资料整理，不代表投资建议
+#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">多模态</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425448288441882" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425448288441842">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-17 14:07 · 👁 929</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">BE-<mark>谷歌</mark>-AEP项目达成协议...</div>
+  <div class="topic-content">BE-<mark>谷歌</mark>-AEP项目达成协议，SOFC大单再进一程
+
+[玫瑰]2026年10月15日，AEP正式宣布，将在美国怀俄明州建设702MW的Bloom SOFC发电项目，向Google供应电力。项目投资约40亿美元，Google签署20年购电协议，预计2028年底全面投运。
+
+[玫瑰]该项目是今年1月AEP与BE达成1GW/26.5亿美元采购协议的具体落地。由此推算，该702MW项目中，BE硬件费用为18.6亿美元（2.65$m/mw）
+
+[玫瑰]<mark>谷歌</mark>在Cheyenne的布局中，包含了702MW SOFC，654MW天然气发电机组（3台燃气轮机合计120MW，24台发动机合计432MW），以及其他1.4GW第三方签约电源，多种电力供应协同。
+
+[玫瑰]我们继续看好SOFC作为清洁能源在<mark>数据中心</mark>中的应用，推荐潍柴动力、三环集团、振华股份、壹联科技、华丰股份等产业链公司#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">数据中心</span><span class="kw-tag">谷歌</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425448288441842" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425448288441442">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-17 14:07 · 👁 755</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">[红包]【中信互联网】快手可灵...</div>
+  <div class="topic-content">[红包]【中信互联网】快手可灵4.0全量上线，刷新视频模型新基准
+
+[咖啡]可灵4.0于10月15日全量上线，版本更新核心升级：真实、可控、专业，在动态表现、长时长生成和多素材控制等方向进行升级，在画面真实感、创意可控性和叙事完整度方面实现大幅提升，并在视听表现、多关键帧、口型匹配、文字生成、创意复刻等能力上带来全新突破。此外，面向高频创作场景，可灵4.0 Flash版本兼具高性价比与高效的生成速度。
+
+[咖啡]可灵4.0核心参数升级：1）最多支持10张关键帧输入、15项参考素材；2）单次原生生成最长可达 30 秒；3）动态范围：1080P&amp;4k支持10bitHDR；4）输入文本长度：不超过8000tokens；5）语种和口音强化等等；6）最长2分钟续拍等。此外，Flash版本兼具高性价比与高效的生成速度，支持文生视频、图生视频（首帧）、全能参考、3-20s视频、720P、8 bit SDR。
+
+[咖啡]创作页面全新升级：支持一个输入框的一体化创作体验、宫格与列表两种视图自由切换、时间线连续创作、全新画布<mark>Agent</mark>体验等。Kling 4.0也接入了可灵<mark>MCP</mark>与CLI，创作者可通过<mark>AI</mark> <mark>Agent</mark>调用4.0全能参考、关键帧生视频等能力。
+
+[咖啡]全球创作者对可灵4.0给予高度评价。如《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D&quot; title=&quot;%E6%9F%A5%E6%89%BE%E5%9B%BE%E4%B9%A6&quot; /&gt;首尔之春》导演金性洙“借助Kling 4.0的升级，我们能够更加接近真正意义上的电影创作，也让<mark>AI</mark>生成的影像拥有了更加丰富的电影表现力。”《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3DMINIBOTS&quot; title=&quot;%E6%9F%A5%E6%89%BE%E5%9B%BE%E4%B9%A6&quot; /&gt;》将Kling 4.0融入专业制作流程，通过全能参考等功能完成动作设计和镜头调度，为独立动画拓展全新创作空间。Evolutionary Films 的联合创始人“镜头运动和多角色之间的一致性尤其令人印象深刻” 。两部由可灵 <mark>AI</mark> 制作的作品斩获戛纳金狮等。
+
+[太阳]本次可灵4.0系列模型及创作页面核心针对用户需求痛点“稳定+可控生成”升级，核心镜头的高质量交付成为可灵持续迭代的方向，推动<mark>AI</mark>视频由“能用”走向“好用”，亦体现可灵从内容生成工具向专业影像创作平台的持续推进。建议关注可灵模型升级带来的收入提升和估值增量。
+
+[玫瑰]欢迎联系中信证券互联网团队</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Agent</span><span class="kw-tag">MCP</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425448288441442" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548551411552818">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-17 14:06 · 👁 759</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">浙商机械【九州一轨】拟回购股份...</div>
+  <div class="topic-content">浙商机械【九州一轨】拟回购股份用于员工持股计划或股权激励，激光隐切、金刚石散热空间广阔，持续推荐！
+
+10月16日，公司公告，拟回购股份用于员工持股计划或股权激励。#回购金额800-1500万元。 [太阳]核心逻辑：一体两翼布局新业务，通用半导体设备优势筑基，<mark>硅光</mark>芯片激光隐切、金刚石芯片基板空间广阔。
+
+1️⃣一体：依托通用半导体设备优势，开展半导体新业务。
+
+#通用半导体：国内领先的激光隐切设备商，半导体激光隐切设备关键性参数国际领先。
+
+#陶为银获聘公司副总裁，累计增持公司股份272万股。
+陶为银：通用半导体和通创九州法定代表人、晶禧半导体原法定代表人、江南大学客座教授。
+
+8月20日，#公司增资通用半导体6999万元，持有其6.5%的股权。
+
+2️⃣两翼之一：激光隐切加工服务。<mark>硅光</mark>芯片激光隐切需求放量、晶禧业绩有望爆发。
+
+晶禧半导体：国内领先的<mark>硅光</mark>芯片激光隐切服务提供商。#技术：切割良率99.8%；#客户：包括苏州旭创、<mark>新易盛</mark>、羲禾科技等。
+
+#2026年5月31日晶禧并表（公司持股100%），6月晶禧收入1062万元，净利润596万元，#净利润率56%。晶禧承诺：26-28年实际净利润分别不低于3000、4000、5000万元。
+
+#激光隐切产能将于27Q1投产，后续业绩有望加速：晶禧拟投资不超过6.3亿元建设激光隐切产业化项目，提供<mark>硅光</mark>芯片切割等服务，预计27Q1投产。
+
+3️⃣两翼之二：金刚石芯片基板。金刚石散热产业化提速、空间广阔。
+
+金刚石散热：#已被写入国家规划，落地十万卡<mark>AI</mark>超集群曙光8000、<mark>H200</mark><mark>服务器</mark>。#美国热管理公司已发布金刚石冷板方案，<mark>台积电</mark>有望导入高端<mark>AI芯片</mark>散热。
+
+公司与通用半导体合资成立通创九州（公司持股40%），布局单晶、多晶金刚石片。#通用半导体激光隐切设备可用于金刚石切割。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI芯片</span><span class="kw-tag">H200</span><span class="kw-tag">台积电</span><span class="kw-tag">服务器</span><span class="kw-tag">新易盛</span><span class="kw-tag">硅光</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548551411552818" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425448288441582">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-17 14:06 · 👁 755</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【东吴电子陈海进】<mark>海康</mark>威视：前...</div>
+  <div class="topic-content">【东吴电子陈海进】<mark>海康</mark>威视：前三季度净利润同比增长38.55%，营收与毛利率双升
+
+🧧<mark>海康</mark>威视发布26年三季报
+🚩26Q1-Q3：
+营收740.44亿元，yoy+12.60%；
+毛利率49.63%，yoy+4.26pct；
+归母净利润129.11亿元，yoy+38.55%；扣非归母净利润126.96亿元，yoy+41.52%，利润增速显著高于营收增速，经营质量持续改善。
+
+🚩26Q3：
+营收272.22亿元，yoy+13.71%，qoq+4.27%；
+毛利率49.05%，yoy+3.38pct，qoq-1.62pct；
+归母净利润50.16亿元，yoy+36.97%，qoq-1.94%；扣非归母净利润49.84亿元，yoy+43.13%，qoq-1.59%。
+单季度营收同比增速较Q2进一步提升，扣非利润同比增长超过40%，盈利能力维持较高水平。
+
+🚩营收双位数增长，利润率维持高位
+公司业绩变动主要系收入同比增长、毛利率同比上升。且公司利润增速持续高于营收增速，产品结构优化及精细化经营成效显现。
+
+风险提示：宏观经济波动风险，下游需求不及预期风险，创新业务市场竞争加剧风险等。
+🎁欢迎联系东吴电子团队</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">海康</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425448288441582" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258221511224851">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-17 14:06 · 👁 757</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">浙商机械/电子 【科翔股份】：...</div>
+  <div class="topic-content">浙商机械/电子 【科翔股份】：26Q3公司归母净利润3.1亿元，陶瓷混压<mark>PCB</mark>业绩有望释放，持续推荐！
+
+Q3公司实现扭亏，期待后续陶瓷混压<mark>PCB</mark>业绩释放
+
+2026Q3单季度，公司实现营收18.5亿元，同比+101%；归母净利润3.1亿元，#同比、环比扭亏。毛利率30%，环比+21%；净利率17%，环比+18%。
+
+2026Q1-Q3，公司实现营收39.8亿元，同比+46%；归母净利润2.4亿元，同比、环比扭亏。
+
+核心逻辑：陶瓷混压<mark>PCB</mark>年内或将导入，公司卡位北美客户格局优，主业有望拐点向上
+
+1️⃣陶瓷混压<mark>PCB</mark>：有望成为<mark>AI芯片</mark>散热破局关键，公司与北美大厂合作研发用于<mark>AI服务器</mark>的陶瓷板，竞争格局优
+
+①行业：陶瓷板（氮化铝）导热能力优异，可缓解<mark>PCB</mark>板翘曲问题，有望成为下一代AIPCB标配。
+
+#2030年全球陶瓷混压<mark>PCB</mark>市场空间有望达630亿人民币，2026-2030年CAGR为129%。
+
+②广州陶积电（公司持股86%）：专注氮化铝等先进陶瓷板，在陶瓷板材料端、工艺端技术领先。
+
+公司在低介电常数氮化硅的陶瓷材料上取得关键突破。#目前该材料已完成小批量试制、计划在2026年导入<mark>AI服务器</mark>。
+
+③客户关系：#正与北美大厂合作研发用于<mark>AI服务器</mark>的陶瓷板，重点攻克散热问题。
+
+2️⃣主业：下半年业绩有望拐点向上，股权激励彰显信心
+
+公司公告2026股权激励计划草案。#业绩考核目标：2026年净利润不低于2.5 亿；2026-2027 年累计净利润不低于8亿元；2026-2028 年累计净利润不低于15亿元。
+
+26Q1-Q3公司盈利2.4亿元，#基本完成今年股权激励目标。
+
+风险提示：订单落地不及预期；退市风险；高管减持风险；短期股价上涨过快风险；募投项目兑现风险；再融资风险
+
+🔗# 2026年7月26日【科翔股份】深度： &lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fs.comein.cn%2Fcm7fma8s&quot; title=&quot;https%3A%2F%2Fs.comein.cn%2Fcm7fma8s&quot; /&gt;
+
+☎【浙商机械/电子 王华君18610723118/田发祥/蒋逸18158576706/秦乐恒15221680140】</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI服务器</span><span class="kw-tag">AI芯片</span><span class="kw-tag">PCB</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258221511224851" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258221511228251">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-17 14:03 · 👁 697</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【天风电子】科翔股份：Q3利润...</div>
+  <div class="topic-content">【天风电子】科翔股份：Q3利润大幅跃升，高端<mark>PCB</mark>能力兑现，陶瓷<mark>PCB</mark>迈入爆发前夜
+ 
+🥇#基本面拐点确认：Q3利润大幅跃升-盈利水平显著抬升
+
+公司2026年Q3单季归母净利润3.11亿元，同比+638.54%；营收18.5亿元，同比+100.90%。三季度销售毛利率30.07%，较二季度9.25%提升20.82pct；单季销售净利率16.64%，较二季度-1.43%提升18.07pct，盈利指标大幅改善。
+
+公司强劲的盈利能力核心依托高端<mark>PCB</mark>制造能力，叠加<mark>PCB</mark>行业顺价逻辑清晰、下游<mark>AI算力</mark>需求持续爆发，三季度经营质量实现非常显著的跃升，基本面拐点明确落地。
+ 
+🥈#客户突破临近质变：小批量生产顺利推进-处在大批量产前夕
+
+公司内嵌陶瓷<mark>PCB</mark>、高阶HDI业务已完成全流程产线搭建、核心设备导入与工艺迭代，技术壁垒全面打通。目前产品已通过头部<mark>AI服务器</mark>ODM客户多轮验证，小批量交付有序开展。
+
+当前业务处于关键拐点：技术、良率、客户认证逐步落地，具备从小批量交付转向大规模量产的基础。产品匹配<mark>Rubin</mark>、Ultra、Feynman等高功耗<mark>GPU</mark>平台散热刚需，客户导入节奏清晰，大批量订单放量窗口临近。
+ 
+🥉#行业格局迎来质变：技术革新重塑赛道-核心卡位造就强稀缺性 
+
+<mark>AI算力</mark>芯片功耗持续飙升，传统<mark>PCB</mark>散热方案已达物理瓶颈，内嵌陶瓷基板成为行业优选方案，产业替代趋势不可逆。
+
+新工艺打破传统高阶HDI盈利与估值天花板，重塑<mark>服务器</mark><mark>PCB</mark>供应链格局。公司作为国内少数实现陶瓷<mark>PCB</mark>量产能力突破的标的，先发优势显著，技术+客户双重卡位，行业红利即将集中释放，公司正式进入业绩与估值双击的爆发前夜。
+ 
+[玫瑰]路演欢迎联系对口分析师冯浩凡</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI服务器</span><span class="kw-tag">Rubin</span><span class="kw-tag">AI算力</span><span class="kw-tag">PCB</span><span class="kw-tag">GPU</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258221511228251" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521558288551224">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-17 14:02 · 👁 699</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">[红包]重点推荐！【60185...</div>
+  <div class="topic-content">[红包]重点推荐！【601858 中国科传】：国家数据集团即将挂牌成立，科传跃升为国家级知识数据要素产业核心标的！
+
+#伴随国家数据集团近期正式挂牌落地，数据要素市场化改革进入全面加速阶段，中国科传作为国内规模最大的科研学术期刊龙头，坐拥海量权威学术文献与核心版权资源，成为国家知识数据要素确权、运营与商业化的核心承载平台，深度受益科技强国与数据要素产业双重政策红利。
+
+#根据国家科技强国战略与数据要素改革整体逻辑，中国科传依托不可替代的国家级学术资源壁垒，未来有望通过“政策补贴落地”、“版权价值变现”、“国家级平台协同”等模式，全面打开成长空间。
+
+[红包]#国内期刊补贴定向倾斜，下半年业绩确定性修复
+国家此前针对科研人员订阅海外期刊设置专项补贴，当前科技强国战略下优化科技投入结构，逐步缩减海外期刊补贴、定向加大对国内高质量学术期刊的扶持力度。中国科传作为国内科研期刊出版龙头，旗下核心期刊数量与学术影响力均居行业首位，将直接承接国内期刊补贴增量，业绩端下半年有望迎来明确修复。
+
+[红包]#<mark>AI</mark>版权商业化加速兑现，高毛利价值持续释放
+当前流媒体<mark>AI</mark>短视频、<mark>AI</mark>问诊、医药研发等多元场景均需大量引用期刊文献、分子式等学术内容，对应的知识版权付费机制目前尚未全面普及。公司今年单季度<mark>AI</mark>相关内容授权收入已接近2亿元，且均为高毛利的数据服务收入；后续随着国家数据要素确权政策持续推进，学术内容版权付费规范化落地，公司手握的海量期刊版权资产将持续释放长期价值。
+
+[红包]#国家数据集团深度协同，夯实知识数据要素核心地位
+伴随国家数据集团挂牌成立，国家级数据要素运营体系加速成型。中国科传的海量学术文献数据是国家知识数据要素的核心组成部分，未来有望与国家数据集团在数据确权、知识数据交易、学术数据服务等领域开展深度协同，进一步强化公司在知识数据要素赛道的产业地位，打造国家级学术数据服务标杆。
+
+[烟花]国家数据集团落地叠加知识版权确权政策持续推进，中国科传已不再是一家传统的科研期刊出版企业，而是国家级知识数据要素产业的核心标的，长期成长空间值得重点关注！</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521558288551224" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258221511225122">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-17 14:02 · 👁 705</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">海外<mark>AI</mark>叙事变化（简版）
+一、...</div>
+  <div class="topic-content">海外<mark>AI</mark>叙事变化（简版）
+一、旧叙事（2022-2026H1）三条公理：
+① <mark>算力</mark>永远不够，需求无限
+② 云厂商现金流充足，债务融资只是补充
+③ 买<mark>AI</mark>=买芯片<mark>光模块</mark>，卖铲人逻辑永续
+二、10月以来五条裂缝：
+① <mark>OpenAI</mark>收入口径暴雷（500亿vs预期700亿）
+② <mark>Anthropic</mark>月增速从33%骤降至个位数，IPO估值从2万亿砍到1.5万亿
+③ CoreWeave债券收益率15%+、CDS爆表，<mark>AI</mark>叙事从估值层传到信用层
+④ 巨头CEO集体转谨慎：陈福阳&quot;投资者如赌徒&quot;、陈立武&quot;ROI是核心挑战&quot;、扎克伯格承认2000亿是盲注
+⑤ 长鑫存储技术突破，存储从&quot;永续短缺&quot;变&quot;有竞争者的周期品&quot;
+三、叙事重心四次迁移：
+<mark>算力</mark>叙事→融资叙事（今年发债6000亿，现金流转负）→回报叙事（顶级模型使用占比从55%跌至14%，Gartner测算基建投入10.3万亿vs收入3.55万亿，缺口4.9万亿）→<mark>智能体</mark>应用叙事接棒（<mark>Meta</mark> Muse、推理时代CPU重估）
+四、多空对峙核心：
+共识是需求真实、分歧在&quot;谁付钱、何时收回&quot;。风险不在<mark>AI</mark>证伪，而在2027年4.9万亿融资缺口遇上2000年以来最大股权供给潮。
+五、对A股映射：
+海外映射链（<mark>光模块</mark>/<mark>CPO</mark>/存储）被杀最狠；中国<mark>AI</mark>相对受益（Token消耗全球第一、成本低、<mark>DeepSeek</mark>上市在即）。盯三个拐点：美债10Y是否随<mark>AI</mark>信用事件回落、11月<mark>Anthropic</mark> IPO定价、10月下旬美股财报资本开支指引。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Anthropic</span><span class="kw-tag">DeepSeek</span><span class="kw-tag">OpenAI</span><span class="kw-tag">Meta</span><span class="kw-tag">智能体</span><span class="kw-tag">光模块</span><span class="kw-tag">CPO</span><span class="kw-tag">算力</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258221511225122" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521558284455814">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-17 11:53 · 👁 823</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">黄仁勋谈<mark>AI</mark>市场震荡 “这一切...</div>
+  <div class="topic-content">黄仁勋谈<mark>AI</mark>市场震荡 “这一切都会过去”</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521558284455814" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548551415224248">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-17 10:06 · 👁 840</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">1016生益科技业绩超预期&amp;金...</div>
+  <div class="topic-content">1016生益科技业绩超预期&amp;金洲管道Q3落地，<mark>液冷</mark>积极表现🌞
+
+1️⃣#<mark>PCB</mark>产业链业绩持续喜人，#生益科技超预期，中枢利润33.78e，叠加Q4 M8-9放量加速&amp;明年PTFE重新回归，公司Q4-明年业绩有望持续高增，继续看好<mark>PCB</mark>业绩确定性&amp;技术升级确定性；同时生益科技产业链机会值得持续期待，生益放量加速@产业链相关HVLP—【德福科技】，碳氢树脂—【东材科技】【瑞丰高材】【呈和科技】，化学法硅微粉—【凌玮科技】【联瑞新材】，同时继续关注【华正新材】Q3确定性。
+
+2️⃣#金洲管道<mark>液冷</mark>订单开始释放，截至Q3，公司项目一期建设进度优于预期，现已实现产品出货并进入产能爬坡阶段；一期投入设备基本已完成采购、安装及调试，二期、三期建设将结合市场订单情况分步实施。公司<mark>液冷</mark>业务采用 ODM/OEM 代工模式，已与行业优质<mark>液冷</mark>零部件客户（含台资<mark>液冷</mark> T1 厂商）建立合作并实现批量供货。截至今日，<mark>液冷</mark>业务累计承接订单规模约 4900 万元，2026 年 9 月开票金额约 2261 万元，客户根据产能情况滚动追加订单。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">PCB</span><span class="kw-tag">液冷</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548551415224248" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
