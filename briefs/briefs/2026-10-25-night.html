@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-10-25 深夜 AI 简报</title>
+<style>
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-10-25 01:30:47</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-10-25 深夜 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-10-24 20:30</strong> &nbsp;→&nbsp; <strong>2026-10-25 01:30</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">11</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">8 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">72.7%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">5 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">算力</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">4</span></div><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">4</span></div><div class="hot-kw-row"><span class="kw-name">大模型</span><div class="bar-track"><div class="bar-fill" style="width:75%"></div></div><span class="kw-count">3</span></div><div class="hot-kw-row"><span class="kw-name">GPU</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">Agent</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">GPT</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">AMD</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">AI服务器</span><div class="bar-track"><div class="bar-fill" style="width:25%"></div></div><span class="kw-count">1</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-82258215282411152">亚马逊年内2200亿美元资本开支仍喂不饱需求，2026年算力售罄、2027年几乎售罄，AI扩产还没到散席时</a></li><li><a class="tldr-jump" href="#t-55521582515224544">按需GPU租赁指数创历史新高、连A100都开始回暖，老卡也能吃上算力紧缺的红利</a></li><li><a class="tldr-jump" href="#t-45548514585484488">AI GPU功耗奔向2000W，50V供电越来越吃力，800V直流、垂直供电和GaN/SiC迎来“电力升级局”</a></li><li><a class="tldr-jump" href="#t-14425482454228882">Synopsys与OpenAI联手开发GPT-Synopsys，AI EDA从辅助工具走向全流程智能体，收费算盘有望从卖License打到按效果收钱</a></li><li><a class="tldr-jump" href="#t-45548514588222488">物理AI先闯工厂、再进家庭，世界模型、3D仿真和具身数据集成为增量方向，机器人上岗先得补足“模拟实习”</a></li><li><a class="tldr-jump" href="#t-82258215282551282">五洲新春联手重庆精钢补齐减速器，丝杠、轴承、减速器凑齐硬件套餐，卖方展望机器人单机配套价值超万元</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-82258215282411152">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-25 00:26 · 👁 119</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">刚听完亚马逊CEO的采访：
+1...</div>
+  <div class="topic-content">刚听完亚马逊CEO的采访：
+1. 今年，即使我们花了220B在资本开支，我们仍然有很多需求无法满足（LEAVING MEANINGFUL DEMAND ON THE TABLE）。能让我们有信心花那么多是因为我们对于需求有足够的清晰度。
+2. 我们其实可以花很多且不会成为糟糕的投资，26全卖完了，27几乎卖完了，我们总会留一些<mark>算力</mark>给ON-DEMAND，28年相当大的一部分也卖完了
+3. 我希望我能告诉你供给的问题只是27年，但我认为可能未来的几年在不同环节都会看到供给问题
+4. 1. 我们在三个巨大的趋势上：<mark>AI</mark>, 机器人，太空
+
+市场预期亚马逊27年资本开支285B，同比29%增速，我认为起码330B指引，50%，最终可能停在更高。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">算力</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258215282411152" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548514585484488">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-24 23:11 · 👁 219</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">随着<mark>AI</mark> <mark>GPU</mark>功耗从数百瓦向...</div>
+  <div class="topic-content">随着<mark>AI</mark> <mark>GPU</mark>功耗从数百瓦向2000W级别演进，传统50V级供电架构面临越来越大的电流与配电压力。800V高压直流配电将成为支撑下一代高功率<mark>AI服务器</mark>的重要技术方向，而垂直供电（VPD）、高效率DC/DC转换器以及GaN/SiC功率器件，将成为提升系统供电效率和功率密度的关键。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI服务器</span><span class="kw-tag">GPU</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548514585484488" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425482454228882">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-24 23:11 · 👁 223</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">🌟【申万计算机】<mark>AI</mark> EDA从...</div>
+  <div class="topic-content">🌟【申万计算机】<mark>AI</mark> EDA从单点走向全流程！<mark>DeepSeek</mark>开源推理框架！20261024
+
+✨# AIEDA从单点辅助走向全流程<mark>智能体</mark>
+10月2日，Synopsys与<mark>OpenAI</mark>宣布联合开发<mark>GPT</mark>-Synopsys，以“<mark>算力</mark>+模型+License”交付。
+模型将直接操作EDA工具、解读时序与物理验证结果，围绕PPA目标自主迭代，人类工程师负责目标设定与审核。
+&lt;e type=&quot;hashtag&quot; hid=&quot;15122818181282&quot; title=&quot;%23%E6%A0%B8%E5%BF%83%E7%9C%8B%E7%82%B9%23&quot; /&gt;  <mark>Agent</mark>具备以PPA优化为导向的自主迭代能力，打通前端提效与后端PPA；
+除License、Token外，按效果付费，或为<mark>AI应用</mark>在半导体行业的创新。
+
+✨# 华大九天加速补齐核心工具
+近日，华大九天与芯行纪、奇捷科技、中科鉴芯、上海曼光签署战略合作协议。
+分别对应数字EDA的布局布线、ECO逻辑优化、DFT，以及光电EDA的光器件与光链路仿真等关键环节。
+合作重点是工具数据互通与流程串链，加速数字与光电EDA全流程布局。
+
+✨# <mark>DeepSeek</mark>开源DeepInfer
+10月20日，<mark>DeepSeek</mark>开源推理框架及Token编解码组件，单集群吞吐155万亿Tokens/天，每卡每小时收入38美元（谷价）。
+通过PD分离、专家并行、四套负载均衡与KV Cache长周期复用，在同等硬件下提升吞吐、优化成本。
+推理降本与长上下文复用降低<mark>Agent</mark>开发门槛；官方适配<mark>昇腾</mark>950，减少国产<mark>算力</mark>迁移不确定性。
+# 我们认为，工程优势扩散加快，纯API转售价差窗口或收窄，模型评价应回到加权售价、付费留存与单位任务贡献。
+
+📥【近期周报】
+1017：海外<mark>大模型</mark>ARR再讨论！<mark>液冷</mark>芯片级散热趋势！#小程序://申万宏源研究/v3I4rxEFcziFSFr
+1009：海内外<mark>大模型</mark>厂商ARR讨论！2026Q3计算机业绩前瞻！#小程序://申万宏源研究/s4GuOn5vJAt0dSq
+0930：<mark>AMD</mark>收购World Labs，物理<mark>AI</mark>平台化竞争加速！#小程序://申万宏源研究/LBXBgPBuPgvDAlh
+0927：阿里云栖：模型、芯片、云-机器智能时代的三大基石#小程序://申万宏源研究/kRD9d1EwsFmaEzr</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">DeepSeek</span><span class="kw-tag">OpenAI</span><span class="kw-tag">Agent</span><span class="kw-tag">AI应用</span><span class="kw-tag">大模型</span><span class="kw-tag">智能体</span><span class="kw-tag">GPT</span><span class="kw-tag">AMD</span><span class="kw-tag">算力</span><span class="kw-tag">昇腾</span><span class="kw-tag">液冷</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425482454228882" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258215282551282">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-24 23:10 · 👁 229</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">🤖【国金具身】五洲新春跟踪：减...</div>
+  <div class="topic-content">🤖【国金具身】五洲新春跟踪：减速器再落一子，品类最全的物理<mark>ai</mark>硬件平台
+
+#布局减速器打造品类最全的物理<mark>ai</mark>硬件平台。近日公司与重庆精钢传动成立合资公司，布局减速器赛道，补齐机器人零部件最后一块拼图。五洲产品矩阵包括：机器人及智驾丝杠、轴承、减速器，已经成为品类最丰富的物理<mark>ai</mark>硬件平台，机器人单机asp可展望到1w+。
+
+#重庆精钢航天级减速器技术降维打击。重庆精钢主要客户为航天航空研究所、航天集团等科研院所及部分知名民营商业航天客户，25年营收1500万，净利率超20%。创始人李俊阳来自重庆大学机械传动国家重点实验室（国内传动领域唯一的国家级重点实验室），与银河航天合作开发的新型谐波减速器成本仅为传统航天减速器的一半左右，曾为国内多家减速器厂商提供技术支持。
+
+#物理<mark>ai</mark>叙事下更要重视高精度硬件的必要性。当<mark>算力</mark>-数据-模型的飞轮开始运转，具身的瓶颈更多被认为是软件的问题。实际上能采集到什么数据，数据能保留什么信息，模型又能从数据策略中学到什么，依靠的是高精度、高可靠性的硬件，尤其是丝杠、减速器等传动部件。
+
+投资建议：
+
+公司在大客户丝杠环节份额稳固，机器人轴承及减速器等产品实现扩张，asp提升逻辑有望持续演绎。持续推荐！</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">算力</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258215282551282" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521582515224544">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-24 23:10 · 👁 233</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">按需 <mark>GPU</mark> 租赁指数全面飙升...</div>
+  <div class="topic-content">按需 <mark>GPU</mark> 租赁指数全面飙升并创下历史新高。近期表现疲软的 A100 指数，似乎也开始略有回升。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">GPU</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521582515224544" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258215282554251">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-24 23:10 · 👁 228</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">🌞强call#峰岹科技：   ...</div>
+  <div class="topic-content">🌞强call&lt;e type=&quot;hashtag&quot; hid=&quot;48828541244548&quot; title=&quot;%23%E5%B3%B0%E5%B2%B9%E7%A7%91%E6%8A%80%EF%BC%9A%23&quot; /&gt;   驱控+数采闭环布局，#机器人物理<mark>AI</mark>感知+电机驱动核心标的，周更新part1，1024
+
+1️⃣#数采感知闭环布局，收购Sciosense补齐传感采集环节。依托自研磁编码器、电流位置检测，叠加荷兰Sciosense温湿度/压力/流量传感技术储备，打通电机端数据采集链路，实现“感知采集-驱动控制”一体化，适配人形机器人关节闭环需求。
+
+2️⃣&lt;e type=&quot;hashtag&quot; hid=&quot;88455141414542&quot; title=&quot;%23%E6%9C%BA%E5%99%A8%E4%BA%BA%E9%A9%B1%E6%8E%A7%2B%E6%84%9F%E7%9F%A5%E5%8D%8F%E5%90%8C%E5%B8%83%E5%B1%80%EF%BC%9A%23&quot; /&gt;   原有主业#BLDC电机驱动芯片，无感FOC算法优势突出；配套自研磁编码器、位置电流传感，叠加收购标的环境传感器矩阵，形成“电机驱动-位置感知-物理信号采集”完整方案，为#物理<mark>AI</mark>底层闭环核心标的。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258215282554251" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258215288444851">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-24 22:47 · 👁 284</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">汇报1❗【天风汽车】机器人大脑...</div>
+  <div class="topic-content">汇报1❗【天风汽车】机器人大脑更新（1）：<mark>Agent</mark>接管大脑控制，机器人<mark>GPT</mark>时刻还由<mark>GPT</mark>带来-1024
+———————————
+GPT6 Astra横空出世，作为机器人云端大脑，具备远超VLA/ WAM的复杂任务理解能力。在没有针对机器人控制进行训练的情况下，就达到Robodojo上的SOTA水平。
+
+这里我们主要讲解Astra的优势所在，以及接下来做的优化。
+
+首先讲Robodojo是什么？它是一个公开测试集，#模型只能通过输出具体的三维坐标控制机械臂包括夹爪，工作视野通过夹爪和头部的相机提供。需要在有限的步骤内完成任务。及其考验模型的任务拆解和操作精度。
+
+对于Astra，优势是任务拆解，劣势是精确操作，也是<mark>大模型</mark>的特征：
+1、Astra能够识别麻将并针对性打出，也可以在障碍物挡住相机时，根据提示词，用空闲的夹爪提供相机视野；
+
+2、涉及精细操作，例如插笔筒、倒水入杯，Astra在空间测量和失败后尝试上很弱。而且操作极慢，因为模型参数大且需要输出每次操作的细节，而这本不应由Astra来做。
+
+基于Astra，仅用时一个月，就有两套方案重回SOTA。分别是HexaShell和WorldScape-R²SI，总结是#让Astra干他擅长的东西。 
+
+HexaShell里Astra只做决策，例如设置运动终点，不需要考虑运动轨迹，轨迹由一套写死的方程实现。优化泛化性（33-&gt;39）且精度13-&gt;41，精度媲美最强的VLA/ WAM。
+
+WS-R²SI尝试自我优化，每次执行生成对应操作的skill，存储怎么做/确认完成度/回退等，并不断迭代。具体怎么动交由另外的WAM做。精度13-&gt;24，泛化性33-&gt;43，长程任务21-&gt;51。
+
+机器人控制分为system0、1、2：，2思考决策做什么怎么做；1把2的结论转化为全身动作；0纯粹的执行。总结下，#让专门的模型做专门的事。S2是机器人泛化一直的痛点，也是Astra类<mark>大模型</mark>最擅长的点。
+
+今天<mark>Kimi</mark> 3.1pro发布，大幅强化了3D理解能力，国模也有了接近Astra的能力。
+
+现在的Astra缺什么？复杂场景理解、复杂任务拆解能力。#这些需要大量优质数据进行针对训练，对应数采的庞大需求。❗上亿小时数据的量级下，对应上下游千亿市场。首选数采的直接供应链。
+———————————
+欢迎交流：孙潇雅/董振</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Agent</span><span class="kw-tag">Kimi</span><span class="kw-tag">大模型</span><span class="kw-tag">GPT</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258215288444851" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548514588222488">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-24 22:47 · 👁 283</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">[太阳]【XN智能制造团队】物...</div>
+  <div class="topic-content">[太阳]【XN智能制造团队】物理<mark>AI</mark>驱动具身智能：技术重塑产业，商业化进程持续推进
+
+[太阳]#物理<mark>AI</mark>赋能具身智能、开启实体交互新范式
+
+1）物理 <mark>AI</mark> 以世界模型为核心底座，依托 VLA 链路实现大小脑分工：基座<mark>大模型</mark>充当 “大脑” 承担语义理解、高层任务规划， “小脑” 处理空间关系、力学规则、物体碰撞等物理约束；具身智能将这套能力承载于实体硬件，打通感知‑推理‑执行的完整闭环，和仅做图文解析的纯数字<mark>大模型</mark>形成本质差异。
+
+2）物理 <mark>AI</mark> 核心价值是大幅降低真实场景的数据生成门槛，依靠仿真生成海量物理交互样本，减少高成本实景采集工作。产业链价值迎来重构，世界模型、3D 仿真引擎、具身数据集成为关键增量；行业逐步形成<mark>大模型</mark>公司输出 VLA 与世界模型能力、机器人本体厂商提供硬件载体与真机测试环境的联合迭代模式，双方协同完成从仿真预训练向真机迁移的全流程打磨。
+
+[太阳]#场景分化落地、商业化拐点渐近 
+1）物理 <mark>AI</mark> 拓展人形机器人能力边界，落地顺序优先封闭工业场景，再商业服务、远期家庭。现阶段端侧<mark>算力</mark>、结构材料仍处在持续迭代优化阶段，行业预计约三年迎来产业起量；机器人使用成本逼近人工薪资是商业化拐点，租赁模式更适配现阶段推广。
+
+2）以化工油气巡检为代表的工业机器人是物理 <mark>AI</mark> 优先验证阵地，诉求与人形机器人有所区分，重点聚焦安全可控、告警可追溯、数据本地部署。当前重点推进防爆适配与硬件工程化落地，云边分层架构助力<mark>算力</mark>降本。商业化稳步推进，待 2‑3 年产业逐步走向规模化成熟后毛利有望提升 10 个点，中长期软件订阅模式有望进一步抬升毛利水平，中东、东南亚替代需求可观。
+
+[太阳]#海内外巨头布局、行业迭代加速 
+1）海外动态：<mark>英伟达</mark>迭代 Cosmos 世界模型、Isaac 仿真与 GR00T 工具链，联合 Figure 推进真机 VLA 验证；特斯拉 Optimus 样机进入早期量产，基于自研世界模型优化大脑‑小脑架构。<mark>AMD</mark> 收购李飞飞创办 World Labs，加码空间智能与物理世界模型研究。
+
+2）国内动态：宇树在世界物理 <mark>AI</mark> 大会推进仿真‑真机自进化闭环，同步发布 H2‑X 人形新机；智元迭代 BFM‑2 运动基座与 VLA 具身模型，持续打磨机器人灵巧操作能力。
+
+以上标的不构成投资建议。欢迎交流~WHB#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">大模型</span><span class="kw-tag">英伟达</span><span class="kw-tag">AMD</span><span class="kw-tag">算力</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548514588222488" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
