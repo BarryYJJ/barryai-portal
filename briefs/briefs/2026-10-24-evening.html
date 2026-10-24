@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-10-24 晚间 AI 简报</title>
+<style>
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-10-24 20:30:45</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-10-24 晚间 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-10-24 14:30</strong> &nbsp;→&nbsp; <strong>2026-10-24 20:30</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">23</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">9 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">39.1%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">6 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">5</span></div><div class="hot-kw-row"><span class="kw-name">英伟达</span><div class="bar-track"><div class="bar-fill" style="width:40%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">算力</span><div class="bar-track"><div class="bar-fill" style="width:40%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">字节</span><div class="bar-track"><div class="bar-fill" style="width:40%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">Agent</span><div class="bar-track"><div class="bar-fill" style="width:40%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">Kimi</span><div class="bar-track"><div class="bar-fill" style="width:40%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">GPT</span><div class="bar-track"><div class="bar-fill" style="width:40%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">AI算力</span><div class="bar-track"><div class="bar-fill" style="width:40%"></div></div><span class="kw-count">2</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-45548514544484188">Kimi K3.1 Pro智能指数从44升至55、价格再降1/3，国产模型把“加量降价”卷到前沿</a></li><li><a class="tldr-jump" href="#t-22258215255585151">物理AI卡在数据供给，凡拓数创布局千台Ego设备、年数据产能约100万小时，机器人还没上班，数采先开工</a></li><li><a class="tldr-jump" href="#t-22258215255585251">AI算力扩容让光通信订单变利润，腾景科技Q3营收增93.7%、毛利率创45.3%新高，卖光学零件也能吃到硬菜</a></li><li><a class="tldr-jump" href="#t-14425482422252142">电子布涨价停不下来：中材科技旗下7628电子布10月再涨1.5元至超13元/米，算力热潮把“布生意”织成利润弹性</a></li><li><a class="tldr-jump" href="#t-55521582522212244">美图AI应用开始靠用户买单：Q3生产力收入增42.3%、ARPPU增20.29%，大模型卷价格，工作流赚客单</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-22258215255541851">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-24 17:11 · 👁 390</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【HF大制造】再谈物理<mark>AI</mark>：机...</div>
+  <div class="topic-content">【HF大制造】再谈物理<mark>AI</mark>：机器人是最佳载体，数采是最大卡点
+
+#物理<mark>AI</mark>催化密集，当前板块是最佳布局期：机器人板块大涨，催化上，10月20日<mark>英伟达</mark>柏林GTC召开，黄仁勋将在21日演讲，重心从&quot;卖<mark>GPU</mark>&quot;转向&quot;卖<mark>AI</mark>工厂&quot;，物理<mark>AI</mark>是核心议题；10月22日宇树办2026世界物理<mark>AI</mark>大会；特斯拉本周四也将召开Q3业绩会，此外，<mark>字节</mark>有望在本月底发布自己的世界模型，应重点关注。重磅会议同步举行，物理<mark>AI</mark>从概念期进入底座与本体同步验证阶段。
+
+#核心结论：物理<mark>AI</mark>最好的载体是机器人，而机器人当下最大的卡点不是算法、不是本体，是数据。数字<mark>AI</mark>有互联网既有语料，物理世界真实交互数据积累接近于零，必须从头采集。这一轮叙事正从&quot;整机发布&quot;切换到&quot;数据基建&quot;，谁先把有效小时数做上规模、把单小时采集标注成本降下来，谁掌握供给端。
+
+#关于物理<mark>AI</mark>：物理<mark>AI</mark>学习重力、摩擦、碰撞、形变，通过实体载体完成感知—推理—规划—执行闭环，输出&quot;预测并改变物理世界状态&quot;。四层技术栈为世界模型、VLA、3D感知（Ego数采）、运动执行；链路是<mark>LLM</mark>拆任务→VLA出策略→世界模型校验→底层执行→真机回流。
+
+#数采的三重约束：物理域Gap（仿真与人类动作难迁移到本体动力学）；高质量3D交互数据稀缺；端侧<mark>算力</mark>约束（毫秒级闭环）。结论上看，具身智能的第一阶段不拼模型参数量，拼数据广度、标注密度与跨本体复用效率。
+
+#受益方向：数据基建与仿真软件（无本体数采、3D重建、标注、仿真平台）确定性最高；长期看仍是整机，看整机的场景落地、单位成本与数据闭环。
+标的：#数采：凡拓数创（数据资产）、福莱新材（触觉传感器和数采手套）、奥比中光（3D视觉）；#本体：上纬新材、宇树科技、阿尔特等；#IMU:敏芯股份等。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">英伟达</span><span class="kw-tag">LLM</span><span class="kw-tag">GPU</span><span class="kw-tag">算力</span><span class="kw-tag">字节</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258215255541851" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548514544484188">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-24 17:10 · 👁 381</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title"><mark>Kimi</mark> K3.1 Pro｜综...</div>
+  <div class="topic-content"><mark>Kimi</mark> K3.1 Pro｜综合智能重回全球Frontier【建投<mark>AI</mark>互联网】
+
+<mark>Kimi</mark>发布K3.1 Pro，AA综合智能指数由K3的44分升至55分（+25%），价格较K3降低1/3。智能仅次于Opus 5.5/Sonnet 5.5及Muse Wonder Full。完整模型权重计划于11月4日前开放。
+
+1、K3.1 Pro是K3的后训练版本，沿用约2.8T总参数、104B激活参数及100万token上下文。在没有扩大参数规模的情况下，通过加大后<mark>训练算力</mark>投入、扩展强化学习环境，综合智能提升11分，体现出后训练仍有较大提升空间。
+
+2、前端视觉设计与3D创作仍是重点方向，官方展示了更复杂的网页、Three.js交互及3D资产制作。官方BenchCAD测试中，K3.1 Pro的工具辅助3D重建评分为92.7%，接近Opus 5.5的96.2%和<mark>GPT</mark>-6 Astra的95.9%。
+
+3、Coding和<mark>Agent</mark>执行提升明显。AA测得Terminal-Bench 4.0从13%升至67%，高于Sonnet 5.5的64%；衡量多步业务流程执行的AutomationBench-AA从58%升至73%，GDPval-AA达到1846 Elo、排名第三。
+
+在9～10月海外模型大幅更新后，国产模型有望在10月底至11月迎来一轮集中迭代。关注M3 Pro，GLM新模型等。
+
+建投<mark>AI</mark>互联网团队#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Agent</span><span class="kw-tag">训练算力</span><span class="kw-tag">Kimi</span><span class="kw-tag">GPT</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548514544484188" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258215255585151">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-24 17:10 · 👁 385</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">凡拓数创要点梳理-202610...</div>
+  <div class="topic-content">凡拓数创要点梳理-20261024
+———————————
+✅公司数采业务
+公司形成从“数采设备-场景布局-数采-清洗标注-数据销售”一体化布局。
+
+数采设备：体外公司虚拟动力拥有10年惯性动补+数据动补硬件开发经验，配套Ego、UMI设备，公司硬件端控本能力强，价格低于市场售价。
+
+25年公司营收仅1-2kw，26年预计达到8kw-1e，实现近10X增长，供应200余家机器人本体厂，海外客户以Figure为主。
+
+数据：具备Ego、仿真交互数据和机器人本体数据采集能力，目前公司布局千台Ego设备，形成年数据产能约100w小时。
+
+✅数采行业
+价格：裸数据100元/小时，定制化数据（标注好三维时序，对应场景便利店/家庭/厨房等）在300-500元/小时，特殊场景价格在500元以上。裸数据毛利率约30%-40%，定制化数据因新增<mark>算力</mark>、人工校验与数据损耗，价格与盈利会更高。
+
+数采成本主要是采集硬件、劳务外包、清洗标注人工与<mark>算力</mark>、数据存储四部分成本构成。
+
+✅未来趋势
+当前行业以Ego需求为主，随着模型不断迭代，会产生<mark>多模态</mark>、新场景的数据需求，数采需求会呈现波浪式发展。
+
+当前模型厂数据需求增长最快，物理<mark>AI</mark>数据需要大量资金投入，未来国内市场将主要集中在阿里、<mark>腾讯</mark>、<mark>华为</mark>、<mark>字节</mark>、<mark>Deepseek</mark>等头部大厂。公司目标与头部大客户形成深度绑定。#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">DeepSeek</span><span class="kw-tag">多模态</span><span class="kw-tag">算力</span><span class="kw-tag">字节</span><span class="kw-tag">腾讯</span><span class="kw-tag">华为</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258215255585151" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425482422252142">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-24 17:10 · 👁 377</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">中材科技：Q3业绩符合预期，定...</div>
+  <div class="topic-content">中材科技：Q3业绩符合预期，定增落地助力特种<mark>电子布</mark>加速扩产
+
+[礼物]公司前三季度实现营业收入256.7亿元，同比增长18.28%；归母净利润19.1亿元，同比增长29.06%；扣非归母净利润17.3亿元，同比增长44.24%，其中Q3实现收入94.1亿元，同比增长12.44%，归母净利润7亿元，同比增长45.9%，扣非归母净利润6.31亿元，同比增长62.29%。
+
+[太阳]Q3<mark>电子布</mark>延续高景气度：今年年初以来，<mark>电子布</mark>景气度持续上升，<mark>电子布</mark>价格逐月上涨，以重庆国际7628<mark>电子布</mark>为例，截至9月底，7628<mark>电子布</mark>均价约11.6元/米，较年初实现翻倍以上增长，同时10月份7628价格再次上涨1.5元/米，价格超过13元/米。26Q3<mark>电子布</mark>均价约10元/米，同比增长约140%，价格显著上涨推升公司业绩。我们认为，当前中高端<mark>电子布</mark>产品供不应求，而产品结构调整使得传统电子纱及<mark>电子布</mark>货源紧俏，后市仍有提价预期，<mark>电子布</mark>持续提价有望推升业绩弹性。
+
+[太阳]定增落地，加速扩张特种纤维布产能。公司定增募资不超过约44.8亿元，主要用于年产3500万米低介电纤维布项目（二期）以及年产2400万米超低损耗低介电纤维布项目，定增已于10月初落地，我们认为，公司定增落地将加速推进特种纤维布的建设，同时叠加正在建设中的泰玻邹城一期年产3500万米特种纤维布项目，届时投产后公司特种纤维布年产能将达到9400万米，将充分受益当前<mark>电子布</mark>的高景气度。
+
+[太阳]1-8月国内风电新增装机同比有所回落：2026年前三季度，国内公开招标市场新增招标量91.5GW，比去年同期下降了10.37%，在2025年抢装高基数背景下呈现阶段性回落态势，新增装机规模同比下滑，但行业长期增长逻辑未改。根据国家能源局全国电力工业统计数据，1-8月国内新增风电装机53.26GW，同比减少5.81GW；供给端，目前风电叶片行业内产能充足，部分新增产能预计下半年陆续投产，产能整体仍处于供过于求态势。中材叶片作为全球龙头，优化国内产能并加速海外布局，构建“技术+产能+市场”三位一体的发展格局。
+
+[太阳]前三季度国内锂电池产量同增63.4%，行业景气度回升：2026年前三季度，我国动力及储能电池累计产量1833.1GWH，同比增长63.4%，其中储能电池出货595.4GWh，同比增长111.8%。需求端的高景气带动锂电池隔膜厂家开工率回升，头部锂电池隔膜企业订单饱满，行业供需关系偏紧，锂电池隔膜产品平均价格修复，行业内企业整体实现盈利改善。目前中材锂膜已建成7个国内生产基地，形成6个10亿平米级区域布局，努力提高综合竞争能力，成为具有世界一流技术和产品的锂电池隔膜研发及制造企业。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">电子布</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425482422252142" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258215255585251">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-24 17:10 · 👁 379</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">[太阳]【腾景科技】光通信持续...</div>
+  <div class="topic-content">[太阳]【腾景科技】光通信持续放量，Q3毛利率创历史新高
+
+[庆祝]业绩位于预告中枢。前三季度营收7.44亿元，同比增长74.93%；归母净利润9610.42万元，同比增长50.63%；扣非归母净利润9532.34万元，同比增长55.58%。Q3营收3.14亿元，同比增长93.70%、环比增长21.71%；归母净利润4602.22万元，同比增长69.11%、环比增长29.10%；扣非归母净利润4564.94万元，同比增长71.31%、环比增长27.99%，业绩兑现此前预告，收入与利润延续逐季增长。
+
+[玫瑰]光通信多类产品放量，产品结构优化推动毛利率提升。受益于全球<mark>AI算力</mark>基础设施扩容，高速<mark>光模块</mark>无源光学元组件、OCS钒酸钇晶体及可调谐激光器等光测试仪器订单交付持续增长，Q3毛利率45.30%，连续4个季度环比大幅提升，创下单季新高，高速产品占比提升的结构优化效用非常明显。展望Q4，上述增长动力有望延续之外，预计OCS准直器等新产品将逐步量产，业绩有望提速。
+
+[玫瑰]扩产与研发同步推进。前三季度资本性支出4.99亿元，同比增长159.13%，公司通过银行信贷及科创债等工具支持产能扩张。前三季度研发投入8048.61万元，同比增长74.29%，持续布局<mark>AI算力</mark>光互联多元技术路径等领域。
+
+[拳头]我们认为，高速<mark>光模块</mark>元组件、OCS材料与光测试仪器共同驱动公司增长，订单放量已体现为收入与毛利率同步提升。展望后续，新增产能释放有望进一步支撑规模化交付，OCS准直器等产品的订单拓展及<mark>CPO</mark>相关研发布局有望打开后续成长空间。#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI算力</span><span class="kw-tag">光模块</span><span class="kw-tag">CPO</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258215255585251" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258215255585842">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-24 17:10 · 👁 380</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【<mark>Kimi</mark> K3.1 Pro】...</div>
+  <div class="topic-content">【<mark>Kimi</mark> K3.1 Pro】国模进入密集发布期，K3.1 Pro证实有能力拉进与海外头部模型差距
+
+【事件】10月24日凌晨，<mark>月之暗面</mark>发布<mark>Kimi</mark> K3.1 Pro，#基于K3后训练完成，重点提升编程、3D创作、金融研究及长程<mark>Agent</mark>能力。#模型参数达到3万亿级，支持1M上下文。#新模型在网页端、APP、<mark>Kimi</mark> Work、<mark>Kimi</mark> Code及API同步上线，将于11月4日前开源。
+
+【提升1：编程能力追赶前沿，着重强化3D建模】Benchmark层面，K3.1 Pro在Terminal-Bench 4.0取得65.7%得分，高于<mark>GPT</mark>-6 Astra的58.2%，接近Opus-5.5的66.4%；K3.1 Pro在SWE-Marathon v1.1取得51.7%得分，超过两者的42.5%和46.3%。据<mark>Kimi</mark>官方技术文档，模型可根据文字、草图或参考图推断形状、比例和空间关系，直接编写并运行Blender、SolidWorks、Rhino脚本，完成机械零件、建筑及家具等参数化建模，细化几何、材质与布局，再接入Three.js或游戏引擎。#官方着重强调Coding整体表现追进海外模型与3D&amp;长程任务能力进步。
+
+【提升2：<mark>Agent</mark>及金融等办公场景能力增强】K3.1 Pro在Agents&#x27; Last Exam取得43.2%得分，高于<mark>GPT</mark>-6 Astra的32.8%和Opus-5.5的42.6%；K3.1 Pro在OfficeQA Pro v2取得64.4%得分，同样超过两者的54.4%和62.2%。OfficeQA Pro考察真实金融文档检索、跨文档核对与多步数值推理，体现模型处理复杂财务资料的能力。# 模型对办公等非编程场景同样有高适配度。
+
+【提升3：网安随Coding强化，漏洞研究能力显著增强】K3.1 Pro在ExploitBench得分74.7%，略低于<mark>GPT</mark>-6 Astra的100%和Opus-5.5的91.0%；ExploitGym得分20.7%，亦低于两者的42.4%和34.5%，但相对K3挺有明显提升。多数任务中K3.1 Pro真实复现了 Linux 内核、Node.js、JavaScriptCore、Exim 和 VirGL等软件中近期披露的漏洞。# 通用编程与长程调试能力向网安任务泛化，# 拉进与前沿闭源模型差距。
+
+【定价：较K3降价32%-35%，token输出效率提升】K3.1 Pro定价为每百万tokens缓存命中输入/输入/输出价格为1.3/13/68元，# 相比K3（2/20/100元）同步降价32%-35%左右，# 据用户现阶段实测，# K3.1 Pro token输出速率相比K3提升明显，达到80-150tps水平。
+
+【其他亮点：同步推出K3.1-Pro Highspeed】# 官方同步发布<mark>Kimi</mark>-K3.1-Pro Highspeed，定价为标准版两倍。据<mark>月之暗面</mark>官方微信公众号，高速版与标准版保持同等智能，# 输出速度约为标准版的2-3倍，适合编程交互、连续工具调用等对等待时间敏感的场景。#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Agent</span><span class="kw-tag">月之暗面</span><span class="kw-tag">Kimi</span><span class="kw-tag">GPT</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258215255585842" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521582522212244">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-24 17:09 · 👁 372</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【美图】2026Q3生产力收入...</div>
+  <div class="topic-content">【美图】2026Q3生产力收入&amp;付费人数加速增长，生产力ARPPU大幅增长，“<mark>大模型</mark>”叙事焦虑下，C端用户强粘性增速保持，B段深耕工作流深挖高价值群体提速
+
+#业绩概览：生产力收入&amp;付费人数的增速在加速
+
+影像与设计产品收入：2026Q3为10亿元（同比+28.2%），其中#生产力应用收入+42.3%（占约20%，2026H1增速为40.1%）；生活场景应用收入+27.9%（占80%）。<mark>AI</mark>生产力应用ARR 6.55亿元（同比+40.1%），其中开拍、Vmake Labs的ARR均超去年同期两倍，模型成本价低和性能提升加速<mark>AI</mark>收入
+
+付费订阅用户：2026Q3净增约139万（过去四个季度新高）至1,983万（同比+23.4%，2026H1增速为19.7%），其中生产力239万（+18.3%）、生活场景1,744万（+24.1%）
+
+客单价：生活场景ARPPU约183元/年（同比+0.81%），#生产力334元/年（同比+20.29%，对比2026H1的275元/年提升21%，增长强劲）
+
+海外：国际市场付费用户增速持续快于中国内地，海外是增量主引擎，2026H1海外收入同比增长40.8%
+
+#公司怎么应对<mark>大模型</mark>竞争：C端用户强粘性，B端把战场从&quot;功能&quot;移到&quot;工作流&quot; ，内部孵化<mark>AI</mark>创业团队把握<mark>AI</mark>机遇
+
+① 押注生产力场景：修图是单点功能、可被通用模型平替；电商商品图、口播视频、设计交付是完整工作流
+② 计费模式升级对冲<mark>算力</mark>成本：<mark>AI算力</mark>点按量付费让收入与使用量直接挂钩（H1<mark>算力</mark>点消费+113%），用量增长→收入增长→成本可传导，突破订阅制天花板的同时部分转嫁推理成本；
+③ 模型容器+垂直knowhow：底模开放接入（<mark>通义</mark>万相+自研MiracleVision并行），研发资源全部压在人像审美、人脸精细化、电商设计全链路等产品层，用纵深换差异化；
+④ 国际化+新工作室梯队的期权：海外付费增速持续快于内地（避开国内模型价格战红海）；18周年披露的10个<mark>AI</mark>创新工作室（Picchi、MVLAND已验证PMF）提供低成本期权组合。
+
+#股东回报：上半年派息2.62亿元，占经调利润的40%，创始人吴欣鸿持续增持持股比例上升至12.99%，公司年初至今回购7894万股合计2.85亿港元。
+
+#盈利预测：我们预计公司2026-2028年经调净利润为13.2/16.0/19.2亿元，同比+37.1%/21.3%/19.4%，当前市值对应PE为10.8/8.9/7.5倍，建议持续关注
+
+————————————#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI算力</span><span class="kw-tag">大模型</span><span class="kw-tag">通义</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521582522212244" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521582522228854">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-24 17:09 · 👁 377</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">南方传媒：2026Q3利润端高...</div>
+  <div class="topic-content">南方传媒：2026Q3利润端高增，<mark>AI</mark>布局持续落地【中泰传媒互联网】
+
+[玫瑰]事件：公司发布2026年三季报，2026Q1-Q3收入62.94亿元，同比增长0.2%；归母净利润10.78亿元，同比增长26.7%；扣非归母净利润9.98亿元，同比增长24.6%。2026Q3收入25.05亿元，同比增长8.4%；归母净利润6.04亿元，同比增长51.0%；扣非归母净利润5.54亿元，同比增长51.4%。
+
+[玫瑰]点评：
+⭐公司Q3利润端表现较好，主要得益于公司进一步推进渠道整合、强化成本控制，毛利得以增长，以及股票公允价值变动正向贡献所推动。
+
+⭐分产品来看，教材教辅方面，得益于公司推进渠道整合（子公司教育书店对普宁市广弘教育书店、揭阳市广雅教育书店等网点持股51%，存在整合空间）与征订模式优化（线上线下结合），产品市占率稳中有升。一般图书方面，一般图书出版收入2.7亿元，同增0.7%，公司加强原创精品创作生产，花城社《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D&quot; title=&quot;%E6%9F%A5%E6%89%BE%E5%9B%BE%E4%B9%A6&quot; /&gt;刹海》入选2025年度“中国好书”。
+
+⭐<mark>AI</mark>布局持续落地。<mark>AI</mark>教育方面，公司持续迭代升级粤教翔云数字教材应用平台，上线<mark>AI</mark>陪伴学习助手花卷帮帮，兼具学知识、查资料、聊会天三大特色模式。另外，公司推动图书IP资源结合<mark>AI</mark>，向立体视听跨界转化，《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D&quot; title=&quot;%E6%9F%A5%E6%89%BE%E5%9B%BE%E4%B9%A6&quot; /&gt;谁在撒谎》《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D&quot; title=&quot;%E6%9F%A5%E6%89%BE%E5%9B%BE%E4%B9%A6&quot; /&gt;征途荣耀》等图书IP影视改编项目有序推进。
+
+⚡ 风险提示：文化监管端的政策风险；国有传媒企业优惠政策变动；项目进展不及预期；短视频直播电商图书折扣力度加大。
+
+☎ 欢迎交流&amp;派点请支持中泰传媒互联网团队
+康雅雯 18521305887、李昱喆 18939881981#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521582522228854" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258215255554121">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-24 17:08 · 👁 396</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【物理<mark>AI</mark>行业深度】6G＋物理...</div>
+  <div class="topic-content">【物理<mark>AI</mark>行业深度】6G＋物理<mark>AI</mark>：无线通信迎来新一轮<mark>AI</mark>产业革命
+
+一、SpaceX加速布局天地一体化通信
+
+据媒体报道，马斯克旗下SpaceX正与美国大型通信基础设施公司洽谈，计划获得全美至少8万个移动通信基站站址的使用权。这意味着SpaceX正积极探索“卫星＋地面蜂窝网络”融合，未来有望构建覆盖更广的智能通信基础设施。
+
+ 二、黄仁勋：<mark>AI</mark>将通过无线电波感知物理世界
+
+黄仁勋提出，未来<mark>AI</mark>不仅依靠摄像头理解世界，还可以利用无线电波、电磁波感知物理环境。<mark>英伟达</mark>积极布局<mark>AI</mark>-RAN，推动传统无线基站向通信＋环境感知＋边缘<mark>AI</mark>计算一体化升级。
+
+三、6G＋<mark>AI</mark>端侧，开启射频产业新周期
+
+6G不仅是通信速率升级，更是从“万物互联”向“万物感知＋智能决策”演进。
+随着<mark>AI</mark>-RAN、通感一体化、卫星直连及机器人等物理<mark>AI</mark>终端发展，射频前端、PA/LNA、滤波器、波束赋形芯片及边缘计算芯片有望迎来新一轮价值量提升。
+
+💡 核心观点
+
+<mark>AI</mark>的下一站不仅是手机与机器人，更可能是无处不在的无线电波。6G有望让无线通信网络成为物理<mark>AI</mark>的重要感知与计算基础设施，推动射频产业从通信周期迈向<mark>AI</mark>赋能的新增长周期。#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">英伟达</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258215255554121" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
