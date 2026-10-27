@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="form-action 'none'">
 <title>LLM产业链：Token与GPU租赁价格跟踪 · Barry RS</title>
 <meta name="description" content="Silicon Data LLM Token 支出指数、GPU 租赁基准指数，Ornn GPU 日度结算指数，以及 RunPod / Azure 公开 GPU 报价的统一仪表盘。独立数据、独立口径，不互相换算。">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="assets/app.css?v=20260930-token-range">
+<link rel="stylesheet" href="assets/app.css?v=20261027-otpi-shared">
 </head>
 <body>
 <a class="skip-link" href="#main">跳到主要内容</a>
@@ -17,6 +18,7 @@
   </a>
   <nav class="key-nav" aria-label="仪表盘分区导航">
     <a href="#token" data-key="t"><kbd>T</kbd> TOKEN</a>
+    <a href="#otpi" data-key="i" id="nav-otpi" hidden><kbd>I</kbd> OTPI</a>
     <a href="#gpu" data-key="g"><kbd>G</kbd> GPU</a>
     <a href="#ornn" data-key="o"><kbd>O</kbd> ORNN</a>
     <a href="#rates" data-key="r"><kbd>R</kbd> RATES</a>
@@ -116,7 +118,51 @@
       <div class="chart-scroll"><div id="token-chart" class="token-chart-row"></div></div>
       <figcaption id="token-caption">正在加载图表…</figcaption>
     </figure>
-    <p class="source-line">来源：<a href="https://portal.silicondata.com/token-indexes-chart">Silicon Data Token Indexes</a></p>
+    <p class="source-line">来源：<a href="https://www.silicondata.com/products/silicon-index">Silicon Data Token Indexes</a> · <a href="https://portal.silicondata.com/token-indexes-chart">原始图表</a> · 方法版本未披露，以全部重叠日核对连续性。</p>
+  </section>
+
+  <section id="otpi" class="panel" aria-labelledby="otpi-title" tabindex="-1" hidden>
+    <div class="panel__head">
+      <h2 id="otpi-title">Ornn Token 价格指数（OTPI） <span class="unit-badge">USD / 1M tokens</span></h2>
+      <p class="panel__desc">Ornn 官方日度结算指数：每个模型实验室付费生产模型按 Token 用量加权的混合价格，单位 USD/百万 Token，按 UTC 自然日结算。指数随单价与消费/模型结构共同变化，不等同于厂商目录价调整；与上方 Silicon Data Token 指数口径不同，二者不合并、不换算。</p>
+      <p class="panel__status" id="otpi-status" aria-live="polite"></p>
+    </div>
+    <div class="kpi-row otpi-kpis" id="otpi-kpis" aria-live="polite"><p class="loading-copy">正在加载最新读数…</p></div>
+    <div class="controls">
+      <div class="range-control" role="group" aria-label="OTPI 时间范围">
+        <button type="button" class="range-btn is-active" data-range="all">ALL</button>
+        <button type="button" class="range-btn" data-range="90d">90D</button>
+        <button type="button" class="range-btn" data-range="30d">30D</button>
+        <button type="button" class="range-btn" data-range="7d">7D</button>
+      </div>
+      <div class="series-toggle" id="otpi-toggles" role="group" aria-label="OTPI 实验室显示"></div>
+    </div>
+    <figure class="chart-figure">
+      <p class="otpi-axis-unit">共享价格轴：USD / 1M tokens · 点击图例可单独开关</p>
+      <div class="chart-scroll"><div id="otpi-chart" class="otpi-chart-row"></div></div>
+      <figcaption id="otpi-caption">正在加载图表…</figcaption>
+    </figure>
+    <p class="otpi-note">免费公开接口只提供近 3 个月的日度结算值（Ornn API 文档写 1 个月，2026-10-20 实测为 3 个月）。本页只保存实际采集到的结算值：不回填、不插值、不前向填充；更早历史需 Ornn 付费权限，本页未接入。1D/7D/30D 变化只与恰好早 1/7/30 个自然日的结算值比较，缺少该日时显示暂无。</p>
+    <p class="source-line">来源：<a href="https://index.ornn.com/tokens">Ornn Data · Ornn Token Price Index</a> ·
+      <a href="https://api.ornnai.com/api/otpi">OTPI API</a> ·
+      <a href="https://data.ornn.com/docs/token-price-index">方法论</a> ·
+      <a href="https://data.ornn.com/terms">使用条款</a></p>
+  </section>
+
+  <section id="otpi-owner" class="panel" aria-labelledby="otpi-owner-title" tabindex="-1">
+    <div class="panel__head">
+      <h2 id="otpi-owner-title">Ornn OTPI 所有者视图</h2>
+      <p class="panel__desc">结算值只在本机浏览器用所有者口令解开加密包之后出现。访问登记不能代替这个口令。口令不保存，也不写入页面。</p>
+      <p class="panel__status" id="otpi-owner-status" aria-live="polite">已锁定</p>
+    </div>
+    <form id="otpi-owner-form" class="otpi-owner__form" autocomplete="off" onsubmit="return false">
+      <label for="otpi-owner-pass">所有者口令
+        <input id="otpi-owner-pass" type="password" autocomplete="off" spellcheck="false" disabled>
+      </label>
+      <button type="submit" id="otpi-owner-submit" disabled>解锁</button>
+      <button type="button" id="otpi-owner-lock" hidden>重新锁定</button>
+    </form>
+    <p id="otpi-owner-error" class="error-copy" role="alert" hidden></p>
   </section>
 
   <section id="gpu" class="panel" aria-labelledby="gpu-title" tabindex="-1" hidden data-gated>
@@ -219,6 +265,10 @@
         <dt>免费口径的覆盖边界</dt>
         <dd>Silicon Data H100/A100 历史始于 2024-09-01，B200 始于 2025-07-31，Token 综合始于 2025-12-01；其他序列保留实际起点。当前直接采集值优先，历史仅补缺；不插值、不前向填充。Ornn 使用官方日度结算历史，日期按源时间戳的日期部分记录；H100 SXM 始于 2024-10-01，其他四条始于 2026-04-05。</dd>
       </div>
+      <div id="method-otpi" hidden>
+        <dt>Ornn OTPI 口径</dt>
+        <dd>Ornn Token Price Index 按实验室分别结算：当日付费生产模型的挂牌单价按 Token 用量加权混合，单位 USD/百万 Token；免费档与开放权重自托管不计入，覆盖不足的日期由 Ornn 直接省略。日期为 UTC 结算日，约在当日结束后 12 小时结算并标注 Ornn 计算时间。本页按实验室独立展示，不插值、不与其他来源合并。</dd>
+      </div>
       <div>
         <dt>新鲜度与失败语义</dt>
         <dd>每个数据集独立展示最近成功采集时间与滞后天数；采集失败或数据陈旧会在状态区明确标出，绝不会用旧数据冒充最新读数。</dd>
@@ -238,9 +288,9 @@
 <noscript><style>[data-gated] { display: block; }</style></noscript>
 <footer class="site-footer">
   <p>数据来源：
-    <a href="https://portal.silicondata.com/token-indexes-chart">Silicon Data Token</a> ·
+    <a href="https://www.silicondata.com/products/silicon-index">Silicon Data Token</a> ·
     <a href="https://portal.silicondata.com/gpu-index-chart">Silicon Data GPU</a> ·
-    <a href="https://www.ornn.com/">Ornn</a> ·
+    <a href="https://www.ornn.com/">Ornn</a><span id="footer-otpi" hidden> · <a href="https://index.ornn.com/tokens">Ornn OTPI</a></span> ·
     <a href="https://www.runpod.io/pricing">RunPod</a> ·
     <a href="https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/gpu-accelerated/ncadsh100v5-series">Azure</a>
   </p>
@@ -256,6 +306,7 @@
 <script src="assets/barry-access.js?v=20260927-b300"></script>
 <script src="assets/preview.js?v=20260927-b300"></script>
 <script src="assets/gate.js?v=20260927-b300"></script>
-<script src="assets/app.js?v=20260930-token-range"></script>
+<script src="assets/otpi-crypto.js?v=20260927-b300"></script>
+<script src="assets/app.js?v=20261027-otpi-shared"></script>
 </body>
 </html>

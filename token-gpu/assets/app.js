@@ -95,8 +95,8 @@
     var axisDecimals = options.axisDecimals === undefined ? decimals : options.axisDecimals;
     container.textContent = '';
 
-    var dates = unionDates(seriesList);
-    if (!dates.length || !seriesList.length) {
+    var dates = options.domainDates || unionDates(seriesList);
+    if (!dates.length || !seriesList.some(function (s) { return s.observations.length; })) {
       container.appendChild(el('p', { class: 'loading-copy', text: '当前筛选下暂无可绘制的数据。' }));
       return;
     }
@@ -141,6 +141,7 @@
     var xTicks = options.xTickCount === 2
       ? (dates.length > 1 ? [0, dates.length - 1] : [0])
       : [0, Math.floor((dates.length - 1) / 2), dates.length - 1];
+    xTicks = xTicks.filter(function (value, i, all) { return all.indexOf(value) === i; });
     xTicks.forEach(function (i, idx) {
       var anchor = idx === 0 ? 'start' : (idx === xTicks.length - 1 ? 'end' : 'middle');
       var label = svgEl('text', { x: xAt(i), y: height - pad.bottom + 18, class: 'chart-axis-label', 'text-anchor': anchor });
@@ -155,7 +156,12 @@
         if (v !== null) points.push({ x: xAt(i), y: yAt(v), date: d, value: v });
       });
       if (!points.length) return;
-      var pathData = points.map(function (p, i) { return (i === 0 ? 'M' : 'L') + p.x.toFixed(2) + ',' + p.y.toFixed(2); }).join(' ');
+      // Daily OTPI gaps are separate segments, including days absent from
+      // every lab. A visual line must not invent unobserved daily prices.
+      var pathData = points.map(function (p, i) {
+        var gap = options.breakDailyGaps && i > 0 && addDaysISO(points[i - 1].date, 1) !== p.date;
+        return (i === 0 || gap ? 'M' : 'L') + p.x.toFixed(2) + ',' + p.y.toFixed(2);
+      }).join(' ');
       svg.appendChild(svgEl('path', { d: pathData, class: 'chart-series-path', style: 'stroke:' + series.color }));
       points.forEach(function (p) {
         var text = series.label + '：' + p.date + ' = ' + fmt(p.value, decimals);
@@ -640,6 +646,150 @@
     render();
   }
 
+  // ── Ornn OTPI helpers ─────────────────────────────────────────────────
+  // Owner unlock supplies the authenticated in-memory OTPI block. Public
+  // dashboard.json withholds it; registration alone never opens this panel.
+  var OTPI_DISPLAY_ORDER = ['anthropic', 'openai', 'google', 'deepseek'];
+  var OTPI_FEATURED = 'anthropic';
+  var OTPI_CHANGE_WINDOWS = [['1D', 1], ['7D', 7], ['30D', 30]];
+
+  // Change against the settlement exactly `days` calendar days before the
+  // series' own latest one; without that exact date there is no change.
+  function exactChange(observations, days) {
+    if (!observations.length) return null;
+    var latest = observations[observations.length - 1];
+    var baseDate = addDaysISO(latest.date, -days);
+    for (var i = observations.length - 1; i >= 0 && observations[i].date >= baseDate; i--) {
+      if (observations[i].date === baseDate && observations[i].value > 0) {
+        return { base: observations[i], pct: (latest.value - observations[i].value) / observations[i].value };
+      }
+    }
+    return null;
+  }
+  function formatChange(change) {
+    return change ? (change.pct >= 0 ? '+' : '') + (change.pct * 100).toFixed(1) + '%' : '暂无';
+  }
+  // A failed last run or stale data must never read as fresh.
+  function otpiStatusKey(status, freshness) {
+    if (status === 'failed') return 'failed';
+    if (freshness && freshness.stale) return 'stale';
+    return STATUS_LABELS[status] ? status : 'unknown';
+  }
+  function lagBehind(blockLatest, seriesLatest) {
+    return Math.round((Date.parse(blockLatest) - Date.parse(seriesLatest)) / 86400000);
+  }
+
+  // Bumped by every owner submit and by lock. In-flight fetch/decrypt must
+  // match this value at every continuation, including a late error.
+  var ownerGeneration = 0;
+  var ownerAbort = null;
+  var dropOwnerPlaintext = function () {};
+
+  function bumpOwnerSession() {
+    ownerGeneration += 1;
+    if (ownerAbort) {
+      try { ownerAbort.abort(); } catch (ignore) { /* the generation check still applies */ }
+      ownerAbort = null;
+    }
+  }
+
+  function initOtpi(doc) {
+    dropOwnerPlaintext();
+    dropOwnerPlaintext = function () {};
+    var block = doc.otpi;
+    if (!block || !Array.isArray(block.series)) return;
+    ['otpi', 'nav-otpi', 'method-otpi', 'footer-otpi'].forEach(function (id) {
+      var node = document.getElementById(id);
+      if (node) node.hidden = false;
+    });
+    var section = document.getElementById('otpi');
+    if (section) {
+      var controls = qs('.controls', section);
+      if (controls && controls.parentNode) controls.parentNode.replaceChild(controls.cloneNode(true), controls);
+    }
+    var dropped = false;
+    var seenGeneration = ownerGeneration;
+    var series = orderSeries(block.series, OTPI_DISPLAY_ORDER);
+    function dropPlaintext() {
+      dropped = true;
+      series = null;
+      if (window.removeEventListener) window.removeEventListener('resize', render);
+    }
+    dropOwnerPlaintext = dropPlaintext;
+    var kpis = document.getElementById('otpi-kpis');
+    var chartEl = document.getElementById('otpi-chart');
+    var caption = document.getElementById('otpi-caption');
+    var statusEl = document.getElementById('otpi-status');
+    var collection = block.collection || {};
+    var freshness = block.freshness || {};
+    var key = otpiStatusKey(collection.status, freshness);
+    var parts = [statusLabel(key), freshness.latest_date ? '最近结算日 ' + freshness.latest_date + ' · 滞后 ' + freshness.lag_days + ' 天' : '暂无结算值',
+      '最近成功采集 ' + (collection.last_success_at_utc || '暂无')];
+    if (collection.attempted_at_utc && collection.attempted_at_utc !== collection.last_success_at_utc) {
+      parts.push('最近尝试 ' + collection.attempted_at_utc);
+    }
+    statusEl.textContent = parts.join(' · ');
+    statusEl.className = 'panel__status ' + statusClass(key);
+
+    kpis.textContent = '';
+    series.forEach(function (s) {
+      var featured = s.key === OTPI_FEATURED;
+      var lag = s.latest && freshness.latest_date ? lagBehind(freshness.latest_date, s.latest.date) : 0;
+      var tile = el('div', { class: featured ? 'kpi-tile is-featured' : 'kpi-tile' }, [
+        el('p', { class: 'kpi-tile__label', text: featured ? 'Ornn ' + s.label + ' Token Price Index' : s.label }),
+        el('p', { class: 'kpi-tile__value-line' }, [
+          el('span', { class: 'kpi-tile__value', text: fmt(s.latest && s.latest.value, 4) }),
+          el('span', { class: 'kpi-tile__value-unit', text: 'USD/百万 Token' }),
+        ]),
+        el('p', { class: 'kpi-tile__meta', text: s.latest ? '结算日 ' + s.latest.date + (lag > 0 ? '（落后最新结算日 ' + lag + ' 天）' : '') : '暂无结算值' }),
+        el('p', { class: 'otpi-kpi__changes' }, OTPI_CHANGE_WINDOWS.map(function (w) {
+          return el('span', { text: w[0] + ' ' + formatChange(exactChange(s.observations, w[1])) });
+        })),
+      ]);
+      if (featured && s.latest) tile.appendChild(el('p', { class: 'kpi-tile__meta', text: 'Ornn 计算于 ' + s.latest.computed_at }));
+      kpis.appendChild(tile);
+    });
+
+    var rangeGetter = wireRangeControl(qs('.controls', section), render);
+    var visible = buildToggle(document.getElementById('otpi-toggles'), series.map(function (s) {
+      return { key: s.key, label: s.label, color: 'var(--series-otpi-' + s.key + ')' };
+    }), render);
+    function render() {
+      if (dropped || seenGeneration !== ownerGeneration || !series) return;
+      chartEl.textContent = '';
+      // One common date window anchored to the source's latest observation,
+      // independent of legend selection; stale labs do not move the axis.
+      var allDates = unionDates(series);
+      var days = RANGE_DAYS[rangeGetter()];
+      var cutoff = days && allDates.length ? addDaysISO(allDates[allDates.length - 1], -(days - 1)) : '';
+      var selected = series.filter(function (s) { return visible[s.key]; }).map(function (s) {
+        return { key: s.key, label: s.label, color: 'var(--series-otpi-' + s.key + ')',
+          observations: s.observations.filter(function (o) { return !cutoff || o.date >= cutoff; }) };
+      });
+      var width = Math.max(280, Math.round(chartEl.clientWidth || Math.min(1000, (window.innerWidth || 960) - 64)));
+      renderLineChart(chartEl, selected, {
+        decimals: 4, axisDecimals: 4, width: width, height: width < 600 ? 300 : 360,
+        pad: { top: 16, right: 12, bottom: 34, left: 66 }, yTicks: 4,
+        xTickCount: width < 600 ? 2 : 3, breakDailyGaps: true,
+        domainDates: allDates.filter(function (d) { return !cutoff || d >= cutoff; }),
+        ariaLabel: 'Anthropic、OpenAI、Google、DeepSeek Token 价格指数；共享日期轴与 USD / 1M tokens 价格轴，未归一化',
+      });
+      var dates = unionDates(selected);
+      caption.textContent = dates.length
+        ? dates[0] + ' ~ ' + dates[dates.length - 1] + '，' + dates.length + ' 个结算日；四家共享日期轴及价格轴（USD / 1M tokens），未归一化；只画实际结算值，缺失日断线。'
+        : '当前筛选下暂无数据';
+    }
+    window.addEventListener('resize', render);
+    render();
+  }
+
+  function showOtpiFailure(err) {
+    var statusEl = document.getElementById('otpi-status');
+    if (!statusEl) return;
+    statusEl.textContent = 'Ornn OTPI 渲染失败（' + (err && err.message ? err.message : '未知错误') + '）';
+    statusEl.className = 'panel__status is-failed';
+  }
+
   function statusCard(label, value, cls) {
     return el('div', { class: 'status-card' }, [
       el('p', { class: 'status-card__label', text: label }),
@@ -666,6 +816,10 @@
       !gpuLatest || gpuLag >= 4 ? 'is-stale' : 'is-ok'
     ));
     statusEl.appendChild(statusCard('Ornn GPU 新鲜度', doc.ornn.freshness.latest_date ? doc.ornn.freshness.latest_date + ' · 滞后 ' + doc.ornn.freshness.lag_days + ' 天 · ' + statusLabel(doc.status.ornn.status) : '暂无观测', statusClass(doc.status.ornn.status === 'failed' ? 'failed' : doc.ornn.freshness.stale ? 'stale' : doc.status.ornn.status)));
+    if (doc.otpi && doc.otpi.freshness) {
+      var otpiKey = otpiStatusKey(doc.otpi.collection && doc.otpi.collection.status, doc.otpi.freshness);
+      statusEl.appendChild(statusCard('Ornn OTPI 新鲜度', doc.otpi.freshness.latest_date ? doc.otpi.freshness.latest_date + ' · 滞后 ' + doc.otpi.freshness.lag_days + ' 天 · ' + statusLabel(otpiKey) : '暂无观测', statusClass(otpiKey)));
+    }
     var pipelineKeys = Object.keys(doc.status.pipeline);
     var pipelineOk = pipelineKeys.length > 0 && pipelineKeys.every(function (k) { return doc.status.pipeline[k].status === 'ok'; });
     statusEl.appendChild(statusCard('Token/GPU 采集管道', pipelineOk ? '正常' : '存在失败，见上方口径说明', pipelineOk ? 'is-ok' : 'is-stale'));
@@ -675,7 +829,7 @@
 
   // ── keyboard section navigation ───────────────────────────────────────
   function initKeyboardNav() {
-    var map = { t: 'token', g: 'gpu', o: 'ornn', r: 'rates', m: 'method' };
+    var map = { t: 'token', i: 'otpi', g: 'gpu', o: 'ornn', r: 'rates', m: 'method' };
     document.addEventListener('keydown', function (evt) {
       if (evt.metaKey || evt.ctrlKey || evt.altKey) return;
       var target = evt.target;
@@ -685,7 +839,7 @@
       var id = map[key];
       if (!id) return;
       var section = document.getElementById(id);
-      if (!section) return;
+      if (!section || section.hidden) return;
       section.scrollIntoView({ behavior: REDUCED_MOTION ? 'auto' : 'smooth', block: 'start' });
       section.focus({ preventScroll: true });
     });
@@ -724,6 +878,7 @@
         initGpu(doc);
         initOrnn(doc);
         initRates(doc);
+        try { initOtpi(doc); } catch (err) { showOtpiFailure(err); }
       })
       .catch(function (err) {
         showFailure('数据加载失败，请稍后刷新重试。（' + (err && err.message ? err.message : '未知错误') + '）');
@@ -734,7 +889,128 @@
     return document.documentElement.getAttribute('data-barry-unlocked') === '1';
   }
 
+  var OWNER_BUNDLE_URL = 'data/otpi-owner.bin';
+
+  function ownerStatus(text, failed) {
+    var statusEl = document.getElementById('otpi-owner-status');
+    var errorEl = document.getElementById('otpi-owner-error');
+    if (statusEl) {
+      statusEl.textContent = text;
+      statusEl.className = failed ? 'panel__status is-failed' : 'panel__status';
+    }
+    if (errorEl) {
+      errorEl.hidden = !failed;
+      errorEl.textContent = failed ? text : '';
+    }
+  }
+
+  function lockOwnerOtpi() {
+    bumpOwnerSession();
+    dropOwnerPlaintext();
+    dropOwnerPlaintext = function () {};
+    var pass = document.getElementById('otpi-owner-pass');
+    if (pass) pass.value = '';
+    var section = document.getElementById('otpi');
+    if (section) {
+      var controls = qs('.controls', section);
+      if (controls && controls.parentNode) controls.parentNode.replaceChild(controls.cloneNode(true), controls);
+    }
+    var toggles = document.getElementById('otpi-toggles');
+    if (toggles) toggles.textContent = '';
+    ['otpi', 'nav-otpi', 'method-otpi', 'footer-otpi'].forEach(function (id) {
+      var node = document.getElementById(id);
+      if (node) node.hidden = true;
+    });
+    ['otpi-kpis', 'otpi-chart', 'otpi-caption', 'otpi-status'].forEach(function (id) {
+      var node = document.getElementById(id);
+      if (!node) return;
+      node.textContent = '';
+      node.className = id === 'otpi-status' ? 'panel__status' : node.className;
+    });
+    var lockBtn = document.getElementById('otpi-owner-lock');
+    if (lockBtn) lockBtn.hidden = true;
+    ownerStatus('已锁定', false);
+  }
+
+  function ownerStill(generation) {
+    return generation === ownerGeneration;
+  }
+
+  function initOwnerOtpi() {
+    var form = document.getElementById('otpi-owner-form');
+    if (!form || form.getAttribute('data-owner-bound') === '1') return;
+    form.setAttribute('data-owner-bound', '1');
+    ['otpi-owner-pass', 'otpi-owner-submit'].forEach(function (id) {
+      var node = document.getElementById(id);
+      if (node) node.disabled = false;
+    });
+    form.addEventListener('submit', function (evt) {
+      evt.preventDefault();
+      bumpOwnerSession();
+      var generation = ownerGeneration;
+      var passEl = document.getElementById('otpi-owner-pass');
+      var passphrase = passEl ? passEl.value : '';
+      if (passEl) passEl.value = '';
+      if (!window.OtpiCrypto || !window.OtpiCrypto.decryptBundle) {
+        ownerStatus('解锁组件未加载', true);
+        return;
+      }
+      var controller = typeof AbortController === 'function' ? new AbortController() : null;
+      ownerAbort = controller;
+      fetch(OWNER_BUNDLE_URL, { cache: 'no-store', signal: controller ? controller.signal : undefined })
+        .then(function (res) {
+          if (!ownerStill(generation)) {
+            var stale = new Error('stale');
+            stale.code = 'stale';
+            throw stale;
+          }
+          if (res.status === 404) {
+            var missing = new Error('missing');
+            missing.code = 'missing';
+            throw missing;
+          }
+          if (!res.ok) throw new Error('load');
+          return res.arrayBuffer();
+        })
+        .then(function (buf) {
+          if (!ownerStill(generation)) {
+            var stale = new Error('stale');
+            stale.code = 'stale';
+            throw stale;
+          }
+          return window.OtpiCrypto.decryptBundle(new Uint8Array(buf), passphrase);
+        })
+        .then(function (opened) {
+          passphrase = '';
+          if (!ownerStill(generation)) return;
+          try {
+            initOtpi({ otpi: opened.payload.otpi });
+          } catch (err) {
+            if (!ownerStill(generation)) return;
+            lockOwnerOtpi();
+            ownerStatus('加密包无法显示', true);
+            return;
+          }
+          if (!ownerStill(generation)) return;
+          var lockBtn = document.getElementById('otpi-owner-lock');
+          if (lockBtn) lockBtn.hidden = false;
+          var licensed = opened.payload.archival && opened.payload.archival.state === 'authorized';
+          var privateUse = opened.payload.archival && opened.payload.archival.state === 'owner_private_use';
+          ownerStatus(privateUse ? '已解锁。所有者已选择私人使用采集；不代表供应商书面同意。' : licensed ? '已解锁' : '已解锁。每日采集未开启，图中是本机已捕获的历史。', false);
+        })
+        .catch(function (err) {
+          passphrase = '';
+          if (!ownerStill(generation) || (err && err.code === 'stale')) return;
+          lockOwnerOtpi();
+          ownerStatus(err && err.code === 'missing' ? '加密包不存在，这一节未启用' : '口令不正确或加密包已损坏', true);
+        });
+    });
+    var lockBtn = document.getElementById('otpi-owner-lock');
+    if (lockBtn) lockBtn.addEventListener('click', lockOwnerOtpi);
+  }
+
   function boot() {
+    initOwnerOtpi();
     if (isUnlocked()) { init(); return; }
     window.addEventListener(UNLOCK_EVENT, init, { once: true });
   }
