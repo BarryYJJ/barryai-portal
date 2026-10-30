@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-10-30 晚间 AI 简报</title>
+<style>
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-10-30 20:30:43</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-10-30 晚间 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-10-30 14:30</strong> &nbsp;→&nbsp; <strong>2026-10-30 20:30</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">16</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">6 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">37.5%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">6 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">数据中心</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">大模型</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">算力</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">DeepSeek</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">Kimi</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">英伟达</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">服务器</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">1</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-14425125415414282">东山精密光模块开始兑现利润：索尔思并表助攻，Q3净利同比增401%、环比增26%，800G/1.6T撑场、3.2T接棒布局</a></li><li><a class="tldr-jump" href="#t-45548248528528128">中电港吃上存储涨价红利，Q3净利同比增775%、环比增89%，算力卖水人也赚得盆满钵满</a></li><li><a class="tldr-jump" href="#t-82258458248225452">瑞萨电子数据中心订单覆盖至2027年上半年，数字电源目标产能达2026年的2—2.5倍，AI供电生意忙着扩产接单</a></li><li><a class="tldr-jump" href="#t-45548248528521858">太空算力开始“天地拼单”：北京太空算力云平台纳管40余颗卫星，打通地面CPU/GPU/NPU调度，大模型推理向天上延伸</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-55521421545552114">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-30 19:26 · 👁 244</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">20261030今日段子汇总
+...</div>
+  <div class="topic-content">20261030今日段子汇总
+
+1、满坤科技：公司<mark>PCB</mark>产品主要应用于BMS控制模块、新能源电池控制单元(BCU)主控模块等
+
+2、上海沪工：1、公司的航天业务板块由两部分构成，华宇科技为航天装备制造平台、沪航卫星科技为卫星业务平台；前三季度业绩同比扭亏：2、公司具备专业的商业卫星AIT生产能力，可同时在线装配多颗50KG以下的商业卫星；一季度净利润同比增长39.52%
+
+3、澳洋健康：公司计划以全资子公司澳洋老年病医院为业务主体，拟投资3500万元开展张家港澳洋老年病医院项目，以二级老年病专科医院为设计标准，计划核定床位约105张
+
+4、中电港：公司是<mark>英伟达</mark>、<mark>AMD</mark>的授权分销商之一，代理DRAM、Nand Flash等存储芯片；第三季度净利同比增长775.17%
+
+5、金安国纪：国内<mark>覆铜板</mark>龙头，同时生产电子级玻纤布，第三季净利暴增超1000%
+
+6、东方海洋：公司主要从事海水苗种繁育、养殖，水产品加工等，水产品加工主要包括调理食品系列、冷冻鱼片系列、海参系列加工产品等
+
+7、桂林三金：公司拥有国家中药保护品种21种，核心产品三金片、西瓜霜等产品为全国知名品牌，作用有清热泻火，消肿止痛、治疗咽炎等；第三季度净利润同比增长15.52%
+
+8、阳光照明：中国最大的节能灯生产和出口基地之一；公司使用自有资金 3,000万元参与蓝星光域（上海）航天科技有限公司融资，完成后阳光照明持有其1.0989%股权。蓝星光域成立于2021年 5月，专注于全场景激光通信解决方案，核心产品包括星载同轨/异轨激光通信终端、机载平流层激光通信终端等，主要应用于卫星间、星地间高速率通信，业务覆盖空天地海全场景空域
+
+9、巴比食品：公司为国内中式面点速冻食品龙头，第三季度净利润同比增长10.51%
+
+10、传智教育：公司近日正式发布“<mark>AI</mark>具身智能机器人开发”新学科，首期班将于今年10月正式开班，课程覆盖工业机械臂、四足巡检机器人、人形服务机器人三类设备，并对接智元、宇树等头部厂商方案；第三季度净利润增幅达3403.46%
+
+11、盛洋科技：公司是DVB-NIP软硬件唯一提供商，软件已获欧洲某头部卫星运营商认可
+
+12、万邦医药：公司拟3.02亿元收购赛德盛75.52%股份，落子创新药临床CRO赛道
+
+13、泉阳泉：吉林省市场占有率第一的饮用水品牌，推出白桦树汁等产品；前三季度净利增近九成
+
+14、欧圣电气：公司的护理机器人主要用于失能、失智等大小便不能自理的老人，或手术后恢复期等不方便自行解决大小便的特殊人群；第三季度净利润同比增长314.1%
+
+15、洪通燃气：新疆天然气专业运营商，第三季度净利润同比增长442.06%
+
+16、首旅酒店：公司为经济型连锁酒店龙头，覆盖高端、中高端、长租公寓、联盟酒店等全系列的酒店
+
+17、地素时尚：公司是国内中高端女装优质企业，泡泡玛特旗下超人气IP「Nyota」与地素时尚旗下品牌d’zzit重磅联名，“慢情绪穿搭”系列上线首日多款售罄；前三季度净利润同比增长19.78%
+
+18、澳弘电子：公司拟3.3亿元投建高端<mark>PCB</mark>定制化生产基地，产品以高性能、高可靠性的多层铝基盲孔板、阶梯槽<mark>PCB</mark>、热电分离铜基板、microled板、高多层厚铜板、多层特种线圈板、高频雷达板等高端定制化<mark>PCB</mark>产品为主
+
+19、九安医疗：1、公司间接投资<mark>Kimi</mark>、<mark>DeepSeek</mark>等多家<mark>大模型</mark>公司；前三季度归母净利润同比增长227.57%；2、公司上半年净利预增204.29%至269.5%，主要系公司在科创投资领域的布局收益显现，报告期内底层标的估值上涨
+
+20、羚锐制药：贴膏剂龙头，国内规模最大的橡胶膏剂生产商之一，国内唯一骨架型芬太尼透皮贴剂生产厂家，主要产品包括通络祛痛膏、培元通脑胶囊、丹鹿通督片等；第三季度净利润同比增长26.71%
+
+21、必易微：1、公司主营高性能模拟及数模混合集成电路设计和销售，产品涵盖电源管理、电机驱动、电池管理、信号链及微控制器芯片；第三季度营收创历史新高，扣非后净利润同比大增4375.82%；2、公司推出面向<mark>服务器</mark>及<mark>数据中心</mark>一手消息群，加qq:1490929960等大功率应用的全栈数字电源方案，相关大功率电源、同步整流器及传感器芯片；3、公司在人形机器人领域已有小批量出货，产品包括磁传感器、磁编码器
+
+22、大参林：公司为华南地区医药零售龙头，主营中西成药、保健品、医疗器械等商品的直营连锁零售业务
+
+23、锦江航运：公司主要从事国际、国内海上集装箱运输业务，多年来持续深耕东北亚、东南亚和国内航线；第三季度净利润同比增长21.8%
+
+24、合百集团：1、安徽区域市场的零售龙头企业，第三季度净利润同比增长24524.13%；2、公司实缴出资2.225亿元分别参投了合肥兴泰慧科创业投资基金、合肥市国联资本股权投资基金、合肥市共创接力创业投资基金，三支基金已投资长鑫科技集团股份有限公司等
+
+25、百花医药：综合服务性CRO企业，控股股东、实际控制人拟变更为金华市国资委
+
+26、津滨发展：天津地区小地产商，前三季度净利润同比增长575.78%
+
+27、迎驾贡酒：徽酒的主要代表企业之一，一季度净利润同比增长0.73%
+
+28、沈阳机床：数控机床龙头，拟吸收合并沈阳优尼斯智能装备公司，后者主营产品包括机器人产品的技术开发与制造
+
+29、黑牡丹：常州房地产开发商
+
+30、泸州老窖：国内中高端白酒龙头企业之一，浓香白酒鼻祖，第三季度净利润环比增长111%
+
+31、好想你：红枣行业龙头，通过持有深圳龙珠股权投资基金合伙企业（有限合伙）基金份额间接参与投资了蜜雪冰城股份有限公司。
+
+32、上海洗霸：公司应用于eVTOL的高比能软包锂离子固态电池已设计完成
+
+33、永安药业：公司是牛磺酸行业龙头，前三季度净利大增348.81%
+
+34、古井贡酒：安徽地区白酒龙头，第三季度营业收入同比增长3.69%
+
+35、新乳业：公司主要从事乳制品及乳饮料的研产销，相继整合了15个主要乳品品牌，拥有47家控股子公司、16家乳制品加工厂
+
+36、黑芝麻：1、我国糊类食品龙头企业；旗下拥有京和米业，主要生产的香米富硒米，年生产大米能力20万吨；第三季度净利润同比大增3969.87%2、公司拟对天臣新能源增资5亿，标的主要从事锂电池生产和销售
+
+37、皇台酒业：甘肃小型白酒企业；公司白酒产业拥有“皇台”和“凉州皇台”两大品牌，目前拥有“窖底原浆”、“皇台经典”等系列产品
+
+38、派斯林：公司通过全资子公司美国万丰间接持有Paslin及其子公司全部生产经营主体100%股权；Paslin主营业务定位于工业机器人系统集成行业，主要从事智能化连接生产线
+
+39、天鹅股份：国内棉业机械龙头，控股股东为山东供销资本公司，实际控制人为山东省供销社；前三季度净利润同比增长28.59%
+
+40、鲁阳节能：中国陶瓷纤维龙头，间接控股股东筹划破产重组，公司实控人拟发生变更
+
+41、天元智能：公司主要为生产蒸压加气混凝土制品的绿色环保建材企业提供生产装备及自动化整线解决方案，持股聚通领先（江苏）智能装备公司，经营范围包含工业机器人制造、工业自动控制系统装置制造等
+
+42、智度股份：公司全资子公司智度智麦专注数字品牌广告业务，第三季度净利润同比增长166.76%
+
+43、阳普医疗：国内真空采血系统行业龙头
+
+44、红太阳：绿色农药全产业链公司，拥有行业内最完整、规模最大的吡啶碱产业链；第三季度净利润同比增长38.96%
+
+45、扬子新材：公司有多款产品可满足于半导体洁净室的不同需求
+
+46、浙江东日：1、公司主营业务收入主要来自于农副产品批发交易市场业务和生鲜食材配送业务；2、子公司培安美此前与首都医科大学开展业务洽谈，推进脑机接口技术研发与产业化
+
+47、哈药股份：公司中药类产品品种齐全，涵盖了粉针剂、颗粒剂、丸剂、贴膏剂等十余种剂型，拥有数百个品种，聚焦骨科、心脑血管、呼吸、慢病四大核心医疗领域；同时围绕“世一堂”核心IP，探索中医药大健康产业
+
+#市场段子 #文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">DeepSeek</span><span class="kw-tag">数据中心</span><span class="kw-tag">Kimi</span><span class="kw-tag">大模型</span><span class="kw-tag">英伟达</span><span class="kw-tag">服务器</span><span class="kw-tag">覆铜板</span><span class="kw-tag">PCB</span><span class="kw-tag">AMD</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521421545552114" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548248528521858">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-30 18:12 · 👁 360</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">全球首个天地一体化太空<mark>算力</mark>云平...</div>
+  <div class="topic-content">全球首个天地一体化太空<mark>算力</mark>云平台发布
+
+30日讯，10月30日，北京太空<mark>算力</mark>创新中心发布天地一体化太空<mark>算力</mark>云平台。据介绍，平台已完成核心功能建设，覆盖40余颗卫星<mark>算力</mark>资源，并与地面CPU、<mark>GPU</mark>、<mark>NPU</mark>等地面<mark>算力</mark>实现了统一纳管与池化调度,支持<mark>大模型</mark>推理业务的天地一体化协同调度。此外，北京太空<mark>算力</mark>创新中心与中国信息通信研究院共同宣布成立太空<mark>算力</mark>应用生态公共服务平台，围绕标准研制、测试验证、应用孵化与产业对接等方向提供公共服务支撑。#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">大模型</span><span class="kw-tag">GPU</span><span class="kw-tag">NPU</span><span class="kw-tag">算力</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548248528521858" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425125415414282">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-30 18:09 · 👁 382</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">✅ 【#东山精密：Q3净利润同...</div>
+  <div class="topic-content">✅ 【#东山精密：Q3净利润同比增长401%  环比增长26%】
+
+财联社10月30日电，东山精密(002384.SZ)公告称，前三季度实现营业收入453.79亿元，同比增长67.63%；归属于上市公司股东的净利润52.89亿元，同比增长332.34%。第三季度实现营业收入175.82亿元，同比增长73.81%；归属于上市公司股东的净利润23.32亿元，同比增长401.18%。业绩变动主要系并购索尔思光电纳入合并范围后新增<mark>光模块</mark>业务，收入实现较大增长，协同传统板块业务稳步提升所致。小财注：公司Q3净利润23.32亿，Q2净利润18.47亿，据此计算，Q3净利润环比增长26%。
+
+✅ 扣非和归母同步爆炸，不是靠一次性收益，是主业利润提升，含金量高；Q3环比继续增长，不是单脉冲
+
+✅ <mark>光模块</mark>实现光芯片+模块一体化，不是单纯外购芯片组装，在<mark>AI</mark><mark>光模块</mark>赛道有差异化竞争力，覆盖800G/1.6T，布局3.2T
+
+ #文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">光模块</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425125415414282" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548248528528128">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-30 18:09 · 👁 367</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">各位领导好！
+我们于2026年...</div>
+  <div class="topic-content">各位领导好！
+我们于2026年7月13日发布《中电港（001287.SZ）公司深度报告：两存上市乘风起，国产分销势正隆》，全市场独家深度覆盖！
+
+2026年10月29日公司披露三季报，Q3业绩显著超预期。
+中电港是国内领先的电子元器件综合服务平台，依托中国电子（CEC）央企平台优势，持有近140项海内外原厂授权资质，重点布局存储、处理器两大高景气赛道。2026年1-9月，公司实现营业收入1308.53亿元，同比增长192.41%；归母净利润约11.84亿元，同比增长359.77%。其中第三季度实现营业收入572.97亿元，环比增长31.13%；归母净利润6.71亿元，同比增长775.17%，环比增长89.28%。
+
+我们继续看好公司中长期表现：
+1）2026年全球存储行业迎来阶段性景气上行，存储芯片价格持续回暖，拉动下游客户需求，带动公司存储业务放量。公司持续拓展企业级存储客户，处理器及配套芯片业务保持稳健增长，构成营收增长的重要支撑。同时公司围绕<mark>算力</mark>设备、工业电子等方向加大布局，叠加内部精细化管理、运营效率改善，盈利能力有望持续提升。
+
+2）公司为A股唯一由国资委直属央企控股的电子元器件分销商，央企信用背书带来突出的融资成本优势。2025年公司有息负债综合利率仅4.39%，低于香农芯创11.47%、英唐智控6.81%。为支撑备货与国产替代拓展，公司维持较高负债规模，低成本融资有效对冲财务压力。
+
+3）伴随运营效率持续优化，2026Q1现金转换周期同比缩短42天，现金流韧性持续增强。供应端，公司深度绑定长江存储、长鑫存储两大国产存储龙头，2024年向两家厂商采购额分别为146.43亿元、25.58亿元，占当年总采购额24.27%、4.24%，核心货源稳定，充分受益存储国产替代进程。
+
+我们近期的公司报告：
+中电港（001287.SZ）公司深度报告  ：&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fmp.weixin.qq.com%2Fs%2FZb8cJ4eCX58IgM0e097stQ%3Fclick_id%3D985642447%26from%3Dsinglemessage%26scene%3D2%26subscene%3D10000%26sessionid%3D1783925623%26clicktime%3D1783926190%26enterid%3D1783926190%26ascene%3D1%26realreporttime%3D1783926190334%26forceh5%3D1&quot; title=&quot;%E4%B8%AD%E7%94%B5%E6%B8%AF%EF%BC%88001287.SZ%EF%BC%89%E5%85%AC%E5%8F%B8%E6%B7%B1%E5%BA%A6%E6%8A%A5%E5%91%8A%20%20%EF%BC%9A%E4%B8%A4%E5%AD%98%E4%B8%8A%E5%B8%82%E4%B9%98%E9%A3%8E%E8%B5%B7%EF%BC%8C%E5%9B%BD%E4%BA%A7%E5%88%86%E9%94%80%E5%8A%BF%E6%AD%A3%E9%9A%86&quot; /&gt;
+
+详情欢迎联系【爱建证券研究所】
+
+ #文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">算力</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548248528528128" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258458248225452">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-30 18:02 · 👁 382</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">瑞萨电子3QFY26：业绩符合...</div>
+  <div class="topic-content">瑞萨电子3QFY26：业绩符合预期，4Q营收指引beat；<mark>数据中心</mark>需求及扩产支撑增长
+
+📊【3Q业绩】#产品mix改善，利润率高于公司指引
+Non-GAAP营收/归母净利润JPY435.2/125.0bn，yoy+30%/+42%，均符合预期。毛利率/营业利润率59.4%/34.6%，较公司原指引高1.9/2.1pct，主要由高毛利内存接口及数字电源mix改善、制造费用下降推动。
+
+💡【需求】#<mark>数据中心</mark>延续高增，订单覆盖至1H27
+<mark>数据中心</mark>产品占3Q收入约21%，4Q预计环比中双位数增长，管理层预计强劲需求延续至2027年下半年。汽车增量主要来自中国客户28nm MCU导入及日本客户R-Car Gen 4放量，实际需求与补库存共同驱动增长。
+
+🖇【4Q指引】#营收指引beat，mix及费用压制短期利润率
+营收中值JPY454bn，yoy+29%、较一致预期高3%；毛利率/营业利润率指引58%/32%，环比下降1.4/2.6pct，主要受数字电源mix转弱、扩产及年末检修费用影响，叠加研发等支出增加。西条工厂扩产预计1Q27起释放，数字电源目标运行产能为2026年的2.0-2.5倍，产能兑现是承接<mark>数据中心</mark>需求的关键。
+
+ #文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">数据中心</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258458248225452" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258458248225811">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-30 18:02 · 👁 376</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">[發]【国泰海通医药】默沙东（...</div>
+  <div class="topic-content">[發]【国泰海通医药】默沙东（MSD）2026Q3点评：全年收入指引上调，当日股价上涨3.8%
+
+[太阳]3Q26收入180.9亿美元，yoy+5%（剔除汇率+4%）；GAAP净利润50.7亿美元，yoy-12%；non-GAAP净利润61.6亿美元，yoy-4%，non-GAAP EPS 2.49美元，yoy-3%。本季收入包含采购时点前置带来的约5.5亿美元收益。#全年指引上调：  收入668-673亿美元（原663-673），non-GAAP EPS 2.77-2.82美元（原2.66-2.76）。
+
+[太阳]#KEYTRUDA家族  收入为86.0亿美元，yoy+6%，但增量全部来自皮下剂型QLEX（8.30亿美元，上年同期0.35亿美元），静脉剂型77.7亿美元，同比约-5%，增长由剂型转换驱动。
+
+[太阳]新产品接棒：#WINREVAIR  (ActRII2) 6.94亿美元+93%、#WELIREG  (HIF-2A) 3.07亿美元+56%、#ENFLONSIA  （治疗RSV）1.87亿美元+138%、#OHTUVAYRE  （PDE3/4）1.84亿美元、#GARDASIL  (HPV疫苗)19.95亿美元+14%（以美国公共部门采购模式＋净价提升为主）。仿制药侵蚀加速：#BRIDION  （肌松剂）-67%、#JANUVIA/JANUMET  （DPP4/二甲双胍复方制剂）-39%、#LAGEVRIO  （抗新冠）-88%。
+
+[太阳]管线进入密集数据读出期：ESMO三项III期Presidential，#sac-TMT  TroFuse-005（子宫内膜癌，死亡风险-32%、mOS改善近7个月），BLA获优先审评，PDUFA 2027/6/15、#mRNA疫苗  INTerpath-001（黑色素瘤辅助，复发或死亡风险-42%，HR 0.58）、#K药  KEYNOTE-C93（dMMR子宫内膜癌一线，进展或死亡风险-43%）；#tulisokibart  (TL1A)化脓性汗腺炎IIb阳性，拟进III期；#remigromig  (FZD4/LRP5)BRUNELLO达主要终点；#I-DXd  (B7-H3 ADC)的ES-SCLC上市申请主动撤回。
+
+[太阳]后续关注tulisokibart ATLAS-UC数据、remigromig BAROLO读出、CHORUS III期启动，以及islatravir联合lenacapavir与intismeran的监管申报。
+
+[玫瑰]联系人：余<mark>文心</mark>/余克清/廖博闻/汪晋/薛健博
+
+ #文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">文心</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258458248225811" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
