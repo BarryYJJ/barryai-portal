@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-10-31 早间 AI 简报</title>
+<style>
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-10-31 08:55:37</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-10-31 早间 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-10-30 20:00</strong> &nbsp;→&nbsp; <strong>2026-10-31 08:55</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">31</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">14 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">45.2%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">12 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">6</span></div><div class="hot-kw-row"><span class="kw-name">算力</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">3</span></div><div class="hot-kw-row"><span class="kw-name">光模块</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">3</span></div><div class="hot-kw-row"><span class="kw-name">硅光</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">PCB</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">AI算力</span><div class="bar-track"><div class="bar-fill" style="width:17%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">ASIC</span><div class="bar-track"><div class="bar-fill" style="width:17%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">电子布</span><div class="bar-track"><div class="bar-fill" style="width:17%"></div></div><span class="kw-count">1</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-82258458415182152">东山精密AI光模块开始“印利润”：Q3归母净利润同比增401%，1.6T产品Q4已进入批量出货阶段</a></li><li><a class="tldr-jump" href="#t-45548248218184528">生益科技把AI需求和涨价传导写进报表：Q3归母净利润同比增238%，毛利率升至41.6%，覆铜板量价齐升有望延续</a></li><li><a class="tldr-jump" href="#t-45548248218284188">剑桥科技800G挑大梁、北美新客户添柴：高速光模块收入占比超50%，Q3归母净利润同比增213%</a></li><li><a class="tldr-jump" href="#t-82258458418451182">华海清科给先进封装“磨出利润”：CMP已批量落地HBM、CoWoS等场景，Q3归母净利润同比增53.5%</a></li><li><a class="tldr-jump" href="#t-82258458418451422">优利德盯上AI硬件的“考试费”：67GHz VNA已发布、1.6T采样示波器研发推进，高端测试仪器有望接棒增长</a></li><li><a class="tldr-jump" href="#t-55521421481411254">中控技术AI开始挣钱、公司还没脱困：Q3工业AI收入2.35亿元、环比增17%，但整体归母仍亏948万元，订阅收费兑现是下一关</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-45548248218184528">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-30 22:50 · 👁 493</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【生益科技】Q3业绩符合预告，...</div>
+  <div class="topic-content">【生益科技】Q3业绩符合预告，<mark>AI</mark>进展+产能释放共驱成长
+
+[礼物]事件：公司发布26年三季报：
+➠26Q1-3：营收332.08亿元，yoy+61.1%；归母67.27亿元，yoy+175.4%；扣非63.79亿元，yoy+168.1%；毛利率35.4%，yoy+8.6pct。
+➠26Q3：营收141.82亿元，yoy+78.8%，qoq+30.3%；归母34.40亿元，yoy+238.4%，qoq+61.6%；扣非34.72亿元，yoy+246.7%，qoq+90.2%；毛利率41.6%，yoy+13.5pct，qoq+9.0pct。
+➠Q3业绩符合预告，归母&amp;扣非略高于预告中值。
+
+[庆祝]价格传导+产品升级+产能扩张带动<mark>覆铜板</mark>&amp;线路板业务共振
+➠<mark>覆铜板</mark>：原材料价格持续上涨，公司此前提价显著提升Q3盈利能力；<mark>AI</mark>旺盛需求下高速产品持续放量，产品结构持续优化。后续上游<mark>电子布</mark>等原材持续紧缺，公司价格传导顺畅，叠加产能持续释放，公司<mark>覆铜板</mark>业务有望持续量价齐升。
+➠线路板：子公司生益电子持续受益<mark>AI算力</mark>领域高景气，产能释放叠加高附加值产品占比提升带动业绩显著增长。
+
+[庆祝]<mark>AI</mark>领域进展顺利，产能释放有望驱动增长
+➠高端<mark>AI</mark> CCL进展顺利：公司深度合作N客户，Switch Tray持续放量，中板&amp;LPU份额有望持续提升，后续亦有望切入M10/PTFE方案供应，持续受益CCL升级。此外公司持续推进<mark>ASIC</mark>客户测试，有望带来新增量！
+➠27年在建产能加速释放：泰国一期已于Q3投产，松山湖&amp;泰国二期新建产能预计于27Q3释放，支撑业绩成长。
+
+风险提示：下游需求不及预期，项目导入进展不及预期等
+
+ #文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI算力</span><span class="kw-tag">ASIC</span><span class="kw-tag">电子布</span><span class="kw-tag">覆铜板</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548248218184528" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258458418158111">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-30 22:47 · 👁 497</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">(钧达股份)国星宇航H上市预期...</div>
+  <div class="topic-content">(钧达股份)国星宇航H上市预期映射机会
+
+[太阳]国星宇航于10月29日在港交所披露聆讯后资料集，公司规划了“全球首个<mark>AI</mark>智算卫星星座”，在手114颗待交付<mark>AI</mark>卫星订单（合约34.75亿元）。
+
+港股聆讯后至上市仅剩锁定基石、正式招股等节点，平均周期3-4周。
+
+今年来看，商业航天已经进入1-100阶段的初期高速增长阶段，年内各家卫星制造商及零部件企业业绩均呈现增长态势。
+
+[红包]考虑到近期港股流动性和积极性问题，建议重视 钧达股份（<mark>算力</mark>星座运营+卫星制造+太空光伏） 、迈为股份（HJT设备头部供应商） 、电科蓝天（卫星能源核心供应商） 、东方日升（太空HJT主要供应商） 、天合光能（持股国星宇航） 、晶科科技（持股国星宇航）
+
+ #文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">算力</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258458418158111" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258458418422541">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-30 22:44 · 👁 499</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">华工科技：Q3营收同比+42%...</div>
+  <div class="topic-content">华工科技：Q3营收同比+42%，XPO领衔<mark>AI</mark>光互联全栈新品
+
+Q3营收同比+42%，归母净利润同比+17%
+✔2026年前三季度，公司营收126.54亿元，同比+14.64%；归母16.66亿元，同比+26.09%；扣非11.84亿元，同比+7.19%；毛利率20.64%，同比-1.05pct；研发费用7.33亿元，同比+8.02%；经营性现金流-12.88亿元，主要系为应对订单增长及部分原材料供应波动。
+✔2026Q3，公司营收48.32亿元，同比+41.75%，环比+35.89%；归母4.80亿元，同比+17.03%，环比-12.33%；扣非4.37亿元，同比+16.47%，环比+16.65%。Q3毛利率20.74%，同比-4.22pct，环比-0.78pct；研发费用2.64亿元，同比-4.24%，环比+13.42%。
+✔截至2026Q3末，公司存货46.48亿元，较H1末+3.10%；预付款项4.98亿元，较H1末-4.45%；合同负债5.02亿元，较H1末+15.61%。
+
+光互联业务收入+25.83%、<mark>光模块</mark>毛利率同比+1.76pct
+✔光互联业务，前三季度收入65.38亿元，同比+25.83%；净利润5.65 亿元，同比+30%；其中<mark>光模块</mark>收 47.6 亿元，同比+97%；净利润 5.63 亿元，其中Q3的净利润约3 亿元。<mark>光模块</mark>整体毛利率达 20%，同比+1.76 pct。
+✔智能制造业务，前三季度收入30.1亿元，同比+13.46%；净利润 3.99 亿元，同比+21.86%；综合毛利率 33.4%，同比+0.34pct，继续维系着行业内的较高水平。
+✔感知业务，前三季度净收入 29.3 亿元，同比+2.85%；净利润 2.9 亿元，同比-36.79%；净利润降幅较大，主要是新能源汽车业务行业承压所致。
+
+CIOE展示XPO、<mark>CPO</mark>、NPO全栈新品，股权激励彰显信心
+✔2026年9月CIOE光博会，公司展示原生<mark>液冷</mark>散热12.8T XPO、6.4T去DSP架构NPO、自研<mark>硅光</mark>平台3.2T <mark>CPO</mark>及3.2T可插拔<mark>光模块</mark>。
+✔10月23日公司通过2026年限制性股票激励计划，拟以52.09元授予980万股限制性股票，占总股本0.97%；激励计划以2025年利润总额为基数，2026~2028年利润增速分别不低于18%/33%/48%。
+
+ #文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">光模块</span><span class="kw-tag">CPO</span><span class="kw-tag">液冷</span><span class="kw-tag">硅光</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258458418422541" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521421481411124">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-30 22:38 · 👁 512</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">小米集团重申推荐：韧性筑底，右...</div>
+  <div class="topic-content">小米集团重申推荐：韧性筑底，右侧在即
+
+#风险回报比高，上行空间和积极信号优于下行空间。基于SOTP估值，给予主业26E净利润334亿*25XPE + 汽车收入1200亿*0.7XPS + <mark>AI</mark>暂不估值，目标市值9000亿+，空间50%以上。
+
+#成本上升、需求Beta等不利因素充分预期且边际都在改善。手机端控量保价，ASP连续创历史新高，近期上修全年毛利率预期1pct到9%。IoT方面，上一轮国补造成高基数窗口在26H2退出，结合出海加速，26H2有望恢复同比增长。汽车方面，整车Beta不利预期出清+澎程新车系26Q4蓄势待发。左侧预期有望抢跑报表净利润回升(预计在26Q4/27Q1)。
+
+#<mark>AI</mark>/芯片等叙事强化可见度高。MiMo的模型能力已跻身主流实验室梯队，已经通过Token Plan/API开始商业化。自研芯片完成旗舰SoC第二代、3D-DRAM端侧推理卡、高<mark>算力</mark>智驾芯片（明年上车）的全面集结。端侧<mark>AI</mark> OS+<mark>Agent</mark>权限+数据模型+自研芯片的全栈优势仍被显著低估。
+
+ #文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Agent</span><span class="kw-tag">算力</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521421481411124" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521421481411254">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-30 22:38 · 👁 512</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【中控技术26Q3点评】工业A...</div>
+  <div class="topic-content">【中控技术26Q3点评】工业<mark>AI</mark>持续放量
+26年前三季度实现收入55.06亿元，同比-2.62%；归母净利润1.46亿元，同比-66.26%；扣非净利润0.91亿元，同比-73.05%。其中，Q3收入18.71亿元，同比+2.57%、环比-12.13%；归母亏损947.90万元；扣非亏损1143.07万元。利润下降主要受到收入下降、软件退税及政府补助、投资收益减少，以及股份支付增加等因素影响。
+
+🔥 #工业<mark>AI</mark>连续三个季度增长，收入占比进一步提升。前三季度工业<mark>AI</mark>收入6.19亿元，测算Q3收入2.35亿元，环比+16.93%，较Q1的1.84亿元、Q2的2.01亿元持续增长；Q3工业<mark>AI</mark>收入占比升至12.55%。在公司整体收入承压背景下，工业<mark>AI</mark>成为结构性增长亮点，后续重点关注标杆项目复制及收入转化效率。
+
+🔥 #TPT从标杆验证走向推广，商业模式向持续收费演进。公司此前披露，TPT已拓展至化工、石化、油气、医药等13个行业，并在万华化学、湖北兴瑞、湖北三宁等客户落地。公司正由一次性授权向MaaS、RaaS等价值订阅模式推进，依托节能、提效及自主运行效果持续收费。我们认为，公司超过10万套控制系统、4万家流程工业客户的积累，以及兼具<mark>AI</mark>、自动化与工艺经验的FDE团队，有望支撑工业<mark>AI</mark>由单装置向多场景复制。
+
+☎️华泰计算机 郭雅丽/范昳蕊/袁泽世/岳铂雄/王浩天（17860627839）/徐诚伟#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521421481411254" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258458418485112">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-30 22:38 · 👁 510</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【华创家电韩星雨】TCL科技2...</div>
+  <div class="topic-content">【华创家电韩星雨】TCL科技26Q3业绩点评：弱市见韧性，面板行业中的#Alpha
+
+[太阳]26Q1—Q3营收1387亿元，YoY+2.03%；归母51.20亿元，YoY+68.06%；扣非归母41.52亿元，YoY+70.96%。单Q3营收500.52亿元，YoY-0.66%；归母13.12亿元，YoY+12.80%；扣非归母10.13亿元，YoY+16.37%。
+
+[强]拆分：华星增长亮眼，投资波动扰动表观利润。华星贡献归母17.5亿元，YoY+38%，#若剔除OLED亏损（受内存影响，确实很难），LCD主业表现亮眼；中环贡献约4亿元亏损，同比减亏0.6亿元；天津普林贡献0.18亿元。若假设茂佳、翰林汇分别贡献0.9、0.3亿元，则剩余业务亏损约1.7亿元，预计主要受#上海银行权益法投资收益减少（拨备计提）及<mark>智谱</mark>相关投资收益回落影响。若加回，Q3归母净利润同比增速为#30%+。
+
+[玫瑰]华星：中尺寸打开增量。Q3收入265亿元，环比+5%。前三季度笔电、车载面板销量分别同比+41%、+45%，Q3分别环比+7%、+20%；笔电份额升至全球第二，电竞显示器稳居第一，车载按面积计全球第三。广州华星少数股权收购亦自9月起增厚归母贡献。
+[玫瑰]中环：出海与降本支撑减亏。前三季度硅片、电池组件海外出货量分别同比+355%、+202%；Q3硅片现金成本同比下降17.3%。
+
+[烟花]业绩判断：穿透投资波动，主业表现更值得定价。我们认为，本次业绩符合、甚至好于此前预期。终端需求与成本压力之下，华星仍实现归母同比高增，中环持续减亏，体现出经营韧性。展望后续，#大尺寸LCD TV面板价格预计企稳回升。根据Omdia 10月最新预测，75吋面板开口价11月维持218美元/片，12月起逐步上涨，至2027年3月升至224美元/片，较10月累计上涨约#2.8%；#LG电子亦预计26Q4电视LCD面板价格稳中偏强、27Q1上涨压力加大。价格预期改善，有望进一步支撑主业盈利。#对投资业务的阶段性波动，应与主业盈利能力分开评估：#若此前未因Q2投资收益上修公司的长期价值判断，也不宜因Q3相关波动下修主业估值。
+
+[發]投资观点：当前市值对应2027年PE不足10倍。公司中尺寸成长逻辑、大尺寸价格弹性均因OLED下行beta被低估，后续OLED及中环亏损影响边际减弱。无论从价值还是成长角度，公司均处于底部阶段。
+
+☎欢迎联系韩星雨18652689415/陆偲聪19864589027/姚昊坤18260009820#</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">智谱</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258458418485112" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548248218284188">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-30 22:37 · 👁 513</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">剑桥科技：Q3业绩高增，北美客...</div>
+  <div class="topic-content">剑桥科技：Q3业绩高增，北美客户突破，高速<mark>光模块</mark>业务加速放量
+
+事件： 公司发布2026年三季报，Q3单季度营收22.16亿元，同比+67.3%、环比+56.2%；归母净利润4.33亿元，同比+212.8%、环比+106.7%；扣非净利润4.10亿元，同比+201.3%、环比+102.6%。Q3收入、利润环比显著提速，业绩表现亮眼，进一步验证高速<mark>光模块</mark>业务快速放量。
+
+北美客户拓展取得重要突破，高速<mark>光模块</mark>成为核心增长引擎。 公司北美新客户拓展取得积极进展，客户结构由传统网络设备商逐步向CSP、New Cloud及<mark>算力</mark>基础设施服务商延伸。截至Q3末，高速<mark>光模块</mark>收入占比已超过50%，其中800G占高速<mark>光模块</mark>出货量的绝大部分。 随着高端产品占比提升和规模效应之下，Q3毛利率环比+3.91pct至35.99%、净利率环比+7.18pct至19.6%。
+
+产能扩张与资金保障同步推进，有望支撑后续订单交付。 Q3末公司在建工程15.52亿元，环比Q2末+63.8%；存货37.81亿元，环比+18.3%；固定资产11.00亿元，环比+6.0%，反映公司持续加大产能及备货投入。客户突破、产品升级与产能扩张形成共振，有望持续提升公司在全球高速<mark>光模块</mark>市场的竞争力。
+
+ 高速<mark>光模块</mark>业务进入加速成长阶段，继续看好后续增长弹性。 公司Q3进一步验证新客户导入及800G放量成效。展望2027年，随着北美客户需求持续释放、1.6T、NPO等新品逐步导入，公司有望延续较快增长，继续看好公司长期成长空间。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">光模块</span><span class="kw-tag">算力</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548248218284188" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548248218284228">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-30 22:37 · 👁 503</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【正帆科技】Q3归母同环比扭亏...</div>
+  <div class="topic-content">【正帆科技】Q3归母同环比扭亏，大订单+盈利修复！
+
+事件：公司发布26年三季报，Q3业绩：
+【营收】16.10 亿元，yoy+26.3%，qoq+27.8%；
+【归母】3.22 亿元，同环比扭亏为盈；
+【扣非】0.63 亿元，同环比扭亏为盈；
+【毛利率】19.5%，yoy+1.5pct，qoq+1.1pct
+➡️Q3半导体设备零组件市场需求持续释放，公司收入规模和运营效率持续提升。前三季度公司新签订单57.4亿，同比+74%，较26H1进一步提速，其半导体订单占比76%，OPEX业务新签订单占比62%；随下游CAPEX景气度回升，公司新签订单的数量和质量均有明显改善。
+
+高纯流体系统绝对龙头：大订单+盈利修复！
+高纯流体系统是将高纯气体、湿化学品等供应至工艺机台的厂务系统；公司作为国内绝对龙头，长期服务<mark>中芯国际</mark>、华虹、长存、长鑫、京东方等头部行业客户；
+当前国内Fab建设密集，高纯流体系统需求爆满，随前期签订的低毛利订单陆续完成验收，公司新订单逐渐确收，盈利能力有望突破前高！
+
+零部件供应紧张、扩产+涨价并行
+随着需求旺盛，零部件供应持续紧张，当前处于涨价周期，且未来扩产上修预期强。定价逻辑从需求侧改为产能供给侧。同时，公司产能加速建设，业绩放量在即！
+公司当前布局：
+1）Gas Box（鸿舸）：主要玩家UCT、Fujikin、富创精密、正帆科技等；公司Gas Box产品国内领先，已实现对国内头部设备厂商的广泛覆盖及规模化供货。
+2）石英件（汉京）：主要玩家贺利氏、信越石英、正帆科技等；公司质地优异，是国内头部石英件供应商，相关产品已进入TEL、KE等设备厂商及头部晶圆厂供应链。
+
+风险提示：下游景气度不及预期；行业竞争加剧</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">中芯国际</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548248218284228" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258458418451182">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-30 22:37 · 👁 501</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【华海清科】Q3归母同比+53...</div>
+  <div class="topic-content">【华海清科】Q3归母同比+53.5%，平台型布局持续拓展！
+
+事件：公司发布26年三季报，Q3业绩：
+【营收】15.39 亿元，yoy+23.7%，qoq+6.8%；
+【归母】4.39 亿元，yoy+53.5%，qoq+38.9%；
+【扣非】3.69 亿元，yoy+40.5%，qoq+26.8%；
+【毛利率】40.6%，yoy-0.3pct，qoq-2.9pct
+➡️Q3公司持续加码研发投入、推进产能体系建设，CMP装备市占率及规模持续提升，各类新产品拓展推进顺畅，产业化成效突出，实现营收及利润的同比增长。
+
+本土CMP装备龙头，平台型布局持续拓展
+公司是国产CMP龙头企业，12英寸CMP全面覆盖先进制程与成熟制程，可适配逻辑、存储、大硅片制造及3DIC、<mark>HBM</mark>、<mark>CoWoS</mark>等先进封装场景，CMP装备已在上述领域实现批量落地应用，市占率及规模稳步提升，有力支撑公司经营业绩实现平稳增长。
+公司同样持续拓展减薄装备、离子注入装备、清洗装备、晶圆再生、关键耗材及维保服务等新产品业务研发迭代，全系列产品应用场景持续拓宽，市场渗透率稳步提升，新签业务订单规模大幅增长。
+
+两存+先进逻辑大扩产趋势向上
+国内两存、逻辑晶圆厂做大做强。两存将有望复制面板成长逻辑成为全球领先企业，晶圆厂体量持续壮大；先进制程必将大扩产，解决国产<mark>AI</mark>最卡脖子环节及众多高端应用芯片制造瓶颈。
+据SEMI，2025年大陆晶圆制造设备市场空间约463亿美元，未来随着大扩产向上， 市场规模有望进一步增长，同时，国产化份额较低，仍有充分提升空间。
+
+风险提示：下游大型晶圆厂扩产不及预期；行业竞争加剧。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">CoWoS</span><span class="kw-tag">HBM</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258458418451182" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258458418451422">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-30 22:37 · 👁 505</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">优利德Q3业绩大超预期，期待V...</div>
+  <div class="topic-content">优利德Q3业绩大超预期，期待VNA和1.6T示波器进展！
+
+事件：公司三季报继续高增：单三季度营收4.78亿元，同比+56.49%，净利润7010.3万元，同比+88.97%;扣非6902.59万元，同比+88.20%。前三季度营收12.93亿元，同比+40.11%;净利润2.1亿元，同比+55.49%;扣非2.08亿元，同比+59.92%。
+
+海外市场继续高增
+北美区域订单饱满，前三季度外销同比+61.67%。越南生产基地已完成产能爬坡，进入批量交付阶段，今年一直处于满产状态，规模效应带动盈利能力提升。
+
+高端67GHz VNA发布
+公司近期发布67G高端VNA，支持扩展至110GHz，迈入第一梯队。高端产线全检在即，可望市场超百亿，景气度极高。市面同类产品单价超200万，且产能紧缺，未来为业绩重要增量。客户端已对接高速连接器客户，放量在即（预计大几十台起步），后续有望在<mark>PCB</mark>和高速铜缆头部客户送测，持续落地批量订单。
+
+采样示波器：1.6t DCA研发快速推进，产品近期有望落地，且三件套同步推进，具备：电测+光测+芯片三重优势，预期差大，且业绩处于高增阶段，有坚实的市值底。
+
+⚡风险提示：海外需求波动、产能释放不及预期</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">PCB</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258458418451422" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258458418451851">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-30 22:37 · 👁 499</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【国海机械】九州一轨：Q3扭亏...</div>
+  <div class="topic-content">【国海机械】九州一轨：Q3扭亏为盈，晶禧利润加速释放！持续强call❗️
+——————
+事件：公司发布2026年三季报：2026年前三季度实现应收入2.39亿元、同比+77.9%，归母净利润102万、扣非归母228万。其中Q3单季度营收1.45亿元，同比+210%，归母净利润1946万元、扣非归母2021万元，扭亏为盈！
+
+晶禧：<mark>硅光</mark>晶圆切割供不应求、Q3利润加速释放
+晶禧半导体自2026年6月起纳入公司合并报表范围。截至2026年9月30日，晶禧半导体计入公司合并报表范围营收为4598万元，净利润为2512万元；其中Q3单季度收入3536万元，净利润1916万元，净利率54.2%。<mark>硅光</mark>晶圆切割行业供不应求，后续随产能释放，公司净利润将逐季度提升。
+
+通创九州：远期规划10亿颗金刚石散热器件、想象空间打开
+依托激光隐切核心技术，通创九州产品定位于单晶金刚石散热器件，直接交付最终成品，区别于其他金刚石长晶公司，成本与盈利能力也显著领先。远期规划10亿颗金刚石散热器件，预计四季度逐步有产品、订单交付。
+
+投资观点：我们预计公司27-28年归母净利润为3.12亿元、6.04亿元，对应PE为37X、19X，根据行业需求与产能释放节奏，盈利预测仍有大幅上修空间。超强α+β标的、未来3-5倍空间，产业趋势才刚刚开始，强烈推荐！
+——————
+联系人：国海机械 张钰莹/闫智13121190503/对口销售#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">硅光</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258458418451851" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258458418455211">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-30 22:33 · 👁 510</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【中金汽车】赛力斯发布3Q26...</div>
+  <div class="topic-content">【中金汽车】赛力斯发布3Q26业绩：
+
+随Q4 M9Ultimate版本交付、M8改款焕新，后续销量表现与销售结构有望共同改善，叠加原材料成本趋势下行、<mark>华为</mark>合作升级与专属专营全面落地，后续成本与费用端有望向下挖潜，带动盈利能力趋势改善。
+
+[太阳]3Q26公司实现营业收入280.8亿元，同/环比分别-41.7%/-11.6%；归母净利润14.2亿元，同/环比分别-40.1%/扭亏为盈；扣非归母净利润-13.7亿元，同比由盈转亏/环比减亏45%。
+其中归母净利润同比承压，主要受核心零部件成本上涨及研发费用率提升影响；受子公司出表后相关会计核算方式变化，当季非经常性损益实现27.9亿元。
+
+[太阳]据公司产销快报，3Q26总销量为8.7万辆，同/环比分别-39%/-19.9%。据乘联会，3Q26问界销量为6.6万辆，同/环比分别-46.3%/-26.6%，其中M9销量为3万辆，环比+94.2%，占比44.7%；M6销量为2.2万辆，占比33.2%。
+
+[太阳]3Q26单车收入32.4万元，同/环比-4.3%/+10.5%；单车净利润1.6万元，同比-1.8%/环比扭亏为盈。
+
+[太阳]毛利率及费率方面（扣除税金及附加，经重述）
+3Q26毛利率18.8%，同比-8.1ppt/环比-0.1ppt。3Q26销售/管理/研发/财务费用率分别为13.6%/3.3%/7.0%/0.1%，同比分别-1.1/+1.1/+2.5/+0.3ppt。
+
+[太阳]3Q26实现投资收益18.6亿元。
+
+ #文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">华为</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258458418455211" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258458415182152">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-30 21:47 · 👁 517</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【长江电子】东山精密2026年...</div>
+  <div class="topic-content">【长江电子】东山精密2026年三季报点评：<mark>光模块</mark>加速放量，Q3业绩表现亮眼
+
+[太阳]前三季度收入利润高增，盈利能力持续提升
+公司前三季度实现收入453.79亿元，同比增长67.63%；归母净利润52.89亿元，同比增长332.34%；扣非归母净利润45.79亿元，同比增长327.48%；毛利率21.28%、净利率11.71%，同比分别提升7.50pct和7.19pct。
+
+[太阳]单Q3表现亮眼，利润维持高增
+单三季度来看，26Q3公司实现收入175.82亿元，同比＋73.81%、环比＋19.93%；实现归母净利润23.32亿元，同比＋401.18%、环比＋26.25%；扣非归母净利润20.99亿元，同比＋406.69%、环比＋47.80%；毛利率23.07%、净利率13.25%，环比分别提升2.18pct和0.56pct。
+
+[太阳]<mark>光模块</mark>业务快速兑现，稀缺光芯片业务有望开启新一轮增长
+三季度来看，公司<mark>光模块</mark>业务爆发性增长与传统业务稳步提升共同驱动业绩，当前800G<mark>光模块</mark>出货量逐季快速提升，1.6T产品已于Q4进入批量出货阶段，下游订单饱满、产能利用率维持高位。我们看好<mark>光模块</mark>产能释放与高速产品升级持续推进，叠加高速EML光芯片自研自产能力，有望进一步增强交付能力及盈利弹性。
+#我们依旧强调：2026年公司业绩有望实现85亿、2027年东山将迎来<mark>光模块</mark>+光芯片+AIPCB三轮驱动大年、27年业绩看350亿、现价坚定看好！
+
+
+欢迎联系长江电子杨洋团队</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">光模块</span><span class="kw-tag">PCB</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258458415182152" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258458415455482">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 10-30 21:29 · 👁 541</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【长江计算机&amp;机械】中控技术2...</div>
+  <div class="topic-content">【长江计算机&amp;机械】中控技术2026年三季报点评：收入增速重回正增，<mark>AI</mark>加速1-N兑现！满意答卷
+
+业绩情况：Q3收入转正、利润阶段性承压
+[玫瑰]2026前三季度：实现营收55.06亿元，同比-2.62%；归母净利润1.46亿元，同比-66.26%。
+[玫瑰]单Q3：实现营收18.71亿元，同比+2.57%；归母净利润-0.09亿元，同比-112.23%。
+
+收入拆分：<mark>AI</mark>环比加速、主业企稳修复
+[玫瑰]前三季度/单Q3收入增速-3%/+3%，Q3单季收入同比转正，拆分看：1）主业：测算得Q3主业收入-8%，降幅收窄，结合26H1订单增速转正，看好主业持续修复；2）<mark>AI</mark>：单Q3公司<mark>AI</mark>收入2.35e，环比增速17%，较Q2增速+8pct，加速1-N兑现。
+
+盈利拆分：毛利率维持韧性、费用前置压制利润
+[玫瑰]前三季度/单Q3归母增速-66%/-112%，1）毛利率：单Q3毛利率31%，同环比微降，考虑主要系DCS争夺份额有一定影响，整体有韧性。2）费用端：Q3单季销售/管理费用同比+17%、+33%，投入持续加码是利润承压的核心原因之一。3）非经营项：延续中报逻辑，政府补助减少+减值计提扰动单季利润。
+[玫瑰]我们认为利润下滑并非主业盈利能力下降，而是为了TPT规模化复制进行的主动前置投入，订单先拿、收入后置、费用前置本就是工业<mark>AI</mark>订阅落地的产业规律，公司战略本质在于抢占流程工业标杆客户和场景壁垒，厚积薄发。
+
+观点更新：Q3答卷满意、趋势强化继续坚定推荐！
+[烟花]三季报核心信号：①收入端降幅收窄、单季转正，下游资本开支最差阶段或已过去；②TPT收入环比加速提升，年初至今6e+收入已是去年3倍；③标杆项目已从单点验证走向规模化复制，万华、镇海、兴发等头部客户持续加速推广，由点到面扩散逻辑强化。高壁垒+流程工业万亿空间+持续落地兑现，中控仍是26H2工业<mark>AI</mark>核心应用标的，随着标杆项目持续复制、后续费用率逐步企稳，业绩与估值修复窗口有望打开，继续坚定推荐！
+
+ #文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258458415455482" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
