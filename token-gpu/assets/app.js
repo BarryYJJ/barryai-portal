@@ -647,8 +647,8 @@
   }
 
   // ── Ornn OTPI helpers ─────────────────────────────────────────────────
-  // Owner unlock supplies the authenticated in-memory OTPI block. Public
-  // dashboard.json withholds it; registration alone never opens this panel.
+  // Explicit publication mode supplies four whitelisted series through the
+  // normal dashboard fetch, after the existing general visitor gate.
   var OTPI_DISPLAY_ORDER = ['anthropic', 'openai', 'google', 'deepseek'];
   var OTPI_FEATURED = 'anthropic';
   var OTPI_CHANGE_WINDOWS = [['1D', 1], ['7D', 7], ['30D', 30]];
@@ -679,23 +679,7 @@
     return Math.round((Date.parse(blockLatest) - Date.parse(seriesLatest)) / 86400000);
   }
 
-  // Bumped by every owner submit and by lock. In-flight fetch/decrypt must
-  // match this value at every continuation, including a late error.
-  var ownerGeneration = 0;
-  var ownerAbort = null;
-  var dropOwnerPlaintext = function () {};
-
-  function bumpOwnerSession() {
-    ownerGeneration += 1;
-    if (ownerAbort) {
-      try { ownerAbort.abort(); } catch (ignore) { /* the generation check still applies */ }
-      ownerAbort = null;
-    }
-  }
-
   function initOtpi(doc) {
-    dropOwnerPlaintext();
-    dropOwnerPlaintext = function () {};
     var block = doc.otpi;
     if (!block || !Array.isArray(block.series)) return;
     ['otpi', 'nav-otpi', 'method-otpi', 'footer-otpi'].forEach(function (id) {
@@ -707,15 +691,7 @@
       var controls = qs('.controls', section);
       if (controls && controls.parentNode) controls.parentNode.replaceChild(controls.cloneNode(true), controls);
     }
-    var dropped = false;
-    var seenGeneration = ownerGeneration;
     var series = orderSeries(block.series, OTPI_DISPLAY_ORDER);
-    function dropPlaintext() {
-      dropped = true;
-      series = null;
-      if (window.removeEventListener) window.removeEventListener('resize', render);
-    }
-    dropOwnerPlaintext = dropPlaintext;
     var kpis = document.getElementById('otpi-kpis');
     var chartEl = document.getElementById('otpi-chart');
     var caption = document.getElementById('otpi-caption');
@@ -755,7 +731,6 @@
       return { key: s.key, label: s.label, color: 'var(--series-otpi-' + s.key + ')' };
     }), render);
     function render() {
-      if (dropped || seenGeneration !== ownerGeneration || !series) return;
       chartEl.textContent = '';
       // One common date window anchored to the source's latest observation,
       // independent of legend selection; stale labs do not move the axis.
@@ -889,128 +864,7 @@
     return document.documentElement.getAttribute('data-barry-unlocked') === '1';
   }
 
-  var OWNER_BUNDLE_URL = 'data/otpi-owner.bin';
-
-  function ownerStatus(text, failed) {
-    var statusEl = document.getElementById('otpi-owner-status');
-    var errorEl = document.getElementById('otpi-owner-error');
-    if (statusEl) {
-      statusEl.textContent = text;
-      statusEl.className = failed ? 'panel__status is-failed' : 'panel__status';
-    }
-    if (errorEl) {
-      errorEl.hidden = !failed;
-      errorEl.textContent = failed ? text : '';
-    }
-  }
-
-  function lockOwnerOtpi() {
-    bumpOwnerSession();
-    dropOwnerPlaintext();
-    dropOwnerPlaintext = function () {};
-    var pass = document.getElementById('otpi-owner-pass');
-    if (pass) pass.value = '';
-    var section = document.getElementById('otpi');
-    if (section) {
-      var controls = qs('.controls', section);
-      if (controls && controls.parentNode) controls.parentNode.replaceChild(controls.cloneNode(true), controls);
-    }
-    var toggles = document.getElementById('otpi-toggles');
-    if (toggles) toggles.textContent = '';
-    ['otpi', 'nav-otpi', 'method-otpi', 'footer-otpi'].forEach(function (id) {
-      var node = document.getElementById(id);
-      if (node) node.hidden = true;
-    });
-    ['otpi-kpis', 'otpi-chart', 'otpi-caption', 'otpi-status'].forEach(function (id) {
-      var node = document.getElementById(id);
-      if (!node) return;
-      node.textContent = '';
-      node.className = id === 'otpi-status' ? 'panel__status' : node.className;
-    });
-    var lockBtn = document.getElementById('otpi-owner-lock');
-    if (lockBtn) lockBtn.hidden = true;
-    ownerStatus('已锁定', false);
-  }
-
-  function ownerStill(generation) {
-    return generation === ownerGeneration;
-  }
-
-  function initOwnerOtpi() {
-    var form = document.getElementById('otpi-owner-form');
-    if (!form || form.getAttribute('data-owner-bound') === '1') return;
-    form.setAttribute('data-owner-bound', '1');
-    ['otpi-owner-pass', 'otpi-owner-submit'].forEach(function (id) {
-      var node = document.getElementById(id);
-      if (node) node.disabled = false;
-    });
-    form.addEventListener('submit', function (evt) {
-      evt.preventDefault();
-      bumpOwnerSession();
-      var generation = ownerGeneration;
-      var passEl = document.getElementById('otpi-owner-pass');
-      var passphrase = passEl ? passEl.value : '';
-      if (passEl) passEl.value = '';
-      if (!window.OtpiCrypto || !window.OtpiCrypto.decryptBundle) {
-        ownerStatus('解锁组件未加载', true);
-        return;
-      }
-      var controller = typeof AbortController === 'function' ? new AbortController() : null;
-      ownerAbort = controller;
-      fetch(OWNER_BUNDLE_URL, { cache: 'no-store', signal: controller ? controller.signal : undefined })
-        .then(function (res) {
-          if (!ownerStill(generation)) {
-            var stale = new Error('stale');
-            stale.code = 'stale';
-            throw stale;
-          }
-          if (res.status === 404) {
-            var missing = new Error('missing');
-            missing.code = 'missing';
-            throw missing;
-          }
-          if (!res.ok) throw new Error('load');
-          return res.arrayBuffer();
-        })
-        .then(function (buf) {
-          if (!ownerStill(generation)) {
-            var stale = new Error('stale');
-            stale.code = 'stale';
-            throw stale;
-          }
-          return window.OtpiCrypto.decryptBundle(new Uint8Array(buf), passphrase);
-        })
-        .then(function (opened) {
-          passphrase = '';
-          if (!ownerStill(generation)) return;
-          try {
-            initOtpi({ otpi: opened.payload.otpi });
-          } catch (err) {
-            if (!ownerStill(generation)) return;
-            lockOwnerOtpi();
-            ownerStatus('加密包无法显示', true);
-            return;
-          }
-          if (!ownerStill(generation)) return;
-          var lockBtn = document.getElementById('otpi-owner-lock');
-          if (lockBtn) lockBtn.hidden = false;
-          var licensed = opened.payload.archival && opened.payload.archival.state === 'authorized';
-          var privateUse = opened.payload.archival && opened.payload.archival.state === 'owner_private_use';
-          ownerStatus(privateUse ? '已解锁。所有者已选择私人使用采集；不代表供应商书面同意。' : licensed ? '已解锁' : '已解锁。每日采集未开启，图中是本机已捕获的历史。', false);
-        })
-        .catch(function (err) {
-          passphrase = '';
-          if (!ownerStill(generation) || (err && err.code === 'stale')) return;
-          lockOwnerOtpi();
-          ownerStatus(err && err.code === 'missing' ? '加密包不存在，这一节未启用' : '口令不正确或加密包已损坏', true);
-        });
-    });
-    var lockBtn = document.getElementById('otpi-owner-lock');
-    if (lockBtn) lockBtn.addEventListener('click', lockOwnerOtpi);
-  }
-
   function boot() {
-    initOwnerOtpi();
     if (isUnlocked()) { init(); return; }
     window.addEventListener(UNLOCK_EVENT, init, { once: true });
   }
