@@ -188,6 +188,274 @@
     container.appendChild(svg);
   }
 
+  // Comparison overview: pure model and markup
+  // Separate from the existing small multiples and OTPI. Only these exact
+  // public-schema identities may enter the comparison; metadata is not data.
+  var COMPARISON_BASE = '2026-09-19';
+  var COMPARISON_BASES = { '2026-09-19': '共同可用基期', '2026-05-31': '原图基期' };
+  var COMPARISON_START = '2026-01-01';
+  var COMPARISON_END = '2026-12-31';
+  var COMPARISON_DAY = 86400000;
+  var COMPARISON_SERIES = [
+    { key: 'expenditure', block: 'token', label: 'LLM Token Expenditure', axis: 'left', color: '#111111' },
+    { key: 'neo_h100', block: 'gpu', model: 'H100', label: 'Neo-cloud H100', axis: 'right', color: '#2463c5' },
+    { key: 'neo_b200', block: 'gpu', model: 'B200', label: 'Neo-cloud B200', axis: 'right', color: '#d97706' },
+    { key: 'neo_b300', block: 'gpu', model: 'B300', label: 'Neo-cloud B300', axis: 'right', color: '#8b5a2b' }
+  ];
+
+  function comparisonDate(date) {
+    if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return false;
+    var ms = Date.parse(date + 'T00:00:00Z');
+    return isFinite(ms) && new Date(ms).toISOString().slice(0, 10) === date;
+  }
+
+  function comparisonPositive(value) { return typeof value === 'number' && isFinite(value) && value > 0; }
+
+  function buildComparison(doc, baseDate) {
+    baseDate = baseDate === undefined ? COMPARISON_BASE : baseDate;
+    if (!Object.prototype.hasOwnProperty.call(COMPARISON_BASES, baseDate)) throw new Error('Invalid comparison baseline');
+    doc = doc || {};
+    var series = COMPARISON_SERIES.map(function (identity) {
+      var s = Object.assign({}, identity, { baseDate: baseDate, base: null, latest: null, change: null, points: [], status: 'missing-series' });
+      var block = doc[identity.block];
+      if (!block || !Array.isArray(block.series)) return s;
+      var matches = block.series.filter(function (item) { return item && item.key === s.key; });
+      if (matches.length !== 1) { s.status = matches.length ? 'invalid-identity' : 'missing-series'; return s; }
+      var source = matches[0];
+      if (block.unit !== (s.axis === 'left' ? 'USD/1M tokens' : 'USD/GPU-hour') ||
+          (s.axis === 'right' && (source.group !== 'neo' || source.model !== s.model))) {
+        s.status = 'invalid-identity'; return s;
+      }
+      var observations = Array.isArray(source.observations) ? source.observations : [];
+      // Group BEFORE filtering values: even identical duplicate base rows are
+      // ambiguous. Invalid and duplicate non-base days remain daily gaps.
+      var days = Object.create(null);
+      observations.forEach(function (o) {
+        if (o && comparisonDate(o.date)) (days[o.date] || (days[o.date] = [])).push(o);
+      });
+      var actual = Object.keys(days).sort().filter(function (date) {
+        return date >= COMPARISON_START && date <= COMPARISON_END && days[date].length === 1 && comparisonPositive(days[date][0].value);
+      }).map(function (date) { return { date: date, raw: days[date][0].value, value: null }; });
+      s.latest = actual.length ? Object.assign({}, actual[actual.length - 1]) : null;
+      if (s.axis === 'right') {
+        var baseRows = days[baseDate] || [];
+        if (!baseRows.length) { s.status = 'missing-base'; return s; }
+        if (baseRows.length !== 1) { s.status = 'duplicate-base'; return s; }
+        if (!comparisonPositive(baseRows[0].value)) { s.status = 'invalid-base'; return s; }
+        s.base = baseRows[0].value;
+      }
+      s.points = actual.map(function (p) {
+        return { date: p.date, raw: p.raw, value: s.axis === 'left' ? p.raw : p.raw / s.base * 100 };
+      });
+      if (s.points.some(function (p) { return !comparisonPositive(p.value); })) {
+        s.points = []; s.status = 'invalid-index'; return s;
+      }
+      s.latest = s.points.length ? s.points[s.points.length - 1] : null;
+      s.status = s.latest ? 'ok' : 'no-data';
+      if (s.latest && s.axis === 'right') s.change = s.latest.value - 100;
+      return s;
+    });
+    var end = baseDate; // Keep the exact baseline marker in empty/early windows.
+    series.forEach(function (s) { if (s.latest && s.latest.date > end) end = s.latest.date; });
+    return { baseDate: baseDate, baseLabel: COMPARISON_BASES[baseDate], start: COMPARISON_START, end: end, series: series };
+  }
+
+  function comparisonEscape(value) {
+    return String(value).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function comparisonPending(s) {
+    var reasons = {
+      'missing-base': '缺少' + s.baseDate + '基准数据，暂不绘制指数',
+      'invalid-base': s.baseDate + '基准数据无效（须为正数），暂不绘制指数',
+      'duplicate-base': s.baseDate + '基准日重复，暂不绘制指数',
+      'invalid-identity': '序列身份或单位不符，暂不绘制',
+      'missing-series': '缺少对应来源序列，暂不绘制',
+      'invalid-index': '指数超出有效数值范围，暂不绘制',
+      'no-data': '2026年暂无有效观测，暂不绘制'
+    };
+    return (s.model || 'Token') + '：' + (reasons[s.status] || '');
+  }
+
+  function comparisonStatus(model) {
+    var dates = model.series.filter(function (s) { return s.latest; }).map(function (s) { return s.latest.date; });
+    var mismatch = dates.some(function (date) { return date !== dates[0]; });
+    var pending = model.series.filter(function (s) { return s.status !== 'ok'; }).map(comparisonPending);
+    return (mismatch ? '最新观测日期不一致，请以各图例实际日期为准。' : '各序列实际观测日期见图例。') +
+      '展示区间：' + model.start + ' 至 ' + model.end + '。' + (pending.length ? ' ' + pending.join('；') : '');
+  }
+
+  function comparisonLegend(model) {
+    return model.series.map(function (s) {
+      var available = s.status === 'ok';
+      var detail = s.latest ? String(s.latest.raw) + (s.axis === 'left' ? ' USD/1M tokens' : ' USD/GPU-hour') + ' · ' + s.latest.date : '无实际观测';
+      var index = available && s.axis === 'right' ? '指数 ' + s.latest.value.toFixed(2) + ' · 较基准 ' + (s.change >= 0 ? '+' : '') + s.change.toFixed(2) + '%' : '';
+      var base = available && s.axis === 'right' ? s.baseDate + ' 基准价格 ' + String(s.base) + ' USD/GPU-hour' : '';
+      return '<button type="button" class="comparison-toggle" data-comparison-key="' + s.key + '"' +
+        (available ? ' aria-pressed="true"' : ' disabled aria-pressed="false"') + ' style="--comparison-color:' + s.color + '">' +
+        '<span class="comparison-label"><span class="comparison-swatch" aria-hidden="true"></span>' + comparisonEscape(s.label) + ' · ' + (s.axis === 'left' ? '左轴' : '右轴') + '</span>' +
+        '<span>' + comparisonEscape(detail) + '</span>' +
+        (index ? '<span>' + comparisonEscape(index) + '</span><span>' + comparisonEscape(base) + '</span>' : '') +
+        (!available ? '<span class="comparison-pending">' + comparisonEscape(comparisonPending(s)) + '</span>' : '') + '</button>';
+    }).join('');
+  }
+
+  function toggleComparison(model, visible, key) {
+    var s = model.series.find(function (item) { return item.key === key; });
+    if (!s || s.status !== 'ok') return false;
+    visible[key] = !visible[key];
+    return true;
+  }
+
+  function comparisonGeometry(model) {
+    var width = 1040, height = 440, left = 78, right = 962, top = 54, bottom = 366;
+    function scale(axis) {
+      var values = axis === 'right' ? [100] : [];
+      model.series.forEach(function (s) { if (s.axis === axis) s.points.forEach(function (p) { values.push(p.value); }); });
+      var low = values.length ? Math.min.apply(null, values) : 0;
+      var high = values.length ? Math.max.apply(null, values) : 1;
+      var pad = (high - low) * 0.1 || Math.abs(high) * 0.1 || 1;
+      low = Math.max(0, low - pad); high += pad;
+      return { min: low, max: high, y: function (v) { return bottom - (v - low) / (high - low) * (bottom - top); } };
+    }
+    return {
+      width: width, height: height, plotLeft: left, plotRight: right, top: top, bottom: bottom,
+      left: scale('left'), right: scale('right'),
+      x: function (date) { return left + (Date.parse(date) - Date.parse(model.start)) / (Date.parse(model.end) - Date.parse(model.start)) * (right - left); }
+    };
+  }
+
+  function comparisonPointText(s, p) {
+    return s.label + ' · ' + (s.axis === 'left' ? '左轴' : '右轴') + ' · ' + p.date + ' · ' + String(p.raw) +
+      (s.axis === 'left' ? ' USD/1M tokens' : ' USD/GPU-hour · 指数 ' + p.value.toFixed(2) + '（' + s.baseDate + ' = 100）');
+  }
+
+  function comparisonMarkup(model, visible) {
+    var g = comparisonGeometry(model);
+    var selected = model.series.filter(function (s) { return s.status === 'ok' && visible[s.key]; });
+    function text(x, y, label, anchor) {
+      return '<text x="' + x + '" y="' + y + '" text-anchor="' + (anchor || 'start') + '" class="comparison-axis">' + comparisonEscape(label) + '</text>';
+    }
+    function line(x1, y1, x2, y2, cls) {
+      return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" class="' + cls + '"/>';
+    }
+    var html = '<svg viewBox="0 0 ' + g.width + ' ' + g.height + '" role="group" aria-label="2026 Token 与 GPU 双轴价格对照，两轴均为线性" aria-describedby="comparison-help">' +
+      '<title>Silicon Data Token 原始价格与 Neo-cloud GPU 基准指数</title>' +
+      text(g.plotLeft, 20, '左轴 · USD / 1M tokens') + text(g.plotRight, 20, '右轴 · GPU 指数（' + model.baseDate + ' = 100）', 'end');
+    for (var t = 0; t <= 5; t++) {
+      var y = g.bottom - (g.bottom - g.top) * t / 5;
+      html += line(g.plotLeft, y, g.plotRight, y, 'comparison-grid');
+      ['left', 'right'].forEach(function (axis) {
+        var value = g[axis].min + (g[axis].max - g[axis].min) * t / 5;
+        html += text(axis === 'left' ? g.plotLeft - 10 : g.plotRight + 10, y + 4, Number(value.toPrecision(4)), axis === 'left' ? 'end' : 'start');
+      });
+    }
+    html += line(g.plotLeft, g.top, g.plotLeft, g.bottom, 'comparison-axis-line') + line(g.plotRight, g.top, g.plotRight, g.bottom, 'comparison-axis-line');
+    for (var month = 1; month <= 11; month += 2) {
+      var date = '2026-' + String(month).padStart(2, '0') + '-01';
+      if (date < model.end && g.x(model.end) - g.x(date) > 84) html += text(g.x(date), g.bottom + 25, date, month === 1 ? 'start' : 'middle');
+    }
+    html += text(g.x(model.end), g.bottom + 25, model.end, 'end');
+    html += line(g.x(model.baseDate), g.top, g.x(model.baseDate), g.bottom, 'comparison-base-date') + text(g.x(model.baseDate), 42, model.baseDate, 'middle');
+    html += line(g.plotLeft, g.right.y(100), g.plotRight, g.right.y(100), 'comparison-base-index') + text(g.plotRight - 5, g.right.y(100) - 7, '右轴 100', 'end');
+    selected.forEach(function (s) {
+      var path = s.points.map(function (p, i) {
+        var gap = i === 0 || Date.parse(p.date) - Date.parse(s.points[i - 1].date) !== COMPARISON_DAY;
+        return (gap ? 'M' : 'L') + g.x(p.date).toFixed(2) + ',' + g[s.axis].y(p.value).toFixed(2);
+      }).join(' ');
+      html += '<path data-series="' + s.key + '" d="' + path + '" fill="none" stroke="' + s.color + '" class="comparison-path"/>';
+      s.points.forEach(function (p, i) {
+        var isolated = (i === 0 || Date.parse(p.date) - Date.parse(s.points[i - 1].date) !== COMPARISON_DAY) &&
+          (i === s.points.length - 1 || Date.parse(s.points[i + 1].date) - Date.parse(p.date) !== COMPARISON_DAY);
+        var tip = comparisonEscape(comparisonPointText(s, p));
+        html += '<circle data-series="' + s.key + '" data-comparison-tip="' + tip + '" cx="' + g.x(p.date) + '" cy="' + g[s.axis].y(p.value) + '" r="5" fill="' + s.color + '" class="comparison-point' + (isolated ? ' comparison-isolated' : '') + '" tabindex="' + (i === 0 ? '0' : '-1') + '" role="img" aria-label="' + tip + '"><title>' + tip + '</title></circle>';
+      });
+    });
+    html += '</svg>';
+    if (!selected.length) html += '<p class="comparison-empty" role="status">' + (model.series.some(function (s) { return s.status === 'ok'; }) ? '所有可用曲线已隐藏，请点击图例恢复。' : '暂无可绘制数据，请查看各序列状态。') + '</p>';
+    return html;
+  }
+
+  // All baseline-sensitive surfaces are derived together, including the live
+  // readout; a mode change cannot leave an old tooltip/caption behind.
+  function comparisonView(model, visible) {
+    var base = model.baseLabel + ' ' + model.baseDate + '=100';
+    return {
+      chart: comparisonMarkup(model, visible), legend: comparisonLegend(model),
+      description: 'Silicon Data LLM Token 综合有效价格与 Neo-cloud GPU 租赁价格走势。双轴均为线性：左轴 USD / 1M tokens；右轴 GPU 指数，' + base + '。',
+      caption: 'Token保留Silicon Data综合有效价格，不做归一化。GPU 指数 = 当日 USD/GPU-hour ÷ 同型号 Neo-cloud 在 ' + model.baseDate + ' 的实际价格 × 100（' + model.baseLabel + '）。仅展示2026年实际观测，缺失日断线，不插值、不前向填充；各线截止各自实际观测日。',
+      source: '当前基期：' + base + '。仅使用该日实际观测，无替代基期。',
+      readout: '当前基期：' + base + '。请选择数据点查看读数。'
+    };
+  }
+
+  // Comparison overview: DOM wiring
+  function initComparison(doc) {
+    var chart = document.getElementById('comparison-chart');
+    var legend = document.getElementById('comparison-legend');
+    var status = document.getElementById('comparison-status');
+    var readout = document.getElementById('comparison-readout');
+    var model = buildComparison(doc), visible = {};
+    model.series.forEach(function (s) { visible[s.key] = s.status === 'ok'; });
+    var baseControl = document.getElementById('comparison-base');
+    function applyMode() {
+      model = buildComparison(doc, baseControl.value);
+      // An explicit mode selection restores every available curve.
+      model.series.forEach(function (s) { visible[s.key] = s.status === 'ok'; });
+      var view = comparisonView(model, visible);
+      hideTooltip();
+      if (tooltipEl) tooltipEl.textContent = '';
+      legend.innerHTML = view.legend;
+      chart.innerHTML = view.chart;
+      status.textContent = comparisonStatus(model);
+      document.getElementById('comparison-description').textContent = view.description;
+      document.getElementById('comparison-caption').textContent = view.caption;
+      document.getElementById('comparison-source-base').textContent = view.source;
+      readout.textContent = view.readout;
+    }
+    baseControl.value = COMPARISON_BASE;
+    baseControl.addEventListener('change', applyMode);
+    function render() { hideTooltip(); chart.innerHTML = comparisonMarkup(model, visible); }
+    legend.addEventListener('click', function (event) {
+      var button = event.target.closest('[data-comparison-key]');
+      if (!button || !toggleComparison(model, visible, button.getAttribute('data-comparison-key'))) return;
+      button.setAttribute('aria-pressed', String(visible[button.getAttribute('data-comparison-key')]));
+      readout.textContent = '曲线显示已更新。';
+      render();
+    });
+    function reveal(event) {
+      var point = event.target.closest('[data-comparison-tip]');
+      if (!point) return;
+      var text = point.getAttribute('data-comparison-tip');
+      readout.textContent = text;
+      var rect = point.getBoundingClientRect();
+      showTooltip(Math.min(rect.left, window.innerWidth - 254), Math.min(rect.top, window.innerHeight - 140), text);
+    }
+    chart.addEventListener('pointerover', reveal);
+    chart.addEventListener('click', reveal);
+    chart.addEventListener('focusin', reveal);
+    chart.addEventListener('pointerout', hideTooltip);
+    chart.addEventListener('focusout', hideTooltip);
+    qs('.comparison-scroll').addEventListener('scroll', hideTooltip);
+    chart.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') { hideTooltip(); return; }
+      var point = event.target.closest('[data-comparison-tip]');
+      if (!point || ['ArrowLeft', 'ArrowRight', 'Home', 'End'].indexOf(event.key) === -1) return;
+      event.preventDefault();
+      var points = qsa('[data-comparison-tip]', chart).filter(function (p) { return p.getAttribute('data-series') === point.getAttribute('data-series'); });
+      var index = points.indexOf(point);
+      var next = event.key === 'Home' ? 0 : event.key === 'End' ? points.length - 1 : index + (event.key === 'ArrowRight' ? 1 : -1);
+      next = Math.max(0, Math.min(points.length - 1, next));
+      point.setAttribute('tabindex', '-1');
+      points[next].setAttribute('tabindex', '0');
+      points[next].focus();
+    });
+    applyMode();
+  }
+  // Comparison overview: end
+
   // ── toggle / range controls ──────────────────────────────────────────────
   function buildToggle(container, items, onChange) {
     container.textContent = '';
@@ -854,6 +1122,7 @@
         initOrnn(doc);
         initRates(doc);
         try { initOtpi(doc); } catch (err) { showOtpiFailure(err); }
+        initComparison(doc);
       })
       .catch(function (err) {
         showFailure('数据加载失败，请稍后刷新重试。（' + (err && err.message ? err.message : '未知错误') + '）');
