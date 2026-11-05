@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-11-05 早间 AI 简报</title>
+<style>
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-11-05 08:55:46</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-11-05 早间 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-11-04 20:00</strong> &nbsp;→&nbsp; <strong>2026-11-05 08:55</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">27</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">16 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">59.3%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">12 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">8</span></div><div class="hot-kw-row"><span class="kw-name">数据中心</span><div class="bar-track"><div class="bar-fill" style="width:75%"></div></div><span class="kw-count">6</span></div><div class="hot-kw-row"><span class="kw-name">算力</span><div class="bar-track"><div class="bar-fill" style="width:62%"></div></div><span class="kw-count">5</span></div><div class="hot-kw-row"><span class="kw-name">服务器</span><div class="bar-track"><div class="bar-fill" style="width:38%"></div></div><span class="kw-count">3</span></div><div class="hot-kw-row"><span class="kw-name">光模块</span><div class="bar-track"><div class="bar-fill" style="width:38%"></div></div><span class="kw-count">3</span></div><div class="hot-kw-row"><span class="kw-name">PCB</span><div class="bar-track"><div class="bar-fill" style="width:38%"></div></div><span class="kw-count">3</span></div><div class="hot-kw-row"><span class="kw-name">英伟达</span><div class="bar-track"><div class="bar-fill" style="width:25%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">大模型</span><div class="bar-track"><div class="bar-fill" style="width:25%"></div></div><span class="kw-count">2</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-22258454241512881">Rubin升级把铜箔推上“紧缺席”：研报预计HVLP4需求三年三倍、年末缺口约五成，德福科技、铜冠铜箔迎涨价窗口</a></li><li><a class="tldr-jump" href="#t-55521424542551144">AI吃电，特锐德接单：前三季度数据中心订单超15亿元、同比增300%，算力扩张先给变电站送钱</a></li><li><a class="tldr-jump" href="#t-22258454212211111">京东给机器人画出大订单：计划五年采购300万台机器人，物流落地先行，灵巧手、传感器和真机数采有望先吃肉</a></li><li><a class="tldr-jump" href="#t-14425121418422482">腾讯Hy4从“会答题”卷向“能干活”：幻觉率由12.95%降至7.2%，视觉、电脑操作与长程Agent争抢游戏和办公场景</a></li><li><a class="tldr-jump" href="#t-82258454212211112">敏实集团跨界卖“空调”：AI液冷已拿下3家客户订单、订单毛利率约35%—45%，汽车零部件厂切进服务器散热生意</a></li><li><a class="tldr-jump" href="#t-55521424558844114">国产先进封装开始数设备兑现：芯碁微装Q3确认收入3台，研报预计Q4升至6—7台、2027年订单60—80台，CoWoS-L替代进入放量预期</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-45548242512588518">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-05 07:32 · 👁 589</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">[红包]南矿集团：市值最小、赔...</div>
+  <div class="topic-content">[红包]南矿集团：市值最小、赔率最高的金矿标的
+
+[烟花]关键词一：转型金矿决心
+公司主业从事金属矿山选矿设备，具备转型矿业开发的关键技术和人才储备。从短短一年时间并购三个金矿看得出，公司紧抓并购金矿项目的关键窗口期，#转型矿业开发的决心非常坚定。公司也招聘了相当的地质、矿山、运营方面的人才，#并顺利完成了核心人才的股权激励计划。过去这一轮有色金属价格上涨周期中，转型矿业开发的公司不乏其数，但真正有这么坚定决定和实际行动能力的公司，屈指可数！
+
+[烟花]关键词二：抄底能力突出
+近两年来，国内企业的金矿并购案例中，#未开发金矿的资源量平均收购成本在3600万/吨黄金金属量，这是高价抢占优质金矿资源的代价。而南矿收购的三个金矿项目，Brown hill金矿（资源量40吨，成本400万/吨）、鹰谷黄金（资源量71吨，成本2700万/吨）、印尼金矿（资源量39吨，成本425万/吨），公司金资源量的平均收购成本不到900万/吨，#收购成本仅为行业平均成本的25%，抄底能力突出！
+
+[烟花]关键词三：金价迎来反转
+民主党横扫两院，金价提前见底！压制黄金价格的两大因素：一方面民主党大概率不会支持特朗普，寻求伊朗局势的进一步恶化，#油价迎来向下反转；另一方面民主党不支持<mark>AI</mark>发展，#美债利率继续趋势下行。两大压制因素都将出现趋势性反转，金价开启主升行情。
+
+[烟花]关键词四：赔率极佳标的
+国内黄金公司在上一轮金价大涨过程中，已经彰显了很强的资源增储和产能扩张的成长性，往后看3-5年最大的增量最多也就翻倍的空间，#很多公司年化10%的产量增速。而南矿集团的金矿转型决心坚定，并以极低价格快速“抄底”全球优质金矿资源，#目前三个矿山的权益资源量已经达到38吨，按照未来开发规划，#中期的权益产量目标可达2吨，权益净利润超10亿规模，叠加主业业绩，目前仅有35亿市值，#中期估值仅3xPE！</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548242512588518" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258454212455852">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-05 02:30 · 👁 738</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">杭州柯林&amp;开普勒携手NVDIA...</div>
+  <div class="topic-content">杭州柯林&amp;开普勒携手NVDIA，用物理<mark>AI</mark>助力打通从仿真到真实现场工业的闭环
+
+NVIDIA发布公众号，开普勒采用NVIDIA物理<mark>AI</mark>全栈平台，将NVIDIA在仿真、机器人基础模型和世界模型方面的技术，与开普勒工业机器人硬件平台、真实工业数据和具身智能模型研发能力相结合，推动物理<mark>AI</mark>从模型训练进一步走向真实工业环境中的验证、迭代与产业化应用。
+
+目前杭州柯林&amp;开普勒已经调用NVIDIAIsaacLab、NVIDIAIsaacGR00T、NVIDIACosmos、NVIDIAOmniverse、NVIDIAJetsonThor和NVIDIAGPU训练平台，<mark>英伟达</mark>的具身智能训练平台和工具链持续赋能叠加杭州柯林&amp;开普勒的本体优势，推动应用落地。
+
+这一轮模型进步，有个核心的底层逻辑，在外部模型、工具可以调用的情况下，有强本体、丰富场景数据的企业更能获得模型提升的效益，如果本身本体厂有VLA、WM的技术储备，取长补短更是锦上添花，杭州柯林&amp;开普勒明确受益。
+
+重点推荐NV国内核心链杭州柯林，具体情况欢迎交流！</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">英伟达</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258454212455852" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258454212211111">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-05 02:28 · 👁 729</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【物理<mark>AI</mark>】京东计划未来五年采...</div>
+  <div class="topic-content">【物理<mark>AI</mark>】京东计划未来五年采购300万台机器人，物理<mark>AI</mark>空间广阔，持续推荐
+
+京东计划启动物理<mark>AI</mark>加速计划，未来五年将采购300万台机器人、100万台无人车和10万架无人机，用于智能物流。
+
+我们认为，物理<mark>AI</mark>正处于规模应用初期，有望率先在物流搬运等B端场景大规模落地。在此之前，物理<mark>AI</mark>仍需突破模型泛化能力瓶颈，看好数采设备、有应用场景、确定性强的整机和零部件企业。
+
+一、真机数据缺乏是模型能力提升的主要瓶颈，看好数采设备+有应用场景的整机、零部件企业
+
+海外<mark>大模型</mark>厂商加速入局，数采仍是当前模型训练重点：
+
+一、<mark>大模型</mark>厂商加速入局：<mark>OpenAI</mark>已重点布局机器人大脑，通用<mark>大模型</mark><mark>GPT</mark>-6Astra在部分具身任务评测中表现领先同业；<mark>Meta</mark>已与中国机器人企业傅利叶智能合作推出机器人原型机，未来将作为个人<mark>智能体</mark>Muse的物理化身。
+
+二、龙头企业发力数采：特斯拉计划制造1-2万台机器人用于数采，OpenAI27年数采体量有望达500万-1000万小时。
+
+我们认为，随数采需求逐步释放，一、电子皮肤、灵巧手、传感器等数采核心硬件；二、有应用场景、有高质量数据来源的标的有望受益。
+
+二、特斯拉Optimus量产启动，我们认为物理<mark>AI</mark>处于规模应用初期，重视确定性高的零部件厂商
+
+Optimus量产时间表：一、26Q2：每周几十台；二、26年九月：每周数百台；三、26年底：每周1000台；四、27年底：每周2万台，对应年产能约百万台。
+
+Optimus后续落地计划：一、26年底左右发布OptimusV3非预编程的演示视频；二、27年4月将AI5集成在Optimus中；三、27年底对外出货。
+
+【物理<mark>AI</mark>】重视：
+
+1、确定性强的机器人零部件供应商：恒立液压、三花智控、拓普集团、浙江荣泰、汇川技术、双环传动、绿的谐波、五洲新春、金沃股份、奥比中光、中大力德、雷迪克等
+
+2、整机及应用场景：宇树科技、杭叉集团、中力股份、杰克科技、咸亨国际、杭州柯林、新时达、横河精密、中坚科技、优必选、安徽合力等
+
+3、传感器等新技术或低估值转型标的：涛涛车业、上海沿浦、华翔股份、峰岹科技、安培龙、柯力传感、汉威科技、福莱新材、日盈电子等
+
+风险提示：<mark>AI</mark>发展不及预期等
+
+浙商机械【具身智能】60多篇深度报告合集：&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fsourl.cn%2F4htrzT&quot; title=&quot;%E6%B5%99%E5%95%86%E6%9C%BA%E6%A2%B0%E3%80%90%E4%BA%BA%E5%BD%A2%E6%9C%BA%E5%99%A8%E4%BA%BA%E3%80%91%E7%B3%BB%E5%88%97%E6%B7%B1%E5%BA%A6&quot; /&gt;
+
+浙商机械邱世梁/王华君18610723118/蒋逸18158576706/秦乐恒15221680140</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">OpenAI</span><span class="kw-tag">Meta</span><span class="kw-tag">大模型</span><span class="kw-tag">智能体</span><span class="kw-tag">GPT</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258454212211111" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258454212211112">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-05 02:28 · 👁 721</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">敏实集团近况更新
+
+基本业务：...</div>
+  <div class="topic-content">敏实集团近况更新
+
+基本业务：我们预估公司Q3收入及经营利润增速进一步提升：中国市场受益于比亚迪、长安等自主品牌电池盒订单放量；欧洲电池盒市占率已接近40%，较两年前不足30%进一步提升；北美则受益于塑件产能稀缺及客户供应链本地化，外饰件和结构件业务持续拓展。
+
+新业务方面：
+
+一、<mark>AI</mark><mark>液冷</mark>：公司已切入台湾地区头部<mark>服务器</mark>供应链，取得3家客户订单，覆盖分水器、<mark>液冷</mark>柜及CDU等产品，目前另有十余至二十个项目处于客户认证阶段。<mark>液冷</mark>业务订单毛利率约35%—45%，盈利能力较好。
+
+二、机器人：公司依托原有塑料、铝合金及精密加工能力，向机器人结构件、智能外饰、关节等产品拓展，并布局整机代工。目前已取得面罩订单，预计明年量产。公司测算可覆盖机器人整机约20%—40%的价值量。
+
+三、低空经济及商业航天：低空方面已与亿航等开展合作，相关订单预计明年量产；商业航天方面已取得北美客户卫星压铸件订单，预计明年上半年量产，另有十余个产品处于报价阶段。公司明年低空经济及商业航天合计收入目标约1亿元。
+
+现金流与资本开支：上半年自由现金流约2800万元，全年目标约10亿元；全年资本开支指引29亿—30亿元，其中新业务相关预算四亿多元，明年资本开支初步预计20多亿元。
+
+欢迎联系：丁逸朦、江莹、刘晓恬、张宇晨或对口销售！</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">服务器</span><span class="kw-tag">液冷</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258454212211112" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521424585588844">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-05 02:28 · 👁 722</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">四川发布储能三年行动方案202...</div>
+  <div class="topic-content">四川发布储能三年行动方案20261105
+
+三年目标装机26GWh
+
+11月4日，四川发改委印发《四川省新型储能项目建设三年行动方案（2026—2028年）》，明确提出三年新增装机13GW/26GWh，其中：
+
+电源侧5GW/10GWh,
+
+电网侧6GW/12GWh,
+
+多场景应用2GW/4GWh。
+
+随文发布已纳规独立储能项目清单共67个项目，总规模7.16GW/16.745GWh，其中已建成投产的项目1.8GW/4.1GWh。三年行动方案装机目标若能达成，四川省储能装机容量将增长534%。
+
+方案提出分场景10%~50%配储
+
+方案根据下游用户差异，对产业园区、商业综合体、<mark>算力</mark>中心、民生保障场所提出了10%~50%不等的配置比例，对于不可中断的生产线或医疗机构，要求100%甚至120%的保安负荷覆盖（配4小时长时）；对于<mark>算力</mark>中心，直接挂钩峰值负荷和2小时日常运行需求。
+
+同时，鼓励储能项目采用源网荷储一体化、虚拟电厂、智能微电网等共享储能方式提升经济性，以平衡用电安全与经济成本
+
+明确提出容量电价机制
+
+此前，四川的独立储能主要依赖“低充高放”的电量价差和部分辅助服务补偿，收益波动大且难以覆盖固定投资，导致四川储能项目建设进度较慢。
+
+行动方案明确提出，加快建立电网侧独立新型储能容量电价机制，对电力系统可靠容量给予合理补偿，完善电网侧独立新型储能充放电价格政策，明确采用峰荷责任法等方式分摊系统运行费。
+
+上述措施有望填补四川省的政策空白，显著改善储能项目的经济性，是激活已建成资产、推动规划落地的关键动作。
+
+四川储能市场或迎来重要拐点
+
+三年新增13GW/26GWh目标直指5倍规模增长；分场景差异化配储引导用户按实际需求配置，让储能切实发挥保供和降本作用；明确提出容量电价机制则补齐了盈利拼图。未来，四川储能项目有望依靠“容量保底+市场收益”实现主动盈利，彻底激活产业投资与落地。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">算力</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521424585588844" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258454218214182">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-04 23:43 · 👁 913</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">迈为基本面更新1104：
+
+#...</div>
+  <div class="topic-content">迈为基本面更新1104：
+
+#民主党赢得中期选举，清洁能源政策预期修复，利好HJT设备海外需求。中期选举民主党赢得参众两院控制权，参议院舒默此前明确表示，重获多数席位后将优先推动恢复IRA清洁能源税收抵免，并提高项目许可确定性、加强输电与储能建设，有利于强化联邦清洁能源支持延续的预期。
+
+国际能源署（IEA）预计，2024—2030年，美国可再生能源对<mark>数据中心</mark>的年度供电量将增加约110TWh，成为仅次于天然气的第二大增量电源。<mark>AI</mark>用电增长为光伏需求提供基本面支撑，政策预期改善则有利于推动项目投资与建设。
+
+#相关投资已持续推进：阿特斯表示，强劲客户需求推动美国HJT工厂扩产，公司计划于2026年内启动二期设备安装，推动电池总名义产能于2027年上半年达到6.3GW；TOYO拟投资3.57亿美元建设1.5GW HJT电池产线，预计不晚于2028年一季度试生产；SEG于10月29日宣布取得项目用地，拟投资9.5亿美元建设4GW HJT电池产能，分两期计划于2028年、2029年投产。
+
+迈为今年预期新签40-50亿半导体设备，两存占比预计70-80%，明年行业预期增速50%以上。重点关注迈为股份。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">数据中心</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258454218214182" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425121418422482">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-04 22:58 · 👁 1013</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【国联民生计算机火线速递】<mark>腾讯</mark>...</div>
+  <div class="topic-content">【国联民生计算机火线速递】<mark>腾讯</mark>混元发布Hy4正式版，首次跻身最强开源模型之列
+
+模型本身：Hy4显著扩展预训练与后训练规模，首次引入视觉和电脑操作能力，指令遵循、长文理解、长程任务与深度研究能力同步提升。视觉可结合感知、推理与工具调用；电脑操作兼容命令行与图形界面，专项适配Blender、CAD等软件。
+
+真实场景：GameDev、GameLogic较preview版分别提升19.1%、9.8%，深度适配UE、Unity、Godot；213位专家、579个金融任务众测得分3.04，同场开源模型第一；幻觉率由12.95%降至7.2%；1.5小时无人干预完成700万细胞小鼠胚胎三维重建。
+
+此外，Hy4正为递归自我改进（RSI）做准备，并自动训练出多项评测优于官方版本的Jev模型。
+
+值得关注的是追赶斜率：2月重建基础设施以来，约两个月迭代一个大版本，Hy3至Hy4参数规模由不足300B升至770B，<mark>腾讯</mark>已从追赶第一梯队转向参与头部竞争。更关键的是，Hy4把视觉、Computer Use和长程<mark>Agent</mark>能力投向游戏、金融、办公等真实任务，竞争正从&quot;答题更聪明&quot;转向&quot;能否独立完成工作&quot;。
+
+<mark>腾讯</mark>的差异化在于同步打通应用层：Hy4提供模型能力，WorkBuddy做任务入口，Buddy One连接文档、会议、网盘和ima，统一账号、积分与上下文。随着权重后续开源，Hy4有望成为<mark>腾讯</mark><mark>AI应用</mark>规模化落地的底座。
+
+免责声明：基于公开资料整理，可能存在信息滞后或更新不及时，任何情况下不构成投资建议。
+
+联系人：国联民生计算机吕伟</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Agent</span><span class="kw-tag">AI应用</span><span class="kw-tag">腾讯</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425121418422482" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521424548188514">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-04 22:58 · 👁 1022</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">[太阳]【国金电子】半导体芯片...</div>
+  <div class="topic-content">[太阳]【国金电子】半导体芯片观点更新：反弹优先关注估值及位置合适，且兼具高产业景气度的模拟及端侧板块
+
+[玫瑰]模拟行业仍处于供需紧张的高景气阶段，海外龙头厂商涨价且交期持续拉长。国内模拟公司平台化布局初显成效，<mark>数据中心</mark>、<mark>服务器</mark>、汽车等非消费类下游占比逐年提升，行业上行周期有望持续。龙头公司明年估值不足30x，低于历史估值以及海外龙头估值，#建议关注：圣邦股份、纳芯微、思瑞浦、南芯科技、杰华特、晶丰明源、艾为电子、帝奥微、必易微等
+
+[玫瑰]端侧<mark>AI</mark>加速落地，正处从技术验证迈向商业化的关键节点。1）<mark>AI应用</mark>及端侧有望成为<mark>AI</mark>落地的更大场景，2）27年国内SoC龙头厂商都有望进入产品周期，推出更高<mark>算力</mark>、更先进制程产品，有望与行业周期形成共振，3）经过2年消化估值后，行业明年平均估值不足30x，估值低位置低。我们持续看好国内SoC厂商的卡位及竞争优势，充分受益端侧落地带来的升级，叠加合理的估值以及位置，#建议关注：瑞芯微、恒玄科技、乐鑫科技、晶晨股份、泰凌微、炬芯科技、中科蓝讯、全志科技、星宸科技、富瀚微、安凯微等。
+
+[礼物]联系人：国金电子樊志远团队 应明哲</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI应用</span><span class="kw-tag">数据中心</span><span class="kw-tag">服务器</span><span class="kw-tag">算力</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521424548188514" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548242521811488">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-04 22:58 · 👁 999</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">浙商机械【九州一轨】公司隐切设...</div>
+  <div class="topic-content">浙商机械【九州一轨】公司隐切设备优势凸显，合作的设备公司通用半导体海外订单将超1亿美金，持续推荐！
+
+据通用半导体公众号，公司<mark>硅光</mark>芯片激光隐切设备：
+1）海外：订单将超1亿美金，客户包括Coherent、思科、<mark>英特尔</mark>、AOI等<mark>光模块</mark>、<mark>硅光</mark>芯片企业，激光隐切设备优势逐步验证。
+2）国内：已配套多数<mark>光模块</mark>、<mark>硅光</mark>芯片头部企业。
+
+[太阳]核心逻辑：一体两翼布局新业务，通用半导体设备优势筑基，<mark>硅光</mark>芯片激光隐切加速落地、金刚石散热全链条加工优势显著。
+
+1️⃣一体：依托通用半导体设备优势，开展半导体新业务。
+
+通用半导体： 国内领先的激光隐切设备商，半导体激光隐切设备关键性参数国际领先，隐切设备海外订单逐步释放。
+
+通用半导体法定代表人陶为银获聘公司副总裁，累计增持公司股份272万股。
+此外，陶为银还是晶禧半导体（全资子公司）原法定代表人、江南大学客座教授。
+
+8月20日公司增资通用半导体6999万元，持有其6.5%的股权。
+
+2️⃣两翼之一：激光隐切加工服务。晶禧激光隐切大单披露，后续业绩有望爆发。
+
+1）晶禧半导体： 国内领先的<mark>硅光</mark>芯片激光隐切服务提供商，切割良率达99.8%，客户包括苏州旭创、<mark>新易盛</mark>、羲禾科技等。
+
+2）2026年晶禧半导体业绩快速释放：
+25年： 净利润662万元
+26H1： 净利润1743万元（6月单月596万元）
+26Q3： 净利润1916万元，净利润率54%。
+
+3）大单+扩产护航，后续业绩有望持续爆发：
+10月23日公告，与<mark>光模块</mark>头部客户签订晶圆划片代加工服务合同，金额3407万。
+
+此前公告6.3亿元扩产<mark>硅光</mark>芯片切割等业务，产能将于27Q1投产。
+
+3️⃣两翼之二：金刚石芯片基板。国内稀缺的金刚石散热器件制造商，阿尔法属性有望凸显。
+
+1）金刚石散热产业突破加速，已写入国家规划、在曙光8000十万卡<mark>AI</mark>超集群等场景落地。
+
+2）公司与通用半导体合资成立通创九州（公司持股40%）布局金刚石片，依托通用半导体激光隐切设备优势，有望打通从金刚石长晶到后道加工全链条能力。
+相较仅提供金刚石材料，竞争壁垒更高、利润更丰厚。
+
+风险提示：新业务放量不达预期；高管及股东减持；短期股价上涨过快；信息披露风险</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">英特尔</span><span class="kw-tag">光模块</span><span class="kw-tag">新易盛</span><span class="kw-tag">硅光</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548242521811488" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258454241512881">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-04 22:49 · 👁 1033</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【天风新材料 π点多支持】大盘...</div>
+  <div class="topic-content">【天风新材料 π点多支持】大盘反弹，进攻买什么？--20261104
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;15125414241542&quot; title=&quot;%23%E9%93%9C%E7%AE%94%EF%BC%9ARubin%23&quot; /&gt; Q4起量开启&quot;全HVLP4&quot;时代，叠加AWS、800G交换机共振，HVLP4需求三年三倍；供给被设备、良率、认证三重锁死，年末缺口约五成，加工费仍有上行空间。国产替代黄金窗口开启，重点推荐德福科技、铜冠铜箔、诺德股份，关注隆扬电子；
+
+#硅微粉：<mark>AI</mark>板材升级的核心是更低介电损耗，球硅填充比例随板材代际持续提升，低介电、Low-α球硅量价齐升，国产龙头已进入全球高端供应链兑现放量。重点推荐凌玮科技、联瑞新材等；
+
+#钻针：<mark>PCB</mark>迈向44层、78层背板，板厚孔小、钻针寿命骤降，从&quot;耐用工具&quot;变&quot;高频耗材&quot;，单柜消耗量数倍增长，格局清晰、弹性直接。重点推荐鼎泰高科、中钨高新（金洲精工）、民爆光电等。
+
+#碳化硅：伴随碳化硅终端价格下降幅度大，支撑其向功率端渗透率快速提升，驱动电压等级高、能耗敏感的应用领域替代速度超预期，是少有的能看到十倍以上需求增量的领域。战略配置时刻又来临，重点推荐天岳+晶盛+晶升。
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;48248525452858&quot; title=&quot;%23%E6%B4%81%E5%87%80%E5%AE%A4%EF%BC%9AAI%23&quot; /&gt; <mark>算力</mark>扩张的本质是产能扩张。先进制程、存储、高阶 <mark>PCB</mark> 每新落地一片产能，都要先建洁净厂房。洁净室是资本开支中最早下单、最早确认收入的一环，6-12 个月按进度结转，业绩兑现快于设备和材料端。#重点推荐：亚翔集成、圣晖集成、柏诚股份、华康洁净等；
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;88458242524822&quot; title=&quot;%23MLCC%EF%BC%9AAI%23&quot; /&gt; <mark>服务器</mark>供电架构重构的核心是“近场供电 + 高容化”。8 卡训练<mark>服务器</mark>单台用量 2-4 万颗，<mark>GB300</mark> NVL72 约 44 万颗，VR200 冲到 60 万颗；容值从 1-10μF 升至 100μF 以上，单颗价格从 0.02 元升至 0.5-2 元，量价呈乘数级跃升。日韩龙头转产 <mark>AI</mark> 与车规，高端交期持续拉长。#重点推荐：三环集团、风华高科、国瓷材料等；
+
+&lt;e type=&quot;hashtag&quot; hid=&quot;51421545254154&quot; title=&quot;%23ABF%23&quot; /&gt; 载板 / ABF 膜：<mark>AI</mark> 封装升级的本质是“层数堆叠 + 线宽微缩”。载板从 14 层增至 20-24 层，单颗耗量提升 5-10 倍；味之素垄断 95% 以上 ABF 膜，2026Q3 涨价 30% 并对大陆砍单，新厂 2032 年才放量。国产化率不足 10%，是最关键的瓶颈环节。#重点推荐：兴森科技、深南电路、华正新材、生益科技等；
+
+#磷化铟：<mark>AI</mark>大时代，InP具有直接带隙、高电子迁移率、优异光电转换效率等特性，是光通信、高频射频和光电子器件的理想材料。伴随需求段的持续爆发，而供给又受制于高纯红磷等原材料，我们测算，供需缺口有望在29年之前都将持续扩大。重点推荐光智科技、海川智能、博杰股份、魅视科技（多晶）、兴福电子（高纯红磷）、智动力（高纯铟）等。
+
+#<mark>电子布</mark>：<mark>电子布</mark>是<mark>覆铜板</mark>的核心骨架材料，<mark>AI</mark>板材向M8/M9升级带动低介电、Low-CTE特种布用量和单价同步提升。供给端约束较为刚性：电子纱窑炉建设周期两年以上、点火后需连续生产，高端织机海外交期超过两年，织机台数基本决定行业产能上限，供给紧张格局预计延续至2028年以后。11月新一轮涨价已经落地，产业链公司普遍满产。#重点推荐，国际复材、中国巨石、宏和科技。
+
+详情请联系：鲍荣富/王丹/于那/周丹丹/上官京杰/林晓龙/曾子峻</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">GB300</span><span class="kw-tag">服务器</span><span class="kw-tag">电子布</span><span class="kw-tag">覆铜板</span><span class="kw-tag">PCB</span><span class="kw-tag">算力</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258454241512881" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425121418214822">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-04 22:46 · 👁 1034</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">🌞<mark>AI</mark>硬件首当其冲技术升级线1...</div>
+  <div class="topic-content">🌞<mark>AI</mark>硬件首当其冲技术升级线1104（周末&amp;周一我们在最悲观的时刻已🔔），更新part2
+
+近几个月来在市场最悲观的时刻，我们一直围绕技术升级研究，继续看好<mark>PCB</mark>升级、散热新材料、VPD垂直供电等。
+
+🐟1️⃣<mark>PCB</mark>升级：mSAP与上游材料升级共振，估值已经具备超高性价比，N和G架构升级在即，1.6T放量在即，产业稳步向前，仓位【景旺电子、红板科技、深南电路、生益科技】，弹性【#德福科技、凌玮科技、联瑞新材、瑞丰高材、呈和科技、华正新材】；
+
+🐟2️⃣散热新材料：1）芯片级散热国内放量加速，看好明年国内金刚石应用渗透率提升，单晶多晶均值得期待【&lt;e type=&quot;hashtag&quot; hid=&quot;88458242522542&quot; title=&quot;%23%E5%9B%BD%E6%9C%BA%E7%B2%BE%E5%B7%A5%E3%80%81%23&quot; /&gt;   沃尔德、黄河旋风】；金刚石铜继续看好【&lt;e type=&quot;hashtag&quot; hid=&quot;51421545255244&quot; title=&quot;%23%E8%BF%9C%E4%B8%9C%E8%82%A1%E4%BB%BD%E3%80%91%EF%BC%9B%23&quot; /&gt;   2）看好散热材料上游高端粉体（TIM、陶瓷基板）—氮化铝【&lt;e type=&quot;hashtag&quot; hid=&quot;28458242522541&quot; title=&quot;%23%E7%91%9E%E6%99%A8%E7%8E%AF%E4%BF%9D%E3%80%81%23&quot; /&gt;   旭光电子】，看好TIM【鸿富诚、中石科技】。
+
+🐟3️⃣VPD垂直供电：关注核心器件增量与国产导入机会，Drmos&amp;TLVR&amp;硅电容我们测算至2030年分别空间在450/350/200e，核心看好【晶丰明源、铂科新材、英集芯】。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">PCB</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425121418214822" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521424544142544">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-04 22:05 · 👁 1101</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">❗❗❗【电力设备美国出海链】观...</div>
+  <div class="topic-content">❗❗❗【电力设备美国出海链】观点更新
+
+今日美国中期选举尘埃落地，民主党拿下参众两院，电力设备出口美国预期有望迎来重大反转。此前，美国拟限制外国主网高压设备进口、FCC以信息通信安全为由可能限制中国电力设备，年中以来出海预期持续承压。2020年的第13920号行政令同样针对69kV以上设备，但后因本土产能不足、变压器缺货，最终被民主党拜登政府废止。此外，民主党密切关注<mark>数据中心</mark>对于电价的影响，更加鼓励<mark>数据中心</mark>自建电源/电网。
+
+美国电力设备出口核心标的（今日收盘价估值）：
+
+【金盘科技】
+北美变压器出海龙头。前三季度新签海外订单61e，同比+297%，新签订单占比达到55%，其中美国占大头。高压主变已批量供货北美。预计26-28年实现业绩7.6/12.7/17.6亿元，对应32/19/14x。
+
+【思源电气】
+北美出口预期最受损标的，修复空间大。前三季度海外新签订单同比+50%以上，北美增速更高，全年新签北美订单规模预计40e左右，公司变压器三期积极扩产，投产后预计达到百亿（全用于出口）。预计26-28年实现业绩36.5/51.0/67.6亿元，对应25/18/13x。
+
+【伊戈尔】
+低压变压器美国出口高弹性标的，26年美国AIDC变压器收入预计达到8e，收入占比12%，27年占比预计20%+，市场开拓迅速。近期获得美国直销大客户突破，27年有望贡献新增量。当前筹码底部，Q3业绩指标亮眼，Q4开始北美直销交付逐季度放量。预计26-28年实现业绩2.9/4.5/6.7亿元，对应32/20/13x。
+
+【四方股份】
+市值仅剩主业，固态变压器海外合作预期差很大，后续可能有催化。公司电力电子出海亮眼，订单逐年翻倍增长，欧洲市场有突破。预计26-28年实现业绩8.6/10.0/12.3亿元，对应30/25/21x。
+
+【良信股份】
+AIDC低压电器+SSCB双龙头。低压电器出海顺利，V需求持续扩张，已完成11个型号UL认证，正在做21+型号认证，27年海外收入有望看5e，其中美国看3e，毛利率50%+。固态断路器积极布局北美。预计26-28年业绩分别为3.0/4.4/8.0亿元，当前对应32/22/12x。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">数据中心</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521424544142544" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521424542551144">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-04 21:07 · 👁 1186</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">❤️【继续推荐-特锐德】：中东...</div>
+  <div class="topic-content">❤️【继续推荐-特锐德】：中东战事缓和趋势下大单有望加速落地，<mark>数据中心</mark>订单加速显著！
+
+➡️若美国中期选举结果促使中东紧张局势缓和，则沙特大单落地将显著加速，包括未来潜在的100多台预制舱变电站需求释放&amp;中东其他区域战后重建需求。
+
+➡沙特订单最新预期仍为年内落地（确定性极高），订单金额有望略超此前预期，该订单金额足以支撑未来2年海外业绩。除此外，中东其他国家需求旺盛，欧洲、澳大利亚、中亚等地公司逐步渗透。
+
+➡<mark>算力</mark>中心订单在今年前三季度呈现加速态势，同时公司持续扩大CSP供货能力，目前基本已经实现国内主要客户覆盖；海外北美地区公司公关进度迅速，产品切中客户核心痛点，有望超预期实现交付突破。
+
+➡Q1-Q3，<mark>数据中心</mark>订单增速依然高位，金额超15亿，同比+300%；公司海外中标超13亿元，同比+~30%，按非沙特口径统计，同比增速更快。
+
+➡Q1-Q3，公司电力设备板块中标超150亿元，同比+16%，其中电网业务中标超20亿，同比+~40%；充电量约200亿度，同比+45%，特来电盈利持续提升。
+
+➡我们再次重点提示：公司海外市场持续开拓，在夯实传统中东市场的同时，新场景、新区域订单持续落地；<mark>数据中心</mark>相关产品国内需求加速，海外推进顺畅，另一增长曲线即将打开。从估值角度来看，目前公司对应2027年仅约15X，仍处在低位，空间大，坚定推荐！
+
+ #文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">数据中心</span><span class="kw-tag">算力</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521424542551144" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521424542518844">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-04 21:06 · 👁 1189</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">20261104今日段子汇总
+...</div>
+  <div class="topic-content">20261104今日段子汇总
+
+1、托伦斯：公司产品包括静电卡盘基体、多管式加热反射罩、气体分布盘等高端半导体设备金属零部件
+
+2、冰山冷热：1、冷热产业链综合方案服务提供商；掌握全球先进的二氧化碳跨临界冷热“五合一”零碳技术，为北京冬奥会多个比赛及配套冰场、哈尔滨亚冬会三个冰上场馆提供制冷设备；2、公司主要研究<mark>数据中心</mark><mark>液冷</mark>的冷源部分，着重研发干冷器、氟泵系统、冷水系统，部分产品已实现小批量交付
+
+3、云南锗业：1、公司作为磷化铟衬底龙头，控股子公司签下N型磷化铟衬底长单，五年预计供货总量达90万片；2、公司“空间太阳能电池用锗晶片建设项目”2025年末将形成年产125万片产能，最终达250万片，锗晶片主要用于空间卫星、空间站等深空设备的空间卫星电池，直接配套商业航天需求
+
+4、金安国纪：国内<mark>覆铜板</mark>龙头，同时生产电子级玻纤布，第三季净利暴增超1000%
+
+5、大晟文化：1、公司游戏影视双驱动，主营业务包括短剧制作、发行业务；2、公司游戏业务主要由全资子公司淘乐网络开发运营，专注于回合制端游与手游，代表作为《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D&quot; title=&quot;%E6%9F%A5%E6%89%BE%E5%9B%BE%E4%B9%A6&quot; /&gt;桃花源记》&quot;
+
+6、高争民爆：西藏民爆行业龙头；公司拟购买紫源铜业51%股权和晟源矿业100%股权
+
+7、桂林三金：公司拥有国家中药保护品种21种，核心产品三金片、西瓜霜等产品为全国知名品牌，作用有清热泻火，消肿止痛、治疗咽炎等；第三季度净利润同比增长15.52%
+
+8、紫竹高科：1、公司核心业务聚焦于铝塑膜业务及汽车检具业务，铝塑膜是软包锂电池电芯封装的关键材料，下游主要应用于3C消费电子、动力、储能三类软包电池；2、公司具备《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D&quot; title=&quot;%E6%9F%A5%E6%89%BE%E5%9B%BE%E4%B9%A6&quot; /&gt;民用核安全电气设备设计许可证》和《民用核安全电气设备制造许可证》，为福清/方家山核电站供货核级压力变送器；公司有能力生产核级的仪器仪表产品
+
+9、龙版传媒：1、公司首部<mark>AI</mark>漫剧《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D&quot; title=&quot;%E6%9F%A5%E6%89%BE%E5%9B%BE%E4%B9%A6&quot; /&gt;穿越1988》完成170集制作上线，全网播放量突破1.2亿，红果热度值超4000万；2、大型现代化综合性国有文化企业；公司旗下109家新华书店门店实现连锁经营，涵盖包括大中型书城、特色书店、专业书店等多种形式；旗下产品多维边疆知识服务产品数据库暂未实现盈收
+
+10、闽发铝业：1、公司位于福建省南安市，为海西板块的铝型材龙头企业，表示将重点拓展机器人等工业铝型材及高端装备铝型材赛道；2、公司<mark>液冷</mark><mark>服务器</mark>用铝型材已开始小批量供货，正积极推进相关领域的市场拓展与技术优化，稳步提升产品交付能力；3、光伏支架和边框等配套产品是公司的主要工业材产品之一
+
+11、扬子新材：公司有多款产品可满足于半导体洁净室的不同需求，前三季度净利润同比增长61.68%
+
+12、鲁阳节能：中国陶瓷纤维龙头，间接控股股东筹划破产重组，公司实控人拟发生变更
+
+13、马矿股份：公司主营铁矿石的开采、选矿及综合利用，拥有全国知名马坑铁矿采矿权，铁矿石保有资源储量约3.25亿吨，主要产品为TFe65%造球铁精粉，面向福建省及周边省份大型钢铁企业销售，是福建省规模最大的铁矿采选企业，属于铁矿石产业链上游资源开采与加工环节
+
+14、大连友谊：公司零售业主要集中在大连地区，以百货店（友谊商城）为主，持续通过第三方直播平台等新媒体营销手段来拉动销售
+
+15、宝明科技：1、公司成功开发出新一代锂电复合铜箔产品，具有低面阻、免辊焊的特点，在硅碳负极及固态电池应用上具有更好的性能优势，并已获得市场高度认可；2、公司HVLP4/5铜箔主要技术指标已完成厂内验证，正布局向客户送样
+
+16、永臻股份：光伏铝边框绝对龙头，全球市占率超 18%；公司主营光伏边框、BIPV 产品、光伏支架等绿色能源结构材料研发生产，配套隆基、天合光能等国内外头部组件厂商
+
+17、招金黄金：公司主要业务包括以黄金为主要品种的矿业开采
+
+18、华盛昌：公司收购伽蓝特100%股权，后者专注光通信模块和光芯片测试
+
+19、郑中设计：室内设计领域的国际领先企业之一；公司已完成对深迪半导体的战略入股并成为第一大股东，切入MEMS陀螺仪芯片及惯性测量单元IMU的研发与设计赛道，布局第二增长曲线
+
+20、华正新材：公司已将<mark>AI算力</mark>赛道纳入五年战略重点，Extreme Low-loss等级<mark>覆铜板</mark>已批量供货<mark>AI服务器</mark>、交换机、<mark>数据中心</mark>等核心场景
+
+21、瑞芯微：公司RK182X协处理器顺利量产，已有数百个客户、几十个行业在深化研发中，应用场景覆盖各类机器人、车载<mark>AI</mark> BOX等领域，首批客户已进入量产阶段，将在下半年放量
+
+22、众生药业：公司自研MASH新药ZSP1601片IIb期临床试验初步结果积极
+
+23、芯源微：公司是国内唯一可提供量产型前道涂胶显影机的厂商，其光刻工序涂胶显影设备和单片式湿法设备等产品是半导体芯片制造过程中的关键设备，已成功打破国外厂商垄断，广泛应用于集成电路制造前道晶圆加工及后道先进封装等环节
+
+24、光华科技：1、国内<mark>PCB</mark>化学品的领先厂商；公司主要产品包括<mark>PCB</mark>化学品，<mark>PCB</mark>化学品的功能主要应用于集成电路互连技术；2、消息称公司在硫化锂的生产上选择了固态和固相合成的干法路线，已在下游固态电池客户中处于领先地位
+
+25、沪电股份：国内规模最大、技术实力最强的<mark>PCB</mark>制造商之一
+
+26、德才股份：1、控股孙公司奇想无限作为漫剧制作以及提出AIGC领域<mark>智能体</mark>一站式解决方案的团队，受邀参与火山引擎<mark>大模型</mark>游戏+漫剧 <mark>AI</mark> 工坊”广州企业沙龙；2、公司主营业务涵盖内装装饰工程、建筑幕墙工程、智能化工程、古建筑工程等
+
+27、深南电路：国内IC载板龙头，已成为全球领先的无线基站射频功放<mark>PCB</mark>供应商、亚太地区主要的航空航天用<mark>PCB</mark>供应商、国内领先的处理器芯片封装基板供应商
+
+28、赤峰黄金：公司位于内蒙古赤峰境内，是国内矿产品位最高的金矿之一
+
+29、万向德农：公司主要从事玉米杂交种子的研产销，单倍体育种技术领先
+
+30、先导基电：公司大股东先导科技集团自有镓、 锗、 铟等稀散金属（产量全球领先） ， 能够提供电子材料（如掺杂材料、 前驱体、 电子特气） 以及工艺测试等多方面支持， 为公司零部件产品研发及国产化验证提供保障
+
+31、海源复材：1、公司在光伏电镀铜技术已取得突破，中试效果良好，且工艺趋于稳定，有望成为行业内首家应用电镀铜工艺的光伏企业，2023具备产业化可能性2、公司通过并购赛维电源进军光伏行业，主要生产制造和销售光伏组件，首期375MW光伏组件生产线项目已投产
+
+32、均胜电子：1、公司与智元等国内外机器人头部客户合作，定制化主控板等产品已实现批量交付；2、子公司近期新获两家头部品牌主机厂客户项目定点通知，公司将为上述客户在全球范围内开发并提供一系列汽车智能化产品，包括CCU、智能网联等产品，根据客户规划，上述项目预计全生命周期订单总金额约人民币150亿元，计划从2027年开始量产
+
+33、博迁新材：公司是全球领先、国内唯一的小粒径纳米镍粉生产商、国内MLCC镍粉市场领军企业，银包铜粉已批量用于光伏HJT电池低温浆料
+
+34、通富微电：公司是国内第二、全球第四的封测巨头，掌握多种先进封测技术，为 <mark>AMD</mark> 等国际巨头及<mark>华为</mark>海思、<mark>寒武纪</mark>等国内芯片企业提供封测服务
+
+35、南矿集团：1、国内技术领先的中高端矿机装备供应服务商之一；公司凭借在砂石骨料和金属矿山破碎、筛分设备领域的技术优势，在俄罗斯、南非、津巴布韦、马来西亚等沿线国家和地区开展诸多合作项目，产品与服务助力当地矿产资源开发；2、公司境外子公司与Sucpass Gold签订合作协议，负责津巴布韦Brownhill金矿地表氧化矿的开采与堆浸处理，合作方式为黄金成品销售收入分成，黄金成品概算销售收入3640万美元，子公司按75%比例分成
+
+36、富创精密：公司结构零部件（基板、冷却板等）多种产品应用于光刻机、涂胶显影设备，主要客户有上海微电子、芯源微
+
+37、光智科技：1、公司磷化铟衬底已实现批量交付，客户包括国内外光通信芯片及器件厂商，海外已向光通信龙头批量出货，6英寸产品获某全球头部客户订单；2、核级高性能铝合金材料主要供应商之一；公司为核燃料加工专用设备提供高性能铝合金材料，研发的新一代高性能铝合金材料符合新型核燃料加工设备所需铝合金材料的技术标准；3、公司表示生产的锗可用于卫星太阳翼
+
+38、中科飞测：公司目前的产品可以满足<mark>HBM</mark>技术领域对于量检测设备的需求，其中图形晶圆缺陷检测设备、三维形貌量测设备等多个系列产品已成功通过国内多家<mark>HBM</mark>客户产线验证，实现了批量出货
+
+39、浙江黎明：1、公司精锻件多以冷锻工艺为主，也有部分热锻工艺，公司的冷镦工艺主要采用国外进口设备，冷锻工艺一人形机器人滚珠丝杆技术；2、汽车发动机总成关键零部件制造商，比亚迪为公司的合作伙伴；公司具备多种工艺技术路线，冷锻工艺属于其中主要的一种
+
+40、浙文影业：公司出品的文旅微短剧《九龙湖之有间客栈》已于2025年度播出，竖屏微短剧《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D&quot; title=&quot;%E6%9F%A5%E6%89%BE%E5%9B%BE%E4%B9%A6&quot; /&gt;江南机动队》杀青待播，并将继续布局微短剧业务矩阵
+
+41、有研新材：控股子公司为长江存储、长鑫存储靶材供应商，子公司有研亿金量产12英寸晶圆制造高纯靶材，为国内大硅片下游晶圆厂提供配套耗材
+
+42、兴业银锡：1、公司主营业务为有色金属及贵金属采选与冶炼，产品有银、锡、锌、铅等有色金属；2、公司旗下西藏黄金拥有金矿资源，主营产品为金精粉
+
+43、宏和科技：公司是全球高端电子级玻璃纤维布龙头，极薄布、低介电、低CTE特种<mark>电子布</mark>技术国际领先，为<mark>AI服务器</mark><mark>PCB</mark>核心上游材料
+
+44、沃格光电：公司<mark>光模块</mark>/<mark>CPO</mark>玻璃基封装载板已批量送样，与北极雄芯战略合作开发<mark>AI芯片</mark>玻璃基先进封装
+
+45、金陵药业：公司拥有香菊感冒颗粒批文
+
+46、飞龙股份：1、公司针对机器人关节等部位日益增长的<mark>液冷</mark>散热需求，依托公司在电子泵、温控阀及集成模块等新能源热管理产品上的技术优势，积极布局机器人领域<mark>液冷</mark>市场；2、公司的<mark>数据中心</mark><mark>液冷</mark>产品在芜湖飞龙、郑州飞龙已建有专门生产线；公司多个<mark>液冷</mark>项目正在进行中，公司电子水泵系列产品和温控阀系列产品已应用在<mark>服务器</mark><mark>液冷</mark>领域，该领域部分项目已经量产
+
+47、春光科技：公司主营吸尘器、洗地机、扫地机器人、布衣清洗机等
+
+48、东材科技：公司双马来酰亚胺树脂、活性酯树脂、碳氢树脂、聚苯醚树脂等已通过国内外一线<mark>覆铜板</mark>厂商，配套应用于<mark>英伟达</mark>、<mark>华为</mark>、<mark>苹果</mark>、<mark>英特尔</mark>等主流<mark>服务器</mark>体系
+
+49、大族激光：全球领先的智能制造装备整体解决方案服务商，控股子公司大族数控研发、生产并销售<mark>PCB</mark>专用设备
+
+50、新亚制程：公司产品已批量用于人型机器人主板，与多家客户建立合作
+
+51、药明康德：全球领先的&quot;&quot;一体化、端到端&quot;&quot;的新药研发服务平台
+
+52、新洁能：功率半导体龙头，国内最早专门从事MOSFET、IGBT研发设计的企业之一
+
+53、四川黄金：公司主要从事金矿采选及销售
+
+54、和远气体：公司给长江存储、烽火科技、华星光电等光通信、半导体企业直接或间接供应氢气、氧气、氮气和氩气
+
+55、长源东谷：公司拟收购康豪机电，标的终端应用覆盖<mark>数据中心</mark>、发电及储能等场景，主要客户包括康明斯集团、卡特彼勒、MTU、广西玉柴、潍柴动力等国内外知名动力系统制造商
+
+56、山东黄金：黄金矿产龙头，上半年净利润同比增长26.17%
+
+57、兆威机电：1、公司产品应用于机器人领域，持续推动微型传动及驱动系统在灵巧手、机器人关节等场景应用，灵巧手产品商业化进程持续推进；2、公司的微型传动系统可以应用于AR/VR领域，如磁感应系统、瞳距调节驱动系统、头部自动松紧装置、智能眼镜隐藏式微型扬声器等
+
+58、快克智能：1、公司高速高精固晶机已批量供货成都先进等头部功率半导体企业，芯片封装AOI与<mark>光模块</mark>AOI设备在800G及以上<mark>光模块</mark>头部客户小批量应用；2、在<mark>服务器</mark><mark>液冷</mark>领域，公司可为<mark>液冷</mark>装置核心零部件提供精密组装自动化产线，已为飞龙股份交付多条散热水泵自动化生产线，该水泵用于<mark>英伟达</mark><mark>服务器</mark><mark>液冷</mark>系统
+
+59、兴业科技：公司拟收购青岛立昂磷化铟衬底及半导体电子材料业务，切入光通信与<mark>算力</mark><mark>光模块</mark>核心材料赛道
+
+60、中恒电气：宁德时代拟以41亿元认购控股股东中恒科技投资新增注册资本
+
+61、盛达资源：公司预计中报净利润同比增长399.31%-470.64%，因“采矿及选矿能力有所提升，产能逐渐释放，2026年上半年度产品产销量增加；另外，叠加贵金属价格上涨，公司矿山主要产品销售价格较上年同期上涨，推动公司经营业绩同比显著增长”
+
+62、广合科技：公司拥有CPU <mark>PCB</mark>产品，在国内<mark>算力</mark><mark>服务器</mark>CPU主板<mark>PCB</mark>制造商中排名第一，在全球同类厂商中排名第三（全球市场份额 12.4%），已应用于 Intel发布的Purley、Whitley、Eagle stream、Birch Stream 等各世代芯片平台的<mark>服务器</mark>，在<mark>AMD</mark>发布的各世代芯片平台也有对应的<mark>PCB</mark>产品向<mark>服务器</mark>厂商供应
+
+63、大千生态：1、公司宠物业务已覆盖零售及服务、智能硬件、互动体验等场景，形成“消费+服务+产品”的全业务链布局；2、子公司浙江深辰凯动科技的羽毛球机器人正从实验原型阶段迈向产业化
+
+64、华峰测控：公司为国内半导体测试机龙头，现已成为国内前三大半导体封测厂商模拟测试领域的主力供应商
+
+65、平安电工：公司薄型电子级玻纤布已经批量供应国内头部<mark>覆铜板</mark>厂商
+
+66、福晶科技：公司具有磁光晶体到法拉第旋光片全制程能力，主要应用于光纤通信、光信息处理系统和精密光学测量系统中；第三季度净利润同比增59.9%
+
+67、雅克科技：1、公司子公司成都科美特专注于含氟类特种气体的研产销，主要产品为六氟化硫和四氟化碳，目前为合肥长鑫供应含氟类特种气体；2、公司向SK<mark>海力士</mark>、<mark>三星电子</mark>等提供逻辑芯片，<mark>海力士</mark>占全球<mark>HBM</mark>市场80%份额
+
+68、北方华创：国产半导体设备龙头，收购诺合键维，切入混合键合设备，补齐先进封装设备短板，先进封装是当前半导体高景气方向
+
+69、昭衍新药：国内创新药龙头；公司核心业务为药物的非临床评价服务，是新药研发链条中非临床安全性评价的关键环节，主要为创新药客户提供药物非临床药理毒理学评价，受益于国内创新药融资与BD授权交易回暖带来的行业需求增长
+
+70、春晖智控：1、公司通过参股并拟全资收购的春晖仪表供应卫星电磁解除装置、航天级温度传感器等，已小批量供货星网、银河航天等；2、公司研发的氢气电磁阀、调压阀等产品，能够精确控制氢气的流量和压力，确保氢燃料电池汽车供氢系统的稳定运行
+
+71、京仪装备：公司主要从事半导体专用设备的研产销，主营产品包括半导体专用温控设备（Chiller）、半导体专用工艺废气处理设备（Local Scrubber）和晶圆传片设备（Sorter）
+
+72、博杰股份：1、公司拿下鼎泰芯源控股权，鼎泰芯源由中科院半导体所Ⅲ-V族化合物半导体技术团队创立，目前的核心产品为磷化铟衬底，是国内少数几家掌握磷化铟衬底材料核心技术并实现国产化量产的企业；2、公司披露人形机器人测试业务覆盖IMU传感器、摄像头、力传感器及麦克风检测；3、公司聚焦<mark>液冷</mark><mark>服务器</mark>制造与检测环节，核心提供<mark>液冷</mark>板精密焊接设备、<mark>液冷</mark>系统密封性检测设备及自动化产线解决方案&quot;
+
+73、正帆科技：公司完成收购汉京半导体62.23%股权，新增石英、碳化硅陶瓷等半导体设备核心零组件，产品矩阵延伸至高端耗材；前三季度净利润同比增长281.11%
+
+74、凯莱英：国内CMO行业龙头之一
+
+75、三联锻造：1、公司仿生连杆相关业务或用在人形机器人上；2、公司主要从事汽车锻造零部件，向问界m7供货拉杆产品；3、公司已进入小米等知名整车厂商新能源汽车零部件的定点开发项目
+
+76、深中华A：公司主要业务为自行车、锂电池材料和珠宝黄金业务
+
+77、湖南黄金：公司拟购买黄金天岳及中南冶炼100%股权
+
+78、长电科技：国内封测龙头，拟投资78亿元在上海临港建设高端先进封测工厂
+
+79、东方钽业：1、国内最大的钽、铌产品生产基地；<mark>AI服务器</mark>对钽电容需求的爆发式增长，25H2至今全球钽电容龙头Kemet已经宣布了三次涨价，公司电容器级钽粉全球市占率25%，电容器用钽丝全球市占率50%+，4月以来公司已针对下游钽电容客户涨价50%+，涨价已经逐渐传递至公司端；2、公司涂层材料已配套商业航天火箭喷管，超导铌材及铌超导腔用于可控核聚变等国家大科学装置
+
+80、高凯技术：公司形成流量控制、点胶封装、精密涂胶三大产品板块，覆盖半导体、新能源及消费电子头部客户供应链
+
+81、中利集团：1、公司上半年业绩扭亏，主要系本期确认大额债务重组收益；2、公司主要线缆产品涵盖阻燃耐火软电缆、舰船用电缆、高铁及铁路信号线缆、新能源汽车及充电桩线缆、<mark>液冷</mark>电缆、数据通信线缆、海洋工程平台用电缆、光电复合缆、光纤预制棒及光纤等；3、全球领先的组件供应商、光伏电站开发与EPC服务商
+
+82、拓荆科技：公司拟定增募资46亿投入高端半导体设备产业化基地建设等项目。在披露定增预案的同时，还宣布向控股子公司拓荆键科增资，后者还将引入多家外部投资者，其中包括实控人为大基金三期的国投集新基金，这也是大基金三期成立至今首度出手半导体产业项目
+
+83、海安集团：我国全钢巨胎行业的龙头企业，全钢巨胎产量国内第一
+
+84、福莱新材：公司向全球灵巧手领军企业灵心巧手累计交付超3万套触觉传感器
+
+85、顺灏股份：公司参股北京轨道辰光布局太空<mark>算力</mark>，其第一代试验星“辰光一号”正在开展在轨测试
+
+86、晓程科技：公司以黄金矿产资源开发利用为主，拥有三座金矿
+
+87、金冠电气：公司自主研发的交直流充电桩、直流快速充电堆实现批量生产，功率范围覆盖7kW到480kW
+
+88、航发科技：中国航发集团旗下发动机零部件平台，主营业务为航空发动机及燃气轮机及零部件的研产销
+
+89、强一股份：公司聚焦晶圆测试核心硬件探针卡
+
+90、思瑞浦：公司主要产品为高性能模拟芯片，包括运算放大器、比较器、模拟开关、数据转换芯片、DC/DC转换器、马达驱动及电池管理芯片等；前三季度净利润同比增长384.33%
+
+91、湖南白银：公司主营业务以白银冶炼和深加工为主，并综合回收黄金等有价金属
+
+92、赛腾股份：公司通过收购日本 Optima 掌握晶圆缺陷检测等核心技术，是国内唯一能量产 <mark>HBM</mark> 量测设备的企业，且半导体设备产品线丰富，涵盖晶圆字符检测机、激光开槽机等，为国产芯片生产提供关键设备支持
+
+93、锡华科技：公司主要从事大型高端装备专用部件的研发、制造与销售，产品结构以风电齿轮箱专用部件为主、注塑机厚大专用部件为辅，是全球行业领先、质量可靠、技术卓越的大型高端装备专用部件制造商
+
+94、引力传媒：1、领先的数字营销服务公司，<mark>字节跳动</mark>巨量引擎核心代理商；公司形成独具特色的短剧业务体系，为客户提供短剧营销投前、投中到投后的全方位服务；2、公司内部自研上线“核力 <mark>AI</mark>”的 1.0 版本、已具备“营销文案 生成”、“图片识别与生成”及“数字分身复刻及驱动”等功能应用
+
+95、海星股份：公司已切入<mark>AI服务器</mark>/<mark>数据中心</mark>用铝电解电容器市场，800V DC高压架构带动<mark>AI</mark>电极箔需求增长，公司主营产品电极箔是铝电解电容器的核心原材料
+
+96、来伊份：公司为休闲食品连锁行业龙头企业，控股股东及一致行动人拟转让10%股份
+
+97、白银有色：公司是我国多品种有色金属综合生产基地，具有年产白银500吨的生产能力，有年产金15吨的生产能力
+
+98、兴森科技：国内本土IC封装基板行业的先行者之一；公司生产的FCBGA封装基板可用于<mark>HBM</mark>存储的封装
+
+99、西部黄金：西北地区最大的黄金采选冶企业
+
+100、广聚能源：深圳市和珠江三角洲地区成品油主要经销者之一；公司主要业务包括成品油批发零售及仓储，具有成品油、危险化学品特许经营资质，以及广东省内高速公路建设经营加油站的资质，在广东省内拥有12座加油站
+
+101、索辰科技：公司推出物理<mark>AI</mark>开发及应用平台全场景解决方案，对标<mark>英伟达</mark>Omniverse，针对机器人场景目前发布了机器人设计优化软件
+
+102、杰瑞股份：公司签署近百亿元燃气轮机发电机组供应合同
+
+103、中信出版：公司主营图书出版与发行业务，已上线画布式<mark>AI</mark>视频工具并完成<mark>AI</mark>视频创作工作流搭建，<mark>AI</mark>短视频内容用于图书营销、IP推广；据2026年8月25日半年报，夸父<mark>AI</mark>数智出版平台升级为“<mark>智能体</mark>+Skills”模式
+
+104、凯迪股份：公司已完成具身机器人产品送样，报告期内机器人、智能产品实现核心技术突破
+
+105、江丰电子：公司拟收购凯德石英控制权，标的专注于石英仪器、石英管道、石英舟等石英玻璃制品的研发、生产和销售
+
+106、金 螳 螂：1、公司及下属公司8月中标天津海信广场裙楼、芜湖梦溪科创走廊酒店改造及越南S4区W塔室内精装修工程，合计金额约5.16亿元；2、洁净室是公司重点布局的战略新赛道，已具备在电子半导体、一手消息加qq:1490929960新能源、大健康、实验室等高附加值领域构建系统集成能力，代表项目包括南京集成电路产业服务中心、杰华特微电子高性能电源芯片项目等；3、综合性专业化装饰集团；公司曾中标海南商业航天发射场项目，目前该工程已完工并投入使用，已为多次卫星发射任务提供稳定保障
+
+107、智微智能：子公司腾云智算<mark>算力</mark>设备销售保持强劲增长，维保业务实现翻倍增长，已发布<mark>GPU</mark><mark>算力</mark>租赁平台HAT，支持整机与切卡租赁，首批种子用户落地
+
+108、中马传动：公司减速器应用于新能源汽车，表示目前未涉足机器人行业
+
+109、金海通：公司主营半导体芯片测试设备，深耕集成电路测试分选机领域
+
+110、征和工业：1、公司研发的微型链系统项目，重点攻关机器人灵巧手传动技术；2、公司是张雪机车链传动系统的核心供应商，双方更在赛事级链系统产品上展开联合研发
+
+111、贝特利：公司四甲基环四硅氧烷可作为半导体上游原材料，LED封装胶已规模化销售，Mini-LED封装胶已量产并开始小批量销售
+
+112、柯力传感：公司六维力传感器给<mark>华为</mark>送样
+
+113、三利谱：国内偏光片行业龙头企业之一，国内少数具备TFT-LCD用偏光片生产能力的企业之一，是<mark>华为</mark>等全球著名终端品牌显示屏材料供应商
+
+114、中钨高新：公司旗下子公司金洲公司是<mark>PCB</mark>微钻领域龙头，具备极小径钻头精磨等核心技术
+
+115、山金国际：公司矿产金产量在中国黄金上市企业中排名第五，拥有的玉龙矿业是目前国内矿产银（含量银）最大的单体矿山之一
+
+116、开勒股份：公司拟控股威泰思光电，深化<mark>AI</mark>硬件全产业链布局，标的专注于精密光学元器件，核心产品覆盖光学棱镜、偏振片、透镜、滤光片、分束器及镜头组件等，广泛应用于光通信、机器视觉、工业激光、生物医学等高成长领域</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI服务器</span><span class="kw-tag">AI算力</span><span class="kw-tag">AI芯片</span><span class="kw-tag">字节跳动</span><span class="kw-tag">三星电子</span><span class="kw-tag">数据中心</span><span class="kw-tag">大模型</span><span class="kw-tag">智能体</span><span class="kw-tag">英伟达</span><span class="kw-tag">英特尔</span><span class="kw-tag">寒武纪</span><span class="kw-tag">海力士</span><span class="kw-tag">光模块</span><span class="kw-tag">电子布</span><span class="kw-tag">覆铜板</span><span class="kw-tag">CPO</span><span class="kw-tag">PCB</span><span class="kw-tag">GPU</span><span class="kw-tag">HBM</span><span class="kw-tag">AMD</span><span class="kw-tag">华为</span><span class="kw-tag">苹果</span><span class="kw-tag">液冷</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521424542518844" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521424558844114">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-04 20:40 · 👁 1244</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">国产链新材料，反弹买什么？--...</div>
+  <div class="topic-content">国产链新材料，反弹买什么？--<mark>AI</mark> 新材料更新（1104）
+
+#【20cm集合】
+优选国产替代逻辑强、进程中（还没完成替代、朦胧美可给估值）的品种，例如：<mark>cowos</mark>-l直写光刻设备、载体铜箔、ABF膜、mlcc离型膜、靶材、静电卡盘、特气、Q布等。
+
+NO.1，芯碁微装
+【定位】国产<mark>算力</mark><mark>CoWoS</mark>-L直写光刻设备独供
+【三季报】 Q3业绩加回汇兑损失、单季度净利率达32%，26Q1-Q3公司先进封装业务收入接近1E，其中Q3确收3台设备。
+【催化】26q4预计确收 6-7 台先进封装设备。27全年订单60-80台、出货50-60台。马来及北美客户 26Q4如期推进。
+【市值】353亿，27 年谨慎 12 亿、 中性 15 亿，对应明年仅为24X pe。
+
+（2）铜冠铜箔
+【定位】大陆唯一成熟、批量、稳定供货hvlp4铜箔的材料商，已公告增产估计3000吨/年，后续仍有万吨级别高端新增产能，#都是高端产品。
+【市值】597 亿，27 年谨慎 15 亿、中性 20 亿，对应明年 30x pe。
+【优势】高端铜箔顶流卡位，不受价格干扰（铜箔价格预期低、通胀不显著）。
+
+（3）宏昌电子
+【定位】筹码结构好，三季报证明自己，受益CCL涨价（#松下TW工厂大火、CCL更紧缺）
+【催化】树脂膜（RCC方案）在<mark>光模块</mark>的认证进展。公告在珠海新建基地、扩产，已发定增预案。
+【市值】152亿，27年中性15亿、仅为10X pe。
+
+（4）斯迪克&amp;洁美
+【定位】mlcc 离型膜国产替代
+【激励】斯迪克10月底激励目标27年营收目标60E、26Q1-Q3仅24.8E，行业景气度高，同行也在扩产，例如洁美月度出货5000多万平、年底 6000万平/月。27-28年化产能扩至10、20亿平。
+
+（5）方邦股份
+【定位】载体铜箔国产替代，三井载体铜箔市占率高达90%以上，且不断提价。
+【催化】公司发货从0到1。近期CX验证持续推进。BT载主要承接为SN、XS，下游为存储、<mark>光模块</mark>等。
+【市值】61亿。
+
+（6）广钢气体
+受益国内存储/逻辑核心客户CAPEX，10月末已公告中标境内某电子大宗现场制气项目，Q4上海等客户仍在继续推荐投标。往年公司自身CAPEX在10E、而26H1就有17.6E（不包括Q4大订单）。
+
+（7）华海诚科
+全球环氧塑封料规模200亿，国内约70亿，其中50亿中高端市场由三家日本企业主导（京瓷/住友/信越），剩余20亿属于20余家国内厂家，公司占55%。国产替代、本土存储技术迭代是前提，最近几年也是替换窗口期。
+
+（8）兴森科技
+【定位】abf载板国产化率极低，海外龙头IBIDEN、欣兴产值过百亿，国内企业刚过亿，26H2订单外溢现象频发，兴森对应国产<mark>算力</mark>大客户（原先供应商为群策+礼鼎，台厂稼动率均已打满）。
+
+（9）江丰电子
+【三季报】 Q3扣非净利2.27E、环比+182%，靶材涨价报表逐步反应，Q4提价落地量环比增加。半导体零部件业务全年预计17E、同比50-60%增速。
+【市值】512亿，26-27年wind一致预期10.3亿、14.1亿，明年对应PE36x。
+------
+（一马平川）</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">CoWoS</span><span class="kw-tag">光模块</span><span class="kw-tag">算力</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521424558844114" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521424558452414">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-04 20:28 · 👁 1238</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【东财北交所】产能出海+<mark>AI</mark>供...</div>
+  <div class="topic-content">【东财北交所】产能出海+<mark>AI</mark>供电+特高压建设三箭齐发，关注特高压电磁线龙头公司【宏远股份】
+
+长期技术研发+海外客户建设、公司构建高技术壁垒与海外知名度。公司主营变压器用电磁线的研发、生产与销售，从1980年起开始涉足电磁线的研发与制造、2012年起涉足海外，发展至今，公司构建了较高的技术壁垒和海外知名度：1）公司是国家级制造业单项冠军企业，率先完成±500kV、±800kV、±1100kV三大电压等级的国产替代，为国内仅有的5家特高压电磁线供应商之一；2）公司已成为全球较为知名的电磁线品牌， 产品远销至四大洲，进入了日立能源、西门子、ABB等全球电力装备巨头供应链。
+
+[红包]展望未来，我们认为公司有望持续受益于产能出海+<mark>AI</mark>供电+特高压，实现业绩的快速增长：
+
+1）全球电网投资进入上行周期、公司海外业务高增并建设海外产能。在老旧电网替换、新兴地区建设等背景下，全球电网投资进入上行周期，如欧盟电网投资指引预计2040年前配电网升级需投入约7300亿欧元，沙特公布2025-2030年1260亿美元电网投资计划等。中国是世界第一大变压器生产国，产能约占全球60%，全球电网投资上行直接利好公司业务，公司2026H1海外业务实现营收6.76亿元，同比+121%，且即将在沙特建设海外电磁线工厂，投产后有望进一步利好海外供货能力。
+
+2）<mark>AI算力</mark>中心高密度供电推升变压器需求、公司与多家美国客户关系密切有望逐步切入。<mark>数据中心</mark>负荷对变压器容量与可靠性要求高于常规电网场景，供电设备已成为<mark>算力</mark>基础设施的组成部分，美国市场变压器交付周期由50周延长至127周。公司与VTC、GTC等美国本土厂商合作多年，关系密切，有望通过其间接进入<mark>数据中心</mark>供电供应链。
+
+3）特高压进入新一轮建设期、公司作为特高压电磁线龙头受益。国家电网&quot;十五五&quot;期间固定资产投资规划4万亿元，较&quot;十四五&quot;期间+40%，并计划在此期间建设15项特高压直流工程，输变电设备排产向上游电磁线传导。公司作为国内特高压电磁线龙头，特高压配套产品销量有望同步抬升。
+
+⚠️风险提示：沙特工厂建设进度不及预期；汇率大幅波动；铜价大幅波动。
+
+ #文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI算力</span><span class="kw-tag">数据中心</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521424558452414" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
