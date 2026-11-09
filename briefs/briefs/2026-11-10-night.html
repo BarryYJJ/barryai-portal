@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-11-10 深夜 AI 简报</title>
+<style>
+::selection { background: #d97757; color: #fff; }
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-11-10 01:30:49</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-11-10 深夜 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-11-09 20:30</strong> &nbsp;→&nbsp; <strong>2026-11-10 01:30</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">35</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">15 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">42.9%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">5 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">6</span></div><div class="hot-kw-row"><span class="kw-name">算力</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">6</span></div><div class="hot-kw-row"><span class="kw-name">数据中心</span><div class="bar-track"><div class="bar-fill" style="width:67%"></div></div><span class="kw-count">4</span></div><div class="hot-kw-row"><span class="kw-name">英伟达</span><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><span class="kw-count">3</span></div><div class="hot-kw-row"><span class="kw-name">大模型</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">PCB</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">TPU</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">谷歌</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="kw-count">2</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-22258485822214141">谷歌TPU据报已订满，TPU8tx、TPU8iMax预计2027年上市，专用算力开始抢英伟达的饭碗</a></li><li><a class="tldr-jump" href="#t-82258485828825222">挪威暂停新数据中心电力接入，AI扩张卡在“插座”，电力配套成为算力硬约束</a></li><li><a class="tldr-jump" href="#t-14425152544414452">Optimus被押注为2027年科技大单品，恒锋工具订单已排至三个月后，机器人行情开始拿订单说话</a></li><li><a class="tldr-jump" href="#t-22258485822221821">瑞晟智能拿下海澜之家约1750万元搬运机器人订单，前期测试成功率98.5%—99%，具身智能先从工厂苦活赚钱</a></li><li><a class="tldr-jump" href="#t-14425152542141812">Kokusai Electric季度营收同比增35.5%，DRAM与先进逻辑设备放量，AI淘金潮继续养肥“卖铲人”</a></li><li><a class="tldr-jump" href="#t-45548284854252548">国星宇航规划十年部署2800颗计算卫星，震裕科技控股的量产平台预计年底投产，太空算力先看谁能批量造星</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-55521412155588284">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-09 23:24 · 👁 354</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">江苏北人：卡位非标焊接具身智能...</div>
+  <div class="topic-content">江苏北人：卡位非标焊接具身智能，强工艺 0-1 破局 - 1109
+———————————
+总结：焊工断档向重工传导，公司「轨迹自主 + 工艺自主」双闭环有望被充分定价，主攻船舶海工 / 发电设备 / 重型钢构，从项目制集成向标准化装备 0-1 切换。机器人板块从「造躯体」走向「懂工艺」，# 得工艺模型者得非标场景。
+
+⭐为什么非标焊接是机器换人最后、也最硬的核心痛点？
+汽车（已吃满）：同一零件干 1-3 年、冲压偏差仅 0.2-0.3mm、工装工艺全固定 → 传统示教机器人背好台词就能印，自动化率见顶，第一代应用天花板到了。
+重工（没啃动）：船舶 / 海工 / 桥梁 / 发电设备多为小批量甚至单件，装配间隙 1-8mm 动态变化，焊位、坡口、工艺随场景走 → 传统在线机器人每换一批就得重新编程，# 越自动越低效，所以到现在还是老师傅蹲着焊。
+人（快没了）：全国焊工保有 500 万，缺口 350 万、今年预计扩到 380-390 万；40 岁以上占近 80%，从业年龄普遍卡在 50 岁，每年退 40 万，年轻人基本不进这行；有证焊工年薪逼近 20 万还在涨 → 不是远期趋势，是当下刚需，仅省一半人力就对应数千亿账。
+
+⭐双自主闭环：别人做「免示教」，它做「免示教 + 保合格」
+1）轨迹自主｜解决部署瓶颈
+3D 视觉自动识别焊缝 → 自主规划最优路径 → 主动避障，# 不用人工示教编程。轻工艺场景行业稼动率仅 60-75%、新品部署 10-30 分钟，客户认的门槛是稼动率 ≥85% / 部署 ≤3-5 分钟；公司当前单台部署 2-3 周，已启动软件优化，目标压到 1 周、理想 3 天。
+2）工艺自主｜解决质量瓶颈（真护城河）
+按装配状态动态匹配电流 / 电压 / 速度 / 摆动，焊接过程中对预规划参数实时二次调整，# 一次合格率 96-98%，超合同 95%、超大船厂人工 95-97% 的优秀水平。厚板、多层多道、要无损探伤的强工艺场景，多数免示教厂商出身视觉 / 软件、工艺能力偏弱，# 该赛道几乎无直接对手。
+3）数据→模型｜把老师傅的手感炼成资产
+自有素材中心全链路真机数据（焊前装配 / 焊中电流电压层间温度 / 焊后尺寸质量）+ 客户端运行回传 + 仿真合成，# 单组真机数据成本 &gt;1000 元、千级真机校准 + 万级~10 万级仿真预训练。路径：细分场景小模型 → 几十个小模型 + 百万级结构化数据 → 二次训练出独立于通用<mark>大模型</mark>的「焊接纯域模型」。工艺模型占焊接<mark>智能体</mark> 2/3 权重，识别规划只占 1/3 —— 市场在盯「像不像人」，公司在攒「会不会焊」。
+
+⭐又一核心卡位：从卖产线到卖标品
+一代泛 <mark>AI</mark> 产品已小批量试单、启动销售；二代模型驱动（视觉 / 规划 / 工艺 / 平台软件四模块并行）2027 定型，种子客户工厂已跑通预规划→过程控制→规划修正全流程，# 结构化有效数据已批量沉淀。形态上 悬臂 + 车载同步第一优先级，车载可挂人推车 / ATV / 四足机器人，# 移动能力即场景覆盖能力，未来量最大；磁吸收窄、定制化订单逐步转标品。组织已拉通销售-研发-产品-交付全链条事业部。管理层北极星只有一个：市占率，细分→整体、中国第一→世界第一。
+
+⭐投资建议
+TAM：GGII 口径 2025 中国智能焊接渗透率仅 8.2%、销量 0.69 万台 → 2030 年 3.75 万台 / 32%，中国 CAGR 约 38%；券商场景口径船舶约 244 亿 + 钢结构约 385 亿；再往上按 500 万焊工 × 替代率 ≥50% 打开千亿叙事。造船高峰可持续到 2028-2030、船厂排产已到 2030 后，需求窗口是锁死的。
+
+经济性闭环：单台单班替代 0.6-0.8 人 → 远期上限 1.1-1.3 人（焊接速度物理决定，不吹一台顶俩）；一人管 3-4 台 → 4-6 台；双班运行下回收期 1.5 年以内 → 1 年以内。客户行为已经验证：巨力重工首单 1 套验效果、达标后直接复购 3 台，多家下游复制「先 1 台、再追加」，# 复购是非标装备最难、也最硬的商业化信号。
+
+假设 2030 年国内智能焊接 3.75 万台，公司凭强工艺卡位拿 20% 份额 ≈ 7500 台，按 40 万/台 → 收入 30 亿；标品化后净利率 20% → 利润 6 亿，给 30x PE，# 增量市值约 180 亿。主业 2025 储能减值出清、2026 前三季归母 2765 万扭亏、海外项目集中验收，给主业 30e 底仓；叠加焊接纯域模型落地后的平台化期权，打包看 200e 目标市值，对应当前 37.5e 小盘子、全流通、1.16 亿股 。
+
+#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">大模型</span><span class="kw-tag">智能体</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521412155588284" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258485822214141">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-09 23:24 · 👁 356</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">20261109 关注海外G+...</div>
+  <div class="topic-content">20261109 关注海外G+A生态硬件条线，Google <mark>TPU</mark>近期进展有望超预期 #中富电路 #新雷能
+
+🔥根据Wall st engine报道，GOOGLE正在推出其第八代<mark>TPU</mark>系统两个新的专用版本，使其阵容扩展到四种配置，这些新系统针对两种日益重要的<mark>AI</mark>工作负载:#1)TPU8tx:专为安全、机密计算而设计。它与<mark>AMD</mark> CPU配对，以实现芯片级数据加密，针对政府机构和受监管行业的公司。#2)TPU8iMax:在单个封装中结合两个<mark>TPU</mark>芯片，以#提供更大的计算能力和内存容量。它专为需要长上下文窗口的<mark>AI</mark>工作负载而设计，包括编码、药物发现和复杂数学。两者都是<mark>谷歌</mark>现有<mark>TPU</mark>设计的重新配GOOGL正在推出其第八代<mark>TPU</mark>系统两个新的专用版本，使其阵容扩展到四种配置版本，而非全新芯片，预计将于2027年上市。随着客户需求的发展，<mark>谷歌</mark>越来越专注于专用<mark>AI</mark>硬件。该公司还表示，其#全部可用的<mark>TPU</mark>供应已被预订一空。
+
+🔍从产业跟踪来看，27-28年<mark>谷歌</mark>TP U加速放量的趋势已经非常明确，市场可能很大程度上低估了<mark>谷歌</mark>在后续<mark>tpu</mark> v8 v9甚至v10的布局，其单卡<mark>算力</mark>&amp;功耗甚至有望持平于nv同代际相关<mark>gpu</mark>的产品。
+
+🧧继续推荐 #中富电路（<mark>谷歌</mark>+A客户核心的三次电源<mark>PCB</mark>供应商，三季度三次电源趋势从订单及出货指引皆到了明显的拐点期，往后看<mark>谷歌</mark><mark>tpu</mark>代际迭代对电源<mark>pcb</mark>是个功耗*单瓦价值量的强双击逻辑，看600e+） #新雷能（核心关注后续<mark>谷歌</mark>400v-54v pdb及vpd项目下单进展）
+
+#</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">PCB</span><span class="kw-tag">GPU</span><span class="kw-tag">TPU</span><span class="kw-tag">AMD</span><span class="kw-tag">算力</span><span class="kw-tag">谷歌</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258485822214141" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425152544482522">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-09 23:21 · 👁 375</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【长江通信】重视太空<mark>算力</mark>Q4投...</div>
+  <div class="topic-content">【长江通信】重视太空<mark>算力</mark>Q4投资机会
+
+事件催化上，中期选举后，民主党掌握参议两院，地面<mark>数据中心</mark>建设难度加大，在<mark>AI</mark>需求依旧旺盛的假设下，太空<mark>算力</mark>可能会得到加速发展。
+
+基本面逻辑上，SpaceX已提出百万颗<mark>算力</mark>卫星申请并建设工厂，目标最早于2027年末规模生产和部署，官方对于规模的指引表述为“数千颗”。按此节奏测算，相关配套企业或在近期陆续取得订单。
+
+激光通信将成为主要数据传输手段。激光通信更多用于星间、星地的传输链路。相较于微波通信，激光的传输速率更高，但对传输环境要求更苛刻。<mark>算力</mark>卫星数据传输要求远高于通信卫星，对于激光通信的依赖度会更高，且该环节长期具备通胀属性。
+
+烽火通信与信科移动同属信科院旗下核心企业，面向国内重点通信星座项目供应激光通信终端及微波相控阵天线，价值量可观。面向太空<mark>算力</mark>时代，公司亦有望深度受益。
+
+关于太空<mark>算力</mark>，我们周日刚发布最新深度研究报告《商业航天产业链观察系列八：太空<mark>算力</mark>将为<mark>AI</mark>需求提供重要<mark>算力</mark>供给》，欢迎沟通交流~
+
+#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">数据中心</span><span class="kw-tag">算力</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425152544482522" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425152544414822">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-09 23:20 · 👁 383</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title"><mark>苹果</mark>HALO表现优异，模型升级...</div>
+  <div class="topic-content"><mark>苹果</mark>HALO表现优异，模型升级指向更<mark>多模态</mark>数据融合【东吴机械】
+
+👉<mark>苹果</mark>发布HALO人形机器人自主控制系统，仿真训练向真实场景迁移。
+2026年11月4日，<mark>苹果</mark>研究团队公开HALO人形机器人系统，采用宇树G1本体、阿里千问模型及Mac mini计算平台。在6个未经预先扫描或建图的真实环境中，单项任务平均成功率达91%，展示了人形机器人在非预设场景中的自主执行能力。
+
+👉HALO训练主要依靠仿真数据，真实数据有望成为补充。
+研究团队用运动扩散模型生成全身动作，用程序化生成器（INFINIGEN）造出 1000 个虚拟家庭，客厅、办公室、卧室，家具疏密随机；再在 Isaac Sim 里把动作放进场景，渲染出机器人头部相机看到的第一视角画面，最后交给自动校验器筛掉穿模、滑脚的坏样本。
+
+👉目前模型仍依赖视觉信息，后续有望加速融入触觉等模态数据。
+HALO团队指出，目前机器人主要依赖视觉感知，难以直接感知接触情况；当物体离开相机视野或被遮挡时，涉及接触的任务表现会下降。加入触觉感知，是后续改进方向之一。
+
+👉投资建议：人形机器人软硬件持续迭代，产业化1-10放量节点将近。国产链关注【宇树科技】【越疆】【仙工智能】【天奇股份】【中大力德】；视觉关注【奥比中光】【奥普特】【凌云光】；触觉传感器与灵巧手关注【安培龙】【福莱新材】【汉威科技】【兆威机电】；T链关注【绿的谐波】【恒立液压】【浙江荣泰】。
+
+👉风险提示：人形机器人商业化不及预期；宏观经济风险。
+
+☎【东吴机械】周尔双/陶泽
+
+#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">多模态</span><span class="kw-tag">苹果</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425152544414822" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425152544414452">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-09 23:19 · 👁 382</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【国盛张一鸣】积极配置机器人
+...</div>
+  <div class="topic-content">【国盛张一鸣】积极配置机器人
+
+Optimus将是27年最大科技单品，用于训练的V3已经开启量产并初步亮相，供应链积累的越来越多的订单已经无法掩盖，10月份爬坡的斜率会很陡峭。Q4诸多大厂（包括T、<mark>英伟达</mark>、<mark>Meta</mark>、hw、小鹏等）都可能有重磅发布，节前建议积极配置。
+
+高确定性高价值量标的：#田中精机、科森科技、斯菱智驱、浙江荣泰、北特科技、鸣志电器 等。同时关注常州链的进展：#光洋科技、新泉股份、凯迪股份；
+
+核心tier2: #恒锋工具 （谐波、丝杠刀具，订单已排产至三个月后，对日替代）、#正强股份 （手腕关节总成+谐波波发生器）；
+
+国产C端：#上纬新材、中坚科技 等。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Meta</span><span class="kw-tag">英伟达</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425152544414452" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258485822221821">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-09 23:17 · 👁 381</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【KYjsj】瑞晟智能：机器人...</div>
+  <div class="topic-content">【KYjsj】瑞晟智能：机器人垂类应用星辰大海 打造太空<mark>算力</mark>新增长极 1109
+
+1️⃣发力物理<mark>AI</mark>垂类纺服搬运场景 具身智能场景落地一体化交付实力显著
+2026年9月，公司与海澜之家签署云服工厂智能机器人项目订单，目标是实现海澜之家新建工厂的搬运全流程自动化。项目总额约1,750万元。公司负责的机器人本体及场景落地，配套约10-19台轮式机器人等设备。已在海澜之家工厂测试约2—3个月，搬运流程的前期测试成功率为98.5-99%。针对千人级工厂预期实现替换15-20%人工，按年化9万人工薪酬成本估算，每年可节省近2000万元。
+2️⃣公司具身垂类应用规划三步走战略 终极阶段有望打通纺服主要核心环节
+1.0阶段聚焦服装纺织行业的搬运环节；2.0阶段拟结合海澜之家二期，拓展至衬布贴合工位的上料、下料、清整等重复性作业；3.0阶段探索覆盖缝纫等柔性工序的黑灯工厂。
+3️⃣公司有望自研机器人组装产线 实现从数据到大脑到软件到具身的全流程打通
+公司自研智能协同平台（IMS）可协同调度机器人、AGV、CTU和吊挂系统，结合服装纺织垂类模型安排各工位作业，并支持数字孪生，具备know how壁垒；公司于2024年借助<mark>AI</mark><mark>大模型</mark>开发了首个<mark>AI</mark>小模型，随后为降低外部模型调用成本，逐步形成自研服装纺织垂类模型，目前有100+位算法开发人员。
+4️⃣深入布局太空<mark>算力</mark> 发力太空<mark>服务器</mark>打造新增长极
+瑞晟智能持有宁波焱林智算科技50%股权，承接太空<mark>算力</mark><mark>服务器</mark>业务；焱林智算对外投资了星箭联航，股权占比16.67%，而国星宇航是星箭联航的控股股东（57.33%）；星箭联航投资设立上海洛克探索航天科技，布局液体运载火箭+卫星激光通信载荷；公司与国星宇航深度绑定，共同发力太空<mark>算力</mark>相关配套产品。随着商业发射频次提升，<mark>服务器</mark>相关配套产品订单有望持续提升。国星宇航累计15次太空任务、35 颗卫星+6个<mark>AI</mark>载荷、26颗<mark>AI</mark>智算卫星，国内累计<mark>AI</mark>卫星发射量第一。
+
+[礼物]估值测算：主业+物理<mark>AI</mark>垂类应用+太空<mark>算力</mark><mark>服务器</mark>，#先看130e市值四倍空间
+主业1e利润给30e市值底；纺服机器人对标#杰克科技 全国229个纺织服装产业集群2024年吸纳就业732万人，假设远期替换15%的比重，对应100万人近1000e市场空间，5%市占率对应50e收入增益；太空<mark>算力</mark>给50e市值增益；整体打包给130e市值，四倍空间，#当前仅29e市值赔率巨大（按手）❗️
+
+#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">大模型</span><span class="kw-tag">服务器</span><span class="kw-tag">算力</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258485822221821" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548284855552228">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-09 23:17 · 👁 383</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【国金电新】AIDC每日重点公...</div>
+  <div class="topic-content">【国金电新】AIDC每日重点公告梳理20261109
+公司公告：
+#<mark>液冷</mark>
+1.申菱环境：公司因股价触发“申菱转债”转股价格向下修正条款，决定本次不下修，转股价格维持95.49元/股，2026年11月10日至2027年5月9日期间如再次触发下修条款，亦不提出下修方案。
+
+2.强瑞技术：公司拟以自有资金及或自筹资金8000.00万元至1.20亿元，通过集中竞价方式回购股份，回购价格不超过148.58元/股，回购股份的一半用于股权激励或员工持股计划、另一半用于维护公司价值及股东权益并择机出售。
+
+3.宁波精达：公司以现金5100.00万元增资入股宁波铪池科技有限公司，持股51%，与持股49%的宁波新睦科技有限公司共同布局粉末冶金全产业链，合资公司总认缴注册资本1.00亿元，已完成工商登记并取得营业执照，成为公司控股子公司并纳入合并报表范围。
+
+#AIDC变压器
+4.伊戈尔：公司2023年股票期权与限制性股票激励计划预留授予限制性股票第三个解除限售期涉及11名激励对象，解除限售数量为13.76万股，上市流通日期为2026年11月12日，占公司总股本0.03%。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">液冷</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548284855552228" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258485828828441">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-09 22:19 · 👁 603</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title"><mark>谷歌</mark>(GOOG.O)将推出两个...</div>
+  <div class="topic-content"><mark>谷歌</mark>(GOOG.O)将推出两个新版本的张量处理单元(<mark>TPU</mark>)系统，向<mark>英伟达</mark>发起挑战。<mark>谷歌</mark>的新款TPU8TX和TPU8IMax将用于处理更多专业化任务。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">英伟达</span><span class="kw-tag">TPU</span><span class="kw-tag">谷歌</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258485828828441" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258485828825222">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-09 22:19 · 👁 611</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">挪威暂停新<mark>数据中心</mark>的电力接入</div>
+  <div class="topic-content">挪威暂停新<mark>数据中心</mark>的电力接入</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">数据中心</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258485828825222" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425152545542212">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-09 22:18 · 👁 612</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title"><mark>英伟达</mark>的<mark>数据中心</mark>愿景引发重新改...</div>
+  <div class="topic-content"><mark>英伟达</mark>的<mark>数据中心</mark>愿景引发重新改造电力变压器的竞赛</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">数据中心</span><span class="kw-tag">英伟达</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425152545542212" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548284854251488">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-09 21:50 · 👁 641</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">海外中选冲击可控 VS 国内稳...</div>
+  <div class="topic-content">海外中选冲击可控 VS 国内稳市组合加码，A股震荡修复可期
+
+海外： 蓝色浪潮冲击<mark>AI</mark>信仰，美股延续承压，美债和黄金支撑仍存
+
+民主党横扫，利好医疗服务保障扩围、清洁能源补贴，<mark>数据中心</mark>审批、<mark>AI</mark>安全监管趋严引发<mark>AI</mark>担忧。目前看<mark>AI</mark>监管联邦立法难度极大，州级和地方审批约束更值得警惕。现在到 1 月为&quot;消息真空 + 预期发酵&quot;的窗口，重点观察暂停令是否扩散。
+
+①美股：震荡承压，重点关注<mark>AI</mark> 融资结构和政策动向，把握必需消费、医疗保健等防御机会。
+②美债：配置机会显现，10Y在5%附近具备配置价值。
+③黄金：震荡修复。
+
+国内： 稳市组合加码，结构韧性显现，震荡修复可期
+
+大势研判：当前指数调整幅度、筹码出清、市场情绪都均呈现底部特征，加上互换便利+回购增持+两融优化+长期资金入市稳市组合加码，宽基ETF托市力度放量，标志性大阳线企稳信号已现，震荡修复可期。
+
+行业选择：
+1）主题轮动（筹码结构较好且有产业催化的机器人、<mark>AI应用</mark>、固态电池、电网设备、商业航天等）；
+2）超跌反弹（超跌修复的国产<mark>算力</mark>、半导体材料与设备、<mark>PCB</mark>等）；
+3）价值防御（内需-农林牧渔、食饮、家电等）。
+
+周度复盘
+
+市场表现：全A指数实现反弹，宽基全面反弹，科创反弹领先，大盘&amp;创业板涨幅相对落后。
+
+资金情绪：成交回暖，拥挤度底部反弹持续，宽基ETF托市力度放量至两千亿规模净流入，融资净卖出延续但力度有所收敛至小百亿规模。
+
+#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI应用</span><span class="kw-tag">数据中心</span><span class="kw-tag">PCB</span><span class="kw-tag">算力</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548284854251488" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425152542141812">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-09 21:50 · 👁 638</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">Kokusai Electri...</div>
+  <div class="topic-content">Kokusai Electric 2QFY27：营收超预期4%、净利低于预期5%；DRAM及先进逻辑需求驱动高增
+
+【业绩回顾】营收超预期，DRAM及先进逻辑设备放量
+2QFY27营收/归母净利润JPY88.6/14.3bn，yoy+35.5%/+63.3%，qoq+17.5%/+24.1%，较彭博预期+3.5%/-5.1%。DRAM及Logic/Foundry设备销售增长，设备/服务收入JPY71.3/17.4bn；毛利率42.8%，qoq+2.1ppts，产品结构改善带动盈利提升。
+
+【公司指引】全年财务指引维持，营收/净利低于预期1%/5%
+FY27营收/归母净利润指引维持JPY340/55.5bn，yoy+44.6%/+84.4%，较彭博预期-0.9%/-5.1%。隐含下半年营收/净利润JPY176.0/29.6bn。公司预计<mark>AI</mark>驱动高性能Logic及DRAM产能扩张与制程升级持续，半导体设备需求维持强劲。
+
+【DRAM/GAA/ALD】中国本土客户需求回升，先进制程推动设备升级
+2Q DRAM/Logic&amp;Foundry设备收入占比约37%/28%，中国本土客户收入占比由1Q的25%升至35%。先进DRAM迭代推动Batch ALD工艺机会增加，GAA先进逻辑制程带动高难度沉积设备POR数量增长；NAND多层化及先进封装需求提供长期增长空间。
+
+#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425152542141812" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548284854252548">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-09 21:50 · 👁 629</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【招商电新】震裕科技：国星宇航...</div>
+  <div class="topic-content">【招商电新】震裕科技：国星宇航上市在即，商业航天业务持续推进20261109
+
+#国星宇航系头部卫星企业，港股上市在即
+国星宇航是国内<mark>AI</mark>卫星头部民营商业航天企业，预计本周五港股上市。其核心规划为 “星算计划”，目标十年部署2800颗计算卫星，搭建天基<mark>算力</mark>基础设施；已累计发射多颗<mark>AI</mark>卫星，在手订单充足，招股书披露待交付卫星订单规模可观，星座组网节奏明确。
+国星宇航定位偏卫星方案、载荷、星上 <mark>AI</mark> 算法与整星设计。传统航天模式下卫星小批量定制、成本高、交付慢，规模化量产能力构成扩张瓶颈，与震裕合作将得到明显的互补。
+
+#双层股权绑定实现深度合作
+震裕科技与国星宇航设立合资主体震裕星算，震裕科技持股 70%，国星宇航创始人陆川个人持股30%。业务范围覆盖卫星制造、航天设备、卫星部组件、集成测试等，定位为卫星工业化量产平台。
+震裕科技董事长蒋震林个人入股国星宇航，持股3.46%，为前五大股东，双方在股权结构方面深度绑定，有利于保障合资公司优先承接国星宇航卫星制造需求。
+
+#商业航天业务有望放量
+震裕星算上海莘庄工厂预计年底投产，随着国星宇航上市，商业航天业务27年有望逐步放量。此外震裕与上海空间技术有限公司（八所旗下）有低轨卫星的合作，预计明年至少50颗星给到震裕代工。
+
+[拳头]27年震裕科技结构件业务在国内头部及二线客户中的占比均有望提升；机器人海外头部客户提前要求送样，国内头部客户持续拓展中；商业航天迎来放量节点，预计业务体量及业绩将大幅增长，建议持续关注！
+
+#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">算力</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548284854252548" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425152542158112">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-09 21:48 · 👁 647</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">软银移动部门为美国可能出现的人...</div>
+  <div class="topic-content">软银移动部门为美国可能出现的<mark>人工智能</mark>回调做准备</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">人工智能</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425152542158112" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425152542158582">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-09 21:47 · 👁 642</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">快舟航天宣布未来三年将完成50...</div>
+  <div class="topic-content">快舟航天宣布未来三年将完成50次以上发射，2027年实现可重复使用液体火箭首飞入轨及回收。
+年初点评提到，极有可能在年内完成回收试验（26 年），后续可回收火箭会由一枝独秀逐步到“百花齐放”。
+运力即<mark>算力</mark>，火箭端重视： 1）上游高壁垒原材料；2）3d 打印链</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">算力</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425152542158582" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
