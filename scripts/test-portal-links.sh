@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # scripts/test-portal-links.sh
 #
-# 校验 barryai.cn 门户首页的入口链接：七个产品都要有入口，
+# 校验 barryai.cn 门户首页的入口链接：六个产品都要有入口，
 # 且都指向主站子路径，而不是旧的 briefs 子域。
 #
 # 用法：bash scripts/test-portal-links.sh [portal-index.html]
@@ -52,14 +52,14 @@ grep -q 'href="#projects"' "$PAGE" && grep -q 'id="projects"' "$PAGE"
 check $? "导航「项目」锚点有效"
 
 card_count="$(grep -c 'class="card" href="/' "$PAGE")"
-[ "$card_count" -eq 7 ]
-check $? "首页恰好展示七个项目卡片"
+[ "$card_count" -eq 6 ]
+check $? "首页恰好展示六个项目卡片"
 
 # 项目卡顺序与门户展示文案要稳定。
 actual_order="$(grep -o 'class="card" href="/[^"]*"' "$PAGE" | sed 's/.*href="//; s/"$//' | paste -sd ' ' -)"
-expected_order="/token-gpu/ /openrouter/ /briefs/ /ai-news/ /briefs/agent/ /research/ /texas/"
+expected_order="/token-gpu/ /openrouter/ /briefs/ /ai-news/ /briefs/agent/ /research/"
 [ "$actual_order" = "$expected_order" ]
-check $? "项目卡顺序为 Token+GPU、Token量与分布、今天在涨啥、AI信号台、AI研究工作台、AI Research OS、单挑德州"
+check $? "项目卡顺序为 Token+GPU、Token量与分布、今天在涨啥、AI信号台、AI研究工作台、AI Research OS"
 
 grep -q '<h3>Token量与分布看板</h3>' "$PAGE"
 check $? "OpenRouter 项目卡标题为「Token量与分布看板」"
