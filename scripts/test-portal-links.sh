@@ -52,14 +52,14 @@ grep -q 'href="#projects"' "$PAGE" && grep -q 'id="projects"' "$PAGE"
 check $? "导航「项目」锚点有效"
 
 card_count="$(grep -c 'class="card" href="/' "$PAGE")"
-[ "$card_count" -eq 6 ]
-check $? "首页恰好展示六个项目卡片"
+[ "$card_count" -eq 8 ]
+check $? "首页恰好展示八个项目卡片"
 
 # 项目卡顺序与门户展示文案要稳定。
 actual_order="$(grep -o 'class="card" href="/[^"]*"' "$PAGE" | sed 's/.*href="//; s/"$//' | paste -sd ' ' -)"
-expected_order="/token-gpu/ /openrouter/ /briefs/ /ai-news/ /briefs/agent/ /research/"
+expected_order="/token-gpu/ /openrouter/ /briefs/ /ai-news/ /briefs/agent/ /research/ /random/blocks/ /texas/"
 [ "$actual_order" = "$expected_order" ]
-check $? "项目卡顺序为 Token+GPU、Token量与分布、今天在涨啥、AI信号台、AI研究工作台、AI Research OS"
+check $? "项目卡顺序为 Token+GPU、Token量与分布、今天在涨啥、AI信号台、AI研究工作台、AI Research OS、掷筊、德州扑克"
 
 grep -q '<h3>Token量与分布看板</h3>' "$PAGE"
 check $? "OpenRouter 项目卡标题为「Token量与分布看板」"
