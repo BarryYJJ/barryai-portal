@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-11-22 深夜 AI 简报</title>
+<style>
+::selection { background: #d97757; color: #fff; }
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-11-22 01:30:43</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-11-22 深夜 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-11-21 20:30</strong> &nbsp;→&nbsp; <strong>2026-11-22 01:30</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">19</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">9 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">47.4%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">5 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">7</span></div><div class="hot-kw-row"><span class="kw-name">英伟达</span><div class="bar-track"><div class="bar-fill" style="width:57%"></div></div><span class="kw-count">4</span></div><div class="hot-kw-row"><span class="kw-name">服务器</span><div class="bar-track"><div class="bar-fill" style="width:57%"></div></div><span class="kw-count">4</span></div><div class="hot-kw-row"><span class="kw-name">算力</span><div class="bar-track"><div class="bar-fill" style="width:43%"></div></div><span class="kw-count">3</span></div><div class="hot-kw-row"><span class="kw-name">Anthropic</span><div class="bar-track"><div class="bar-fill" style="width:29%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">数据中心</span><div class="bar-track"><div class="bar-fill" style="width:29%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">云计算</span><div class="bar-track"><div class="bar-fill" style="width:29%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">GPU</span><div class="bar-track"><div class="bar-fill" style="width:29%"></div></div><span class="kw-count">2</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-22258424845855551">英伟达跌14%、费城半导体跌10.7%，AI交易从“怕踏空”切到“抢出口”</a></li><li><a class="tldr-jump" href="#t-14425141512281852">四家云巨头资本开支已吃掉91%的经营现金流，AI军备竞赛下一关是“谁来付账”</a></li><li><a class="tldr-jump" href="#t-55521454142141154">AI硬件最怕扩产撞上需求退潮：若军备竞赛见顶，两年资本开支狂欢可能换来十年价格低迷</a></li><li><a class="tldr-jump" href="#t-14425141548888812">三星电机称AI载板即使芯片出货零增长也需三倍产能，供给年增却仅约20%，涨价底气藏在尺寸和层数里</a></li><li><a class="tldr-jump" href="#t-45548252824415828">AI Coding仍只是首个应用突破，技术多头押注当前更像1994年，半导体需求长跑尚未结束</a></li><li><a class="tldr-jump" href="#t-14425141541151842">华为昇腾950DT在汕头开启Token出海，国产算力开始挣海外推理的钱，后劲要看调用量和利用率</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-55521454142141154">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-22 00:14 · 👁 188</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">如果这里就是<mark>AI</mark>军备竞赛的尾声...</div>
+  <div class="topic-content">如果这里就是<mark>AI</mark>军备竞赛的尾声，那只能说今年上半年的<mark>AI</mark>真像一个收割全球的阳谋
+
+不管初衷如何，事实上就是P用极其陡峭的资本开支，耗尽自己2年的自由现金流，拉出一个极其夸张的上游硬件利润率水平，制造了一个本身这些大宗硬件不该有也不曾想到的周期高度，然后讲了一个极其令人FOMO的<mark>AI</mark>星辰大海的故事，最终让经历了N轮周期，极其谨慎、不愿意轻易扩产的日本、韩国、台湾产业老兵都被骗进来大幅扩产，更不用说把扩产写进基因里的我们中国企业家。那这次P真是用2年的阵痛，换取了可能未来10年都起不来的硬件价格，这又是一次下游生态公司的胜利。独留东亚扩产资本在风中凌乱。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521454142141154" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258424845855551">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-21 23:50 · 👁 191</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【11/21 基业长青 &amp; 短...</div>
+  <div class="topic-content">【11/21 基业长青 &amp; 短评与信息 资料总结】
+
+今日两星球共 86 条主题，剔除 8 条纯附件，逐条读完 78 条正文约 3.7 万字。今天只有一条主线：全球 <mark>AI</mark> 交易的总清算，以及围绕&quot;这到底是哪一年的市场&quot;展开的大辩论。
+
+一、暴跌全景（今天最重要）
+隔夜美股费城半导体 -10.7%、<mark>英伟达</mark> -14%，亚洲接力崩盘：
+· 台湾加权 -6.23%，单日跌 2400 点，单周 -17%（35 年最惨）；<mark>台积电</mark> -4.8% 相对抗跌，联发科/日月光近跌停，监管出台做空新限制
+· 韩国 -5.53%，跌破 4900 点并触发熔断；外资净卖出 8.5 亿美元且全部来自程序化交易＝被动流出
+· 日经 -5.06%，历史第六大单日点数跌幅；<mark>AI</mark> 板块本周 -16%、距 10 月高点回撤 50%；爱德万 -10.3%、软银 -14.5%、东京电子 -7%，三股贡献日经约 44% 跌幅
+· 恒生 -1.89%，连续第四日下跌，1 月高点回撤 20% 进入技术性熊市；网易 -17.58%、快手 -11.35% 创新低，阿里逆势 +3.5%
+· 沪深300 -0.76%、上证 -1.22%，盘中逼近 3500；长电 -9.3%、<mark>海光</mark> -8.55%、澜起 -7.25%；融资余额约 2.3 万亿未恐慌清盘
+· 印度 Nifty50 +0.87%，区域唯一亮点，银行指数创新高
+导火索：<mark>英伟达</mark>被曝 SEC 调查涉及会计问题；特朗普称只向中国出售较旧芯片、不允许美企海外建<mark>数据中心</mark>；<mark>英伟达</mark><mark>服务器</mark>供应商暂停向东南亚发货。VIX 触及 40，标普七个月最差一周。<mark>Anthropic</mark> 上市次日 -8.5%，绿鞋被承销商提前全额行使（1.47 亿股）削弱支撑，叠加<mark>苹果</mark>自研 <mark>Agent</mark> 的竞争担忧。
+
+二、为什么跌：三种解释
+1) 美元挤压去杠杆：美元快速上涨→巨额美元债务更难还→卖资产换现金→无差别抛售。美国融资融券债务约 1.45 万亿美元，相当流通货币 58%、M2 的 6.2%。黄金本应避险却因流动性好、前期坚挺反被卖。判断：抛售不会因&quot;便宜&quot;停止，要等美元止涨或美联储介入。
+2) <mark>AI</mark> 交易瓦解 + 美联储过热论：市场对 <mark>AI</mark> 回报要求更苛刻，从&quot;营收故事&quot;转向&quot;留存现金&quot;。但不下&quot;周期断裂&quot;结论——已募资金不会消失、已落地项目可继续；欧洲银团债发行破 2 万亿欧元。古尔斯比保留 12 月加息可能，基准判断降息延后。
+3) 机构行为：头部险资减仓接近尾声（9 月底启动、10 月至 11 月中集中减仓），科技股减持主因风控/考核被动调整、非看空，反弹也未必立即回补。但东吴数据 Q3 末险资运用余额 41.6 万亿、单季核心权益逆势增加超 1400 亿主要加仓股票。&quot;战术减科技、战略加权益&quot;并存。
+
+三、大辩论：2000、1994 还是 2008？
+· 主流反对&quot;2000 说&quot;：当前收益率曲线未倒挂、纳指预期 PE 已回落至新冠崩盘低点。2008 是地产泡沫+银行倒闭、2022 是骤然退出 QE，当前都不具备。
+· 更类比 1994：康波周期本质是技术扩散，大型机→PC→移动互联网→<mark>云计算</mark>，每次应用突破都拉升半导体需求。2000 年 PC 渗透率近半找不到新增长点；而 <mark>AI</mark> 的 Coding 只是第一个应用突破。核心制约不在需求而在供给（融资、产能、电力）——供给影响节奏，需求主导趋势。
+· 本轮真正担忧：2028 年及之后 <mark>AI</mark> capex 增速放缓 + <mark>英伟达</mark>管理层与循环融资的不确定性。
+
+四、六个争议点的多空对照（方法论价值高）
+1 <mark>英伟达</mark>会计调查：短期只影响估值倍数，只有披露具体科目（收入确认时点/应收质量/承诺）才有依据改盈利模型，股价下跌不能证明收入有问题
+2 海外建站受限：需求还在 ≠ 订单按原时间交付，先看限制对象是建站/云服务/最终客户，再看存量豁免
+3 得州赶批项目：把已拿批文和排队的分开，关键验证是批文是否发出、电网是否确认通电时间
+4 GTA VI 首日 3250 万份、零售 37.9 亿美元：首日吸收多少预购要看下周曲线，零售额与确认营收口径不同
+5 <mark>Anthropic</mark> 渗透：比守发行价更值得跟踪的是非科技公司从试用到部署、续费、席位扩张
+6 超卖反弹质量：看涨幅能否撑到收盘、等权指数/半导体/软件是否同步；只有最拥挤空头标的反弹＝仓位交易
+
+五、<mark>AI</mark> <mark>算力</mark>链：跌势中的产业真变化（今日最有价值）
+· <mark>GPU</mark> 租金飙升的真相是供给不是需求：Liquid Compute 称贷款机构对 neocloud 的贷款价值比从夏季 80% 降到 50-60%，买不了长期贷款的转向现货市场推高租金；CoreWeave CDS 扩至约 1300bp、2031 债收益率 16%。租金涨支撑资产估值，但 token 价格持续下跌，融资收缩+需求脆弱可能形成恶性循环。
+· <mark>AI</mark> 材料进入交付与回款重估期：四家云厂 2026 capex 指引合计 7200-7400 亿美元，但近 12 个月经营现金流 6768 亿、资本开支 6143 亿（占 91%），余量仅约 625 亿。单批每 1000 亿美元投资年化回收约 246 亿，需年新增收入 410-615 亿；付费量增 80%、单价降 40%，收入仅增 8%。材料收入跟踪链：资金获批→机房通电→采购条件→实物交付→认证结算。
+· CCL 链涨价延续：台股联茂称原材料库存不足 1 个月、难签 LTA 长协，2027 均价有望维持双位数季度涨幅；生益科技澄清&quot;M8 良率极低、被取消资格&quot;传闻与事实严重不符；沪电股份 27 年满产产值估超 200 亿。
+· <mark>昇腾</mark> 950DT 全国首个词元出海集群 11/13 在汕头启用（境内推理生成词元、经海缆交付东南亚）；12/15 HAIC2026 将发布新一代 DCU 与超节点。<mark>海光</mark>称供应链稳定，营收 26/27 年 230/350 亿预测不变。
+· <mark>三星</mark>电机 <mark>AI</mark> 载板：尺寸 70→100/120mm、层数 +20%，出货零增长也需产能翻 3 倍，但全行业年产能增速锁死约 20% vs 客户要求 100%——定价权在载板厂。高阶<mark>服务器</mark> MLCC <mark>三星</mark>+村田占 80-90%。
+· 苏试试验宜特：先进制程回流、覆盖 3nm，MA 产能利用率 30%→70%+，与<mark>寒武纪</mark>/<mark>壁仞</mark>/<mark>燧原</mark>/摩尔线程合作，宜特新签订单 +30%+、26 收入超 4 亿。
+
+六、其他要点
+医药：科伦博泰 SKB264 胃癌 3L+ OS 阳性（但 PFS 未达）；INSMED 被赛诺菲收购市值涨至 316 亿美元，海思科 DPP-1 海外 3 期启动、2 期数据优于对照；Erasca、特宝生物均有数据更新。
+汽车：零跑 Q3 收入 317 亿（+63%）毛利率降至 10.9%；文远知行 Q3 营收 +88%、Robotaxi 单季破亿且广州单车模型转正。
+消费：百胜中国同店 -3% 但交易量 +3%；万物新生 op margin 连续 5 季改善；泸州老窖 27 年去库存 30%；扫地机黑五石头折扣 85 折、畅销机型第 7。
+周期：动力煤 999 元/吨（-2.3%）、LNG 到岸价同比 +139%；光伏 10 月电池对美出口 +3227%（多为中转）；Frontline Q4 VLCC TCE 锁 56.26 万美元/天、预计净利 16.54 亿美元；电子烟 10 月出口 -42.5%。
+其他：软银洽购 SK <mark>海力士</mark>传闻已被否认；SpaceX 星舰转向汽车式量产（Gigabay 可同时组装 24 架）；半导体投资 15 条公理。
+
+七、风险与节点
+风险：美元挤压持续下的强平压力；云厂现金余量仅约 625 亿；<mark>英伟达</mark>应收/存货占用上升与 SEC 调查；neocloud 再融资收缩与 token 降价的负反馈；BIS 新规与特朗普表态的正式文本范围未定。
+节点：12 月初黄仁勋国会听证会、12/15 <mark>华为</mark> HAIC2026、12/1 苏试试验宜特调研。
+
+（资料来自星球公开帖与券商纪要，含未经核实传闻，仅作信息整理，不构成投资建议。市场有风险，决策需谨慎。）</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Anthropic</span><span class="kw-tag">Agent</span><span class="kw-tag">数据中心</span><span class="kw-tag">英伟达</span><span class="kw-tag">寒武纪</span><span class="kw-tag">海力士</span><span class="kw-tag">台积电</span><span class="kw-tag">服务器</span><span class="kw-tag">云计算</span><span class="kw-tag">GPU</span><span class="kw-tag">算力</span><span class="kw-tag">华为</span><span class="kw-tag">昇腾</span><span class="kw-tag">苹果</span><span class="kw-tag">海光</span><span class="kw-tag">壁仞</span><span class="kw-tag">燧原</span><span class="kw-tag">三星</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258424845855551" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425141512281852">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-21 23:48 · 👁 197</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">行业更新：<mark>AI</mark> 材料增长的行业...</div>
+  <div class="topic-content">行业更新：<mark>AI</mark> 材料增长的行业逻辑跟踪与梳理（上）
+
+1.全球股市回撤抬升股权风险溢价，<mark>AI</mark>新材料链进入交付与回款的重估期。现金流强的大云可延后交付，依赖融资的<mark>算力</mark>租赁商更受利差与再融资窗口影响；项目延期先推迟机架与材料排产，取消则同时冲击采购量与设备利用率。
+
+2.云厂商资本开支延续，持续性取决于<mark>AI</mark>变现与实际现金回收。四家2026年开支指引合计约7,200–7,400亿美元，2027年普遍继续增加；<mark>腾讯</mark>Q3资本开支付款651亿元、同比+225%，阿里505亿元、+60%。已披露<mark>AI</mark>收入口径不一（运行率、确认收入、订单、到账现金），尚不足以证明下一轮开支由<mark>AI</mark>独立负担，短期仍靠集团现金流、预付款与融资承担。现金承受力是硬约束：四家近12个月经营现金流约6,768亿、现金资本开支约6,143亿，占比91%，余量约625亿且未分配股息回购，故7,500亿级尚有内生路径，更高规模依赖现金流提速与融资。单批资产每1,000亿美元投资年化回收约246亿，需年新增收入410–615亿；付费量增80%、单价降40%，收入仅增8%。材料收入应沿&quot;资金获批—机房通电—采购条件—实物交付—认证结算&quot;跟踪。
+
+3.<mark>英伟达</mark>需求与指引仍强，本周大跌属治理、会计与出口风险。FY27 Q3营收1,158亿美元、同比+103%，下季指引1,300亿美元上下3%；应收与存货占用上升，需关注逾期、回款与新机架验收。BIS新规短期压低跨境交付与云租用可得性，国产替代意愿提高，材料总量影响可控。
+
+4.<mark>Anthropic</mark>上市净募资约1,170亿美元，公开<mark>算力</mark>采购承诺约9,009亿美元、未来12个月约707亿；融资支持近期履约，持续回款看付费使用量、单位推理收入与利用率。
+
+5.国产替代：先落在推理与部分后训练，预训练决定新增空间。2026年国内<mark>GPU</mark>需求约300–400万颗，2027年预计增速30%+，950系列2027年有望超100万张；最快验证的是<mark>服务器</mark>板、散热、连接与电源，高阶材料受良率与制程进度制约。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Anthropic</span><span class="kw-tag">英伟达</span><span class="kw-tag">服务器</span><span class="kw-tag">GPU</span><span class="kw-tag">算力</span><span class="kw-tag">腾讯</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425141512281852" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548252824415828">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-21 23:46 · 👁 199</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">美股：像2000年还是1994...</div>
+  <div class="topic-content">美股：像2000年还是1994年？
+
+虽然历史不会简单重复，但是在持续下跌之后，情绪化类比2000年，我们认为存在很大的误导性。
+
+本轮以费城半导体指数为代表的美股自23年以来持续大涨，底层驱动源在<mark>AI</mark>需求爆发，而<mark>AI</mark>需求爆发的底层驱动在于<mark>AI</mark>技术进步。
+
+因此，在进行对比时，视角应基于<mark>AI</mark>技术的发展阶段延伸，以此为出发点，当前根据类比价值的是90年代初附近。
+
+康波周期的本质是技术扩散周期，上一轮技术抓手是信息技术。
+
+信息技术的应用端发展，经历了集中大型机、桌面 PC、移动互联网 、<mark>云计算</mark>等几个阶段。其一，应用端的层层进步是贯穿几十年的历程；第二，每个应用的突破都伴随着对半导体需求的拉升。继而整个信息技术时代，纳斯达克指数和费城半导体指数的涨幅都是在百倍以上。
+
+2000年信息技术所处的阶段是桌面PC渗透率接近一半，看未来几年的硬件需求确实找不到新的增长点，直至2008年附近开启移动互联网时代。（有个规律，往往在康波衰退期附近形成本轮技术最成熟的应用载体。）
+
+技术突破决定需求，需求决定趋势，而供给主要影响节奏。从这个角度看<mark>AI</mark>，Coding仅仅是第一个应用突破，展望未来几年需求难以见到天花板，令市场担忧的融资、产能、电力等都集中在供给层面。
+
+因此，当前跟2000附近信息技术的产业发展阶段完全不同。
+
+我们认为，当前更可类比的是90年代初附近，如果结合美联储加息背景，跟1994年有一定类似之处，当然历史不能简单对比。
+
+整体而言，当前制约<mark>AI</mark>发展的核心不在需求，在于供给（融资、产能、电力等），供给影响节奏，需求主导趋势。
+
+这几个月快速消化估值和拥挤度压力后，我们建议将视角回归到需求端积极把握机会。
+
+风险提示：<mark>AI</mark>技术进展不及预期。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">云计算</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548252824415828" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258424845512822">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-21 23:46 · 👁 197</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">光伏主产业链重点公司及行业动态...</div>
+  <div class="topic-content">光伏主产业链重点公司及行业动态日报1120
+
+行业动态：
+1. 11月18日，江苏省政府印发《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E7%BE%8E%E4%B8%BD%E6%B1%9F%E8%8B%8F%E5%BB%BA%E8%AE%BE%22%E5%8D%81%E4%BA%94%E4%BA%94%22%E8%A7%84%E5%88%92&quot; title=&quot;%E7%BE%8E%E4%B8%BD%E6%B1%9F%E8%8B%8F%E5%BB%BA%E8%AE%BE%22%E5%8D%81%E4%BA%94%E4%BA%94%22%E8%A7%84%E5%88%92&quot; style=&quot;book&quot; /&gt;》，提出到2030年非化石能源消费占比提高至少5个百分点，风电、光伏装机达1.98亿千瓦、核电装机达900万千瓦，高耗能企业绿色电力消费占比达30%以上。
+2. 11月20日，自然资源部、国家发改委、人民银行、金融监管总局、证监会等五部门印发《海洋产业投融资指导目录（2026版）》，鼓励发展海上风电、海洋能等可再生能源，并将海上风能、光伏、海洋能、氢能、渔业、海底<mark>算力</mark>等业态融合开发项目列为前沿方向。
+3. 11月19日，华北能源监管局印发《&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fwx.zsxq.com%2Fmweb%2Fviews%2Fweread%2Fsearch.html%3Fkeyword%3D%E8%92%99%E8%A5%BF%E7%94%B5%E5%8A%9B%E5%B8%82%E5%9C%BA%E8%B0%83%E9%A2%91%E8%BE%85%E5%8A%A9%E6%9C%8D%E5%8A%A1%E4%BA%A4%E6%98%93%E5%AE%9E%E6%96%BD%E7%BB%86%E5%88%99&quot; title=&quot;%E8%92%99%E8%A5%BF%E7%94%B5%E5%8A%9B%E5%B8%82%E5%9C%BA%E8%B0%83%E9%A2%91%E8%BE%85%E5%8A%A9%E6%9C%8D%E5%8A%A1%E4%BA%A4%E6%98%93%E5%AE%9E%E6%96%BD%E7%BB%86%E5%88%99&quot; style=&quot;book&quot; /&gt;》（2026修订版），调频量价补偿费用按&quot;日清月结&quot;结算、规模上限1亿元，由省调直调公用煤电机组、风电场、光伏电站、独立新型储能电站按月度上网电量比例分摊，扶贫项目不参与分摊。
+4. 近日，无锡产业发展集团旗下国有控股企业日托光伏向无锡市中级人民法院提交破产重整申请，目前处于破产申请审查阶段、法院尚未裁定受理；公司成立于2012年，布局MWT背接触技术路线，主营光伏电池及组件、轻质组件，建有无锡、徐州、南京三大生产基地。
+
+公司动态：
+【通威股份】11月20日董事会通过回购方案，拟集中竞价回购10亿至20亿元，价格不超17.20元/股，用于员工持股或股权激励，预计回购5813.95万股至1.16亿股、占总股本1.29%至2.58%，期限6个月内、无需股东会审议。
+【晶科能源】11月20日以2.00元/股向1290名对象首次授予2.34亿股第二类限制性股票，占股本总额2.29%，并因120名对象失去资格相应调整激励计划。
+【新特能源】联营公司准东特变能源拟以北一电厂项目为底层资产，在上交所申报发行机构间REIT，公司持其49%股权、拟将部分或全部股权出售予管理人，规模与对价待评估及监管审核确定，或构成须予公布交易。
+
+今日行情：上证综指：-1.22%；沪深300：-0.76%；光伏行业指数：-3.27%</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">算力</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258424845512822" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548252824418128">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-21 23:46 · 👁 209</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">消息人士称，<mark>英伟达</mark>的会计处理成...</div>
+  <div class="topic-content">消息人士称，<mark>英伟达</mark>的会计处理成为美国证券交易委员会调查重点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">英伟达</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548252824418128" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-82258424821111142">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-21 23:33 · 👁 231</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">当前市场对比 2000/200...</div>
+  <div class="topic-content">当前市场对比 2000/2008/2022 年熊市的辨析
+
+💬X 平台上有很多帖子提出，当下行情如同 2000 年、2008 年或是 2022 年。
+🤔目前还不能断定，我们正处在一轮长期熊市当中。就算是历史上那些经典熊市阶段，期间也曾出现持续数周的强力反弹；从仓位与市场情绪指标来看，当前市场的出清程度已经处于较高水平。
+📜2000—2002 年科技、媒体和电信板块泡沫破裂，由紧缩货币政策驱动，带来收益率曲线倒挂并最终引发经济衰退，彼时纳斯达克估值处于极高位置。而当前收益率曲线并未倒挂，纳斯达克的预期市盈率已经回落至新冠疫情崩盘低点的同等水平。
+🏦2008 年市场崩盘的导火索是房地产泡沫叠加多家银行倒闭，当前环境并不具备这类条件。
+💸2022 年熊市由美联储政策转向触发：美联储骤然退出大规模量化宽松，开启一轮激进加息周期，这也和现在的市场背景并不相同。
+⚠️这一轮市场核心担忧点，是2028 年及之后 <mark>AI</mark> 资本开支增速放缓，叠加<mark>英伟达</mark>管理层、循环融资安排存在不确定性。在今年春季，市场还普遍担忧 <mark>AI</mark> 会冲击网络安全、基础设施软件类公司，后续事实证明该担忧并不成立。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">英伟达</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/82258424821111142" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425141548888812">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-21 23:33 · 👁 217</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title"><mark>三星</mark>电机 <mark>AI</mark> 载板供需缺口拉...</div>
+  <div class="topic-content"><mark>三星</mark>电机 <mark>AI</mark> 载板供需缺口拉大，扩产被卡在年增 20%
+
+📌<mark>三星</mark>电机（<mark>Samsung</mark> Electro-Mechanics）管理层预计，未来 5 年 <mark>AI</mark> 芯片载板尺寸将从 70×70 毫米扩大到 100×100 甚至 120×120 毫米。伴随面积扩大、层数增加约 20% 以及集成更多电容，即使加速器出货量零增长，所需的制造产能也要翻 3 倍；如果出货量增长 2 倍，产能需求将暴增 10 倍。然而新建载板产能通常需要 3 到 4 年，部分核心设备交付周期更长达 36 到 48 个月，直接将全行业年产能增速锁死在约 20%，根本无法满足客户提出的约 100% 扩产要求。
+💰供给极度受限让载板厂商牢牢握住定价主动权。<mark>三星</mark>电机正在为 2028 到 2029 年的扩产阶段向客户寻求共同投资，并明确表示如果没有客户资金支持，产品定价将大幅上调。这种通常长达 5 年的合作锁定，赋予了业务极高的防守韧性。根据管理层测算，即使 2028 年全球<mark>数据中心</mark>资本开支较 2027 年腰斩，<mark>AI</mark> 载板产能利用率依然可以保持平稳。
+🔋在 MLCC 业务上，消费级普通电容价格虽然持续走软，但高阶<mark>服务器</mark> MLCC 呈现出完全不同的格局。<mark>服务器</mark>规格每 12 到 18 个月就需要更新一次，而客户认证周期长达 5 年，<mark>三星</mark>电机与村田制作所两家合计控制了高阶<mark>服务器</mark> MLCC 市场 80% 到 90% 的份额。目前<mark>三星</mark>电机的 MLCC 长期协议客户已达到约 50 家，后续可能扩充至 60 家，管理层预计长期协议能够覆盖 2027 年多达 75% 的 MLCC 产出。此外，载板内置电容预计在 2028 年放量，玻璃基板也已送样并计划在 2028 到 2029 年进入量产阶段。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Samsung</span><span class="kw-tag">数据中心</span><span class="kw-tag">服务器</span><span class="kw-tag">三星</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425141548888812" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425141541151842">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-21 21:36 · 👁 463</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【华西计算机刘泽晶团队】<mark>华为</mark>昇...</div>
+  <div class="topic-content">【华西计算机刘泽晶团队】<mark>华为</mark><mark>昇腾</mark>950DT集群在汕头启用：国产<mark>推理算力</mark>走向跨境交付
+
+🚀 <mark>昇腾</mark>950DT落地词元出海：
+据汕头市政府门户网站11月16日消息，11月13日，全国首个基于<mark>华为</mark><mark>昇腾</mark>950DT的词元出海<mark>算力</mark>集群在汕头启用。中国电信提供网络和机房资源，<mark>华为</mark>提供<mark>算力</mark>设备，天亿马负责投资运营。项目在境内完成模型推理、生成词元，再经国际海缆向东南亚等海外市场交付。
+
+🚀 从产业逻辑看：
+汕头项目验证了国产<mark>算力</mark>按词元（Token）交付跨境推理服务的路径。此前，<mark>昇腾</mark>950千卡超节点业务已于10月28日在武汉上线，支撑<mark>大模型</mark>训练和行业<mark>智能体</mark>。<mark>华为</mark>披露的950超节点方案采用灵衢高速互联。后续可跟踪调用量和集群利用率；若需求持续增长，<mark>服务器</mark>、交换互联、电源和云<mark>算力</mark>运营等配套环节有望获得增量。
+
+🚀 受益标的：
+国产<mark>AI</mark>基础建设：盛科通信、华丰科技、航天电器、紫光股份、锐捷网络、中科曙光、杰华特、优刻得、神州数码、浪潮信息、华勤技术、拓维信息；
+晶圆代工：<mark>中芯国际</mark>、华虹宏力、晶合集成。
+
+⚠️风险提示：跨境推理需求、项目扩容及模型适配进度不及预期，跨境数据合规要求变化。
+
+☎️ 联系人：华西计算机刘泽晶(SACNO:S1120520020002)/张祺昌</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">推理算力</span><span class="kw-tag">中芯国际</span><span class="kw-tag">大模型</span><span class="kw-tag">智能体</span><span class="kw-tag">服务器</span><span class="kw-tag">华为</span><span class="kw-tag">昇腾</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425141541151842" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
