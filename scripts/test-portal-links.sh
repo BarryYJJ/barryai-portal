@@ -64,26 +64,22 @@ check $? "项目卡顺序为 Token+GPU、Token量与分布、今天在涨啥、A
 grep -q '<h3>Token量与分布看板</h3>' "$PAGE"
 check $? "OpenRouter 项目卡标题为「Token量与分布看板」"
 
-grep -q '每日AI热点：市场正在交易什么' "$PAGE"
-check $? "今天在涨啥副标题已更新"
+# 卡片精简（2026-11-21）：标题下最多两行，只有 01 保留副标题，其余只留一行范围/能力/内容。
+desc_count="$(grep -c 'class="desc"' "$PAGE")"
+[ "$desc_count" -eq 1 ] && grep -q '大模型 <span class="keep">Token</span> 成本与 GPU 租赁基准的统一跟踪' "$PAGE"
+check $? "项目卡只有 Token + GPU 保留副标题"
 
-grep -q 'AI kol前沿消息高频跟踪' "$PAGE"
-check $? "AI 信号台副标题已更新"
-
-grep -q '全天候研究助理：私人研究与执行终端' "$PAGE"
-check $? "AI 研究工作台副标题已更新"
-
-grep -q 'AI/大模型/算力/科技研究笔记与可检索研究' "$PAGE"
-check $? "AI Research OS 副标题已更新"
+rows_ok=1
+while IFS= read -r n; do [ "$n" -le 1 ] || rows_ok=0; done < <(awk '/<a class="card"/{c=0} /class="row"/{c++} /<\/a>/{if(c) print c; c=0}' "$PAGE")
+[ "$rows_ok" -eq 1 ]
+check $? "每张项目卡最多一行信息"
 
 ! grep -q '<b>barryai\.cn/briefs/agent</b>' "$PAGE" \
   && ! grep -q '<b>barryai\.cn/research</b>' "$PAGE"
 check $? "AI 研究工作台与 AI Research OS 不再展示访问地址行"
 
-grep -q "latest('neo_b300')" "$PAGE" && grep -q "latest('neo_b200')" "$PAGE" \
-  && grep -q 'Silicon Data B300 与 B200 租赁价 USD/GPU-hour' "$PAGE" \
-  && ! grep -q 'gpu.latest.neo_h100\|ornn.latest.b200' "$PAGE"
-check $? "Token + GPU 卡片展示同源 Silicon Data B300 与 B200，使用各序列日期和单位"
+! grep -q 'gpu.latest.neo_h100\|ornn.latest.b200' "$PAGE"
+check $? "Token + GPU 卡片不再引用旧的 H100 / Ornn 序列"
 
 ! grep -q "p.cn_share" "$PAGE"
 check $? "Token量与分布卡片不再展示中国模型份额"
