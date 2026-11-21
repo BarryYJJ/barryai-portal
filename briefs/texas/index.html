@@ -26,6 +26,8 @@
   --cw:clamp(40px,min(10.5vw,8vh),64px);
 }
 html,body{background:var(--room);color:var(--ink)}
+html,body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;cursor:default}
+#exporttxt{-webkit-user-select:text;user-select:text;cursor:default}
 body{font-family:var(--f-body);font-size:14px;line-height:1.55;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 0}
 button{font:inherit;color:inherit}
@@ -40,14 +42,23 @@ header{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:10px 
 .ghost:hover{color:var(--ink);border-color:var(--muted)}
 .ghost[aria-pressed="true"]{color:var(--brass);border-color:var(--brass)}
 .ghost.danger{color:var(--bad);border-color:var(--bad)}
+.settle{position:fixed;inset:0;z-index:100;background:rgba(4,8,7,.66);display:flex;align-items:center;justify-content:center;padding:16px}
+.sbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 22px;width:min(420px,100%);max-height:90vh;overflow:auto;box-sizing:border-box;animation:pop .22s ease-out}
+.sbox h2{margin:0 0 6px;font-size:15px;color:var(--brass);letter-spacing:.08em}
+.sbox h3{margin:14px 0 6px;font-size:13px;color:var(--muted);font-weight:600}
+.snet{font:800 40px/1.1 var(--f-num);font-variant-numeric:tabular-nums}.snet.up{color:var(--good)}.snet.down{color:var(--bad)}
+.ssub{color:var(--muted);font-size:13px;margin:4px 0}
+.sline{font-size:13.5px;margin:10px 0 0;line-height:1.7}
+.smiss{background:var(--panel-2);border-radius:8px;padding:7px 10px;margin:5px 0;font-size:13px}.smiss small{display:block;color:var(--muted);margin-top:2px}
+.sbtns{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}.sbtns .btn{min-width:0}
 
 /* table */
 .tablecol{display:grid;gap:0;min-width:0}
 .table{position:relative;background:radial-gradient(ellipse 80% 70% at 50% 45%,var(--felt) 0%,var(--felt-deep) 78%);
-  border:12px solid var(--rail);border-radius:180px/130px;
+  border:12px solid var(--rail);border-radius:28px;
   box-shadow:inset 0 0 0 2px rgba(255,255,255,.05),inset 0 14px 50px rgba(0,0,0,.45),0 0 0 2px var(--rail-hi),0 18px 40px rgba(0,0,0,.5);
   padding:14px 18px;display:grid;gap:6px;justify-items:center;align-content:space-between}
-@media (max-width:640px){.table{border-width:9px;border-radius:56px;padding:14px 8px}}
+@media (max-width:640px){.table{border-width:9px;border-radius:20px;padding:14px 8px}}
 .dock{position:sticky;bottom:0;z-index:5;display:grid;gap:6px;padding-block:10px calc(10px + env(safe-area-inset-bottom,0px));
   background:linear-gradient(to top,var(--room) 80%,rgba(16,22,20,0))}
 @media (max-height:820px){.print{display:none}}
@@ -71,7 +82,7 @@ header{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:10px 
   .dock .actions .raisebox,.actions .rrow{display:contents}
   .dock .actions .quick{grid-column:1/-1;grid-row:1;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
   .dock .actions .q{flex:none;white-space:nowrap}
-  .dock .actions .rrow input{grid-column:1/-1;grid-row:2}
+  .dock .actions .rrow .rzwrap{grid-column:1/-1;grid-row:2}
   .dock .actions .btn.fold{grid-row:3;grid-column:1}
   .dock .actions .btn.call{grid-row:3;grid-column:2}
   .dock .actions #rbtn{grid-row:3;grid-column:3}
@@ -116,6 +127,9 @@ header{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:10px 
 .card .cs{position:absolute;top:calc(var(--cw)*.36);left:6px;font-size:calc(var(--cw)*.22);line-height:1}
 .card .cb{position:absolute;right:5px;bottom:3px;font-size:calc(var(--cw)*.55);line-height:1}
 .card.back{background:repeating-linear-gradient(45deg,#7a1e19 0 5px,#932a20 5px 10px);border:3px solid #f1ebdd}
+.card.back.blue{background:repeating-linear-gradient(45deg,#1d3f73 0 5px,#2a5594 5px 10px)}
+.deck{transition:opacity .3s,transform .3s}
+.deck.idle{opacity:.4;transform:scale(.92)}
 .card.mini{--cw:34px}
 .slot{width:var(--cw);aspect-ratio:5/7;border:1.5px dashed rgba(255,255,255,.16);border-radius:7px}
 @keyframes deal{from{transform:translateY(-10px) scale(.96)}to{transform:none}}
@@ -149,6 +163,8 @@ header{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:10px 
 .q:hover{color:var(--ink);border-color:var(--muted)}
 .rrow{display:flex;gap:10px;align-items:center}
 .rrow input{flex:1;min-width:0;accent-color:var(--brass)}
+.rzwrap{flex:1;min-width:0;position:relative}
+.rzwrap input{width:100%;margin:0;display:block}
 .waiting{color:var(--muted);padding:12px;display:flex;align-items:center;gap:8px}
 .dots i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--brass);margin:0 2px;animation:blink 1s infinite}
 .dots i:nth-child(2){animation-delay:.2s}.dots i:nth-child(3){animation-delay:.4s}
@@ -161,6 +177,13 @@ header{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:10px 
 
 /* side rail */
 .rail{display:grid;gap:12px;min-width:0}
+.tabs{display:none}
+@media (max-width:920px){
+  .tabs{display:flex;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px;position:sticky;top:0;z-index:5}
+  .tab{flex:1;background:transparent;border:0;border-radius:9px;padding:9px 0;font:600 14px/1 inherit;color:var(--muted);cursor:pointer}
+  .rail[data-tab=coach] .tab[data-t=coach],.rail[data-tab=path] .tab[data-t=path],.rail[data-tab=review] .tab[data-t=review]{background:var(--panel-2);color:var(--ink)}
+  .rail[data-tab=coach]>.box:not([data-tab=coach]),.rail[data-tab=path]>.box:not([data-tab=path]),.rail[data-tab=review]>.box:not([data-tab=review]){display:none}
+}
 .box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;min-width:0}
 .box h2{font-family:var(--f-display);font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--brass);margin:0 0 8px}
 .coach p{margin:6px 0}
@@ -168,6 +191,7 @@ header{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:10px 
 .coach .draw{color:var(--warn)}
 .coach .tip{background:var(--panel-2);border-left:3px solid var(--brass);padding:8px 10px;border-radius:0 8px 8px 0}
 .coach .why{color:var(--muted);font-size:12.5px}
+.gbar{display:flex;height:10px;border-radius:5px;overflow:hidden;margin:12px 0 4px;background:#0c1311}.gbar i{display:block;height:100%}.gbar .gr{background:#c9483d}.gbar .gc{background:#2e7d62}.gbar .gf{background:#3a4a5c}
 .meter{position:relative;height:10px;border-radius:5px;background:#0c1311;margin:18px 0 6px;overflow:visible}
 .meter .fill{position:absolute;inset:0 auto 0 0;border-radius:5px;background:linear-gradient(90deg,#2e7d62,var(--good))}
 .meter .need{position:absolute;top:-6px;bottom:-6px;width:2px;background:var(--warn)}
@@ -213,7 +237,7 @@ header{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:10px 
 .seg .ghost{border-radius:0;margin-left:-1px}
 .seg .ghost:first-child{border-radius:8px 0 0 8px;margin-left:0}
 .seg .ghost:last-child{border-radius:0 8px 8px 0}
-.table{position:relative;display:block;padding:0;height:clamp(520px,66vh,620px);border-radius:220px/170px}
+.table{position:relative;display:block;padding:0;height:clamp(520px,66vh,620px);border-radius:36px}
 #seats{position:absolute;inset:0}
 .seat{position:absolute;left:var(--x);top:var(--y);transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:5px;width:auto;z-index:2}
 .seat.bot{--cw:42px}
@@ -256,7 +280,7 @@ header{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:10px 
 @media (max-width:640px){
   header{flex-wrap:wrap}
   .brand .bl{display:none}
-  .table{height:600px;border-radius:52px}
+  .table{height:600px;border-radius:24px}
   .seat,.betz{left:var(--mx);top:var(--my)}
   .seat.bot{--cw:30px}
   .seat.me{--cw:48px}
@@ -283,7 +307,7 @@ header{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:10px 
         <button class="ghost" data-mode="2" aria-pressed="false">单挑</button><button class="ghost" data-mode="3" aria-pressed="false">3 人</button><button class="ghost" data-mode="6" aria-pressed="false">6 人</button>
       </div>
       <button class="ghost" id="coachbtn" aria-pressed="true">教练：开</button>
-      <button class="ghost" id="resetbtn">重新开始</button>
+      <button class="ghost" id="settlebtn">结算</button><button class="ghost" id="resetbtn">重新开始</button>
     </div>
   </header>
 
@@ -295,7 +319,7 @@ header{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:10px 
           <div class="board" id="board"><div class="cslot bslot"></div><div class="cslot bslot"></div><div class="cslot bslot"></div><div class="cslot bslot"></div><div class="cslot bslot"></div></div>
         </div>
         <div class="potrow">
-          <div class="deck" id="deck" aria-label="牌堆"><div class="card back"></div><div class="card back"></div><div class="card back"></div></div>
+          <div class="deck" id="deckR" aria-label="红色牌堆"><div class="card back"></div><div class="card back"></div><div class="card back"></div></div><div class="deck" id="deckB" aria-label="蓝色牌堆"><div class="card back blue"></div><div class="card back blue"></div><div class="card back blue"></div></div>
           <div class="potline" id="pot"></div>
         </div>
         <div id="resultbox"></div>
@@ -307,10 +331,11 @@ header{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:10px 
     </div>
   </div>
 
-  <aside class="rail">
-    <div class="box coach" id="coach"></div>
-    <div class="box"><h2>行动路线</h2><div class="log" id="log"></div></div>
-    <div class="box hist">
+  <aside class="rail" id="rail" data-tab="coach">
+    <div class="tabs" role="tablist"><button class="tab" data-t="coach" role="tab">教练</button><button class="tab" data-t="path" role="tab">路线</button><button class="tab" data-t="review" role="tab">复盘</button></div>
+    <div class="box coach" id="coach" data-tab="coach"></div>
+    <div class="box" data-tab="path"><h2>行动路线</h2><div class="log" id="log"></div></div>
+    <div class="box hist" data-tab="review">
       <h2>牌谱</h2>
       <p class="why" id="histcount">还没有打完的牌。</p>
       <div class="quick">
@@ -320,6 +345,7 @@ header{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:10px 
       </div>
       <p class="why" id="histmsg" aria-live="polite"></p>
       <textarea id="exporttxt" hidden readonly aria-label="导出的牌谱"></textarea>
+      <div id="prevhand"></div>
     </div>
   </aside>
 </div>
@@ -363,6 +389,65 @@ const LAYOUT={
   3:[[50,86,50,88],[18,22,20,24],[82,22,80,24]],
   6:[[50,86,50,88],[11,60,19,63],[17,18,19,26],[50,11,50,10],[83,18,81,26],[89,60,81,63]],
 };
+
+/* GTO preflop charts: 6-max cash, 100bb (solver frequencies from pokerai.bet range pages). Each spot: 169 hands x [raise,call], one char per value, value = index*2 (%) */
+const GTO_RAW={"bb-vs-btn-4bet":"KUY0Y00o0m0o000I0000000000000000000U00000005000000mA0o000o000i0000000000000000000000000000000000Y00E000k00000000000000000000000000000000006b0I00000000000000000000000000000000000W0o0000000000000000000000000000000e0I000000000000000000000000000Q0i00000000000000000000000A0o000000000000000000050K00000000000000000c0000000000000000000000000000","bb-vs-btn":"o0o0o0o0o0o0IWIW0o0o0o0o8g0o8g0oCco03lSM6i5k0X0o00o0o0XIo0GYi68g0oCc0o0oEa0UMS0h0o000o000o000o00o0Ea4lk42n8g0o1o0K0o000o000o000o000o000o00o0o0Cco03lXH0YMS000o000o000o000o000o00o0o06io01oUK00OQ000o000o000o000o00eAo00o4k006i000o00000000000000QOk40i6i004k000o0000000000Aeo00o0o000o000o0000005jKU0a0o000o000I000ocC0M0o000o000o0o000o000o0o000o","bb-vs-co":"o0o0o0o0SMXI0oGYAe8g6i0o0o6i059g00g86jAe003l004k00o0o0EaaFGZQO4kQO0V0o000o004k000o004k000o000o00o0o09go10oAe042m000o000o000o000o000o000o00o0o04ko00HHY00Db000o000o000o000W000000ZGo00oAe006i000o000000000000000000CcIW0J0o000o000o000000000000007hKU0E6i000o000600000000000oaE0O0o000o00000000004lIW0C0o000o0000000oQP081o000o000o6i000o000o0B000o","bb-vs-mp":"o0o0o0o06iHY0oQO8gCc0l0o0A4l005k00MS0SKU00Cc006i00o0o04kk40oaF0o0o000o00Cd008g002m005j000o000o00o0o08go00oBe00Ae000o000o000o000o000o000000eAo00kIW000o000o000o000100000000000000DcZF0Q4k000o000o0000000000000000007i6i0C0o000o000o000000000000002mQP0A5k000o000000000000000oWI0I0o000o00000000004lEa070o000o0000000oLU080o000o000o8g000o000o0E000o","bb-vs-sb":"o0o0o0o0o0o00oBd1n0o1o0o8g0oIW0oKU8g3m0oCc0oOQ0og8o0o00oQO5jAf5k0oAe0oJV0oSM0oJV0oIW0o000o000o00o00o1n0oAe0oEa0oQO0o000o400o000o000o000o00o00oAe0oLU0oNS8g00KU00Ea00Ea00Cc00eA00o0IW8g0oEa0oU2IW00UK00cC00KV00WI00eAAf4l0o5G0o00Ae00OQ00GY00GY00EbFZ2m0o000o002m00000000006jGY0o0o000o00Eb0000002mEa0o0o000o00OQ000oIW0o0o000o000o0o000o000o0o000o","bb-vs-utg":"o0o0o1bD0oGZ0oaE0o0o002m00HY000o00VJ00KU00Ae002m00o0o03lYG0oPQ0S0o000o000o006i000o008g000o000o00o0o00TWI0Y9f004k000o000o000o000o0003000000KUYH0ZAe002n000o00040000000000000000008hQO0J6j000o000b0000000000000000004k0o000o000o000a000000000000004kOQ044k000o000000000000002nKU0A0o000o00000000000oIW070o000o0000002mMS062m000o000o4k000o000o06000o","btn-open":"o0o0o0o0o0o0o0o0o0o0o0o0o0o0o0o0o0o0o0o0o0o000o000o0o0o0o0o0o0o0o0o0o0o0o000o000o000o000o000o000o0o0o0o0o0o0o0o000o000o000o000o000o0008000o0o0o0o0o0o0A0o000o000o000o00000000000o0o0o0o0o0o000o000o000000000000000o0o0i0o000o0000000000000000000o0o050o000o000000000000000o0o000o000000000000000o0o000o00000000000o0o000o0000000o000000000o00000o0","btn-vs-bb-3bet":"o0o0aE0oGZ0oEb0oI30o002m00Ea006i000o00Af00Cc00OQ00o00o9f0oFR0o137i004e002A00MS008000000000000000j50o000o000o004000000000000000000000000000Ea0o010o00FS000000000000000000000000008h0o000o000000000000000000000000000oGY002E00000000000000000000000o2n00000000000000000000000o0o0000000000000000000o0o000000000000008g0o00000000002m000000000f00000Q","btn-vs-co-4bet":"ooKAP00o4Y0W000L0002000000000000000d00040000000000j33d000e000a0000000000000000000000000000000000M80C000000000000000000000000000000000000007M0O00000000000000000000000000000000000Y0E0000000000000000000000000000000W00000000000000000000000000000N0200000000000000000000000E030000000000000000000I00000000000000000A0C0000000000040000000000000000","btn-vs-co":"o0o0o0o0YGWIdCLTV0WI00aE00fA00n100eA00cD00dB000000o0dCZFeBW4aE00g800P0000000CD000000000000000000o0XI00RN00o0000000000000000000000000000000i6YG00m300G000000000000000000000000000YGaF007000000000000000000000000000WI0C00000000000000000000000000WI650000000000000000000000XI56000000000000000000SM4600000000000000EHCB00000000004B0000000008000008","btn-vs-mp":"o0o0o0o0MSIWQ8QO40WI00TM00bE00i700WJ00XH00ZG000000o0OQXHUK20IW00eA001000000040000000000000000000o0eA00cC00c0000000000000000000000000000000SMRO00W6000000000000000000000000000000UKUL000000000000000000000000000000OQ6E00000000000000000000000000QOA40000000000000000000000QO4B000000000000000000KV2E000000000000004HGM00000000002B000000000800000A","btn-vs-sb-3bet":"o0o0XH0o4k0o9f0oQ00o00MS00SM00C0000o00Ea00IW000000o00o8h0oOC0o008g00260000000Q002000000000000000o00o100o00IW003000000000000000000000000000Ea0o002m000000000000000000000000000000GY0o000o000000000000000000000000002m0o000400000000000000000000006j0o000A0000000000000000000o0o0000000000000000000o0o000000000000006i0o00000000005i000000000e00000W","btn-vs-utg-4bet":"EaC08I0m0007000S0000000000000000000S00000000000000ZA0G000Q000200000000000000000000000000000000002e00000000000000000000000000000000000000000P0000000000000000000000000000000000000D040000000000000000000000000000000A000000000000000000000000000008060000000000000000000000090400000000000000000008020000000000000002080000000000000000000000000000","btn-vs-utg":"o0o0i6m2GY7hC0SM00WI00WI00EA00K500aF00VJ00aE000000o0GYUAQO00LT00f9000000000000000000000000000000h8j600XH0000000000000000000000000000000000PQMS0080000000000000000000000000000000OQOQ000000000000000000000000000000KV0A00000000000000000000000000KUB70000000000000000000000MS4F000000000000000000CSEM000000000000003FMS00000000000A000000000800000C","co-open":"o0o0o0o0o0o0o0o0o0o0o0o0n0o000o000o0F0o000o000o000o0o0o0o0o0o0o0o060o000o000o000o000o000g0000000o0o0o0o0o0o000o000o000o000i000000000000000o0o0o0o020o000o00000000000000000000000o0o0I0o000o00000000000000000000000o0o000o00000000000000000000000o0o000l0000000000000000000o0o0000000000000000000o0k000000000000000o0d00000000000o000000000m00000e0","co-vs-bb-3bet":"o0o0GY0oIW0o600o200o00WA00M000EE000o009f00MS00A000o00o8K0o400o00MC00000000009300K000000000000000LT0o000o00000000000000000000000000000000004k0o000Y0000000000000000000000000000000o0o0000000000000000000000000000000o00000000000000000000000000000o0Z00000000000000000000000i0W0000000000000000000Y0S000000000000000I0d00000000000M000000000O00000N","co-vs-btn-3bet":"o0o0h00oZF0oI4Af000o00JS00C000A000SM00GM0000000000o00oOEaE20SM00GZ00000000000O000000000000000000o0IW000o0000000000000000000000000000000000i2GY008E000000000000000000000000000000IW7i000G000000000000000000000000004k0K000000000000000000000000007h0U00000000000000000000000o0c0000000000000000000o0V000000000000000i0d00000000000o000000000m00000e","co-vs-mp":"o0o0o0o0eAVKE0aE00o000C300M000b000g900k400U2000000o0WJa0eA00cC00a0000000000000000000000000000000o1o000k40000000000000000000000000000000000eAU80000000000000000000000000000000000cC42000000000000000000000000000000eB0000000000000000000000000000cC300000000000000000000000I832000000000000000000C7230000000000000023E60000000000220000000002000002","co-vs-sb-3bet":"o0o0FZ0oCc0oF00o604k00O000C00040004k00OK00A7000000o00oGC0o000o00I200000000003000E000000000000000OR0o000o0000000000000000000000000000000000Cc0o000E0000000000000000000000000000002n0o0000000000000000000000000000000o0A000000000000000000000000004k0Q00000000000000000000001i0f0000000000000000000U0U000000000000000G0d00000000000M000000000Q00000S","co-vs-utg-4bet":"GYC08I0g000Q000O0000000000000000000M00000000000000ZA0S000G000200000000000000000000000000000000003c00000000000000000000000000000000000000000U0000000000000000000000000000000000000B02000000000000000000000000000000090000000000000000000000000000090500000000000000000000000904000000000000000000070200000000000000010A0000000000000000000000000000","co-vs-utg":"o0o0k4g8aFQP00aE00W300E400A000A000g800g800M3000000o0SNO0eA00aE00G0000000000000000000000000000000h8m200eA0000000000000000000000000000000000YGDC0000000000000000000000000000000000WI24000000000000000000000000000000UK0000000000000000000000000000WI510000000000000000000000DA4500000000000000000079A70000000000000014JE0000000000020000000002000004","mp-open":"o0o0o0o0o0o0o0o0o0o080o000o000o000o000o000o000o000o0o0o0o0o0o0o0o000o000o000o000o000000000000000o0o0o0o0K0o000o000000000000000000000000000o0o0E0o000Q000000000000000000000000000o0o000o000000000000000000000000000o0o000600000000000000000000000o0Q00000000000000000000000o0Q0000000000000000000o0L000000000000000o0U00000000000T000000000M00000M0","mp-vs-bb-3bet":"o0WJAe0oCF0o100o00BW00L000A0001000Ae00Cc00PA004000aE0o008g00Af00M00000000000I00000000000000000000o0o000m00000000000000000000000000000000004l0g00000000000000000000000000000000000o0M0000000000000000000000000000000c05000000000000000000000000000d0Q00000000000000000000000T0Q0000000000000000000Q0L000000000000000G0U00000000000G000000000G00000G","mp-vs-btn-3bet":"o0o0c80oaF8h00IW000c00A20000000000YG00KK0020000000o0AeC0h800HX00FE000000000064000000000000000000l08h004j0000000000000000000000000000000000NS7i00000000000000000000000000000000008g0V0000000000000000000000000000000o02000000000000000000000000008g0M00000000000000000000000b0P0000000000000000000g0L000000000000000T0U00000000000T000000000M00000M","mp-vs-co-3bet":"o0o0aA0oeASM009g000A00000000000000aE00BA0000000000o0UK60YG00KU00G0000000000070000000000000000000k00Y000I0000000000000000000000000000000000QO2Z00000000000000000000000000000000005j0M0000000000000000000000000000008g06000000000000000000000000005a0I00000000000000000000000Q6H0000000000000000000V0L000000000000000M0U00000000000T000000000M00000M","mp-vs-sb-3bet":"o0l47i0oIM0o400o006000A00040000000IW00FA00A0000000h70o00IW007h00A00000009000B00090000000000000002m0o000800000000000000000000000000000000008h0o00000000000000000000000000000000000o0T0000000000000000000000000000004k00000000000000000000000000000W0L00000000000000000000000L0Q0000000000000000000J0L00000000000000080U00000000000B000000000G00000H","mp-vs-utg":"o0o0m2i6Y2eA00k4004000G000C0004000m200m200K0000000o0i6O0m200m300B0000000000000005000000000000000l4V000920000000000000000000000000000000000i6020000000000000000000000000000000000h700000000000000000000000000000000W60000000000000000000000000000I4500000000000000000000000A25200000000000000000062B20000000000000001E40000000000000000000000000001","sb-open":"o0o0o0o0o0o0o0o0o0o0o0o0o0o0o0o0o0o0o0o0U0o000o000o0o0o0o0o0o0o0o0o0o0o0o000o000o000o000o000o000o0o0o0o0o0o0o0o000o000o000o000o000o000o000o0o0o0o0o0o000o000o000o000O00000000000o0o0o0o0W0o000o000J000000000000000o0o0j0o000o0002000000000000000o0o030o000o000000000000000o0o000o000000000000000o0o000o00000000000o0o000k0000000o000000000o00000o0","sb-vs-bb-3bet":"o0o0k0o0CJ0oaE0oZF0o000o000o002m000o006j00aE00m000o00oXH0oKU0o060o000o0005000C002000000000000000o00o410o260o000K00000000000000000000000000o00o000o000000000000000000000000000000X20o000o000000000000000000000000000o0C000000000000000000000000000o0000000000000000000000000o0U0000000000000000000o0B000000000000000k0I00000000000M0000000000000000","sb-vs-btn-4bet":"UKY0Y00o0i0o000o000S000800000000000000000000000000oA0o000o000o0001000000000000000000000000000000Y00o000i00000000000000000000000000000000000G0000000000000000000000000000000000000Y0M0000000000000000000000000000000k00000000000000000000000000000i0000000000000000000000000e060000000000000000000a00000000000000000J000000000000000000000000000000","sb-vs-btn":"o0o0o0o0i6o0l3o0W9SM00WI00dB00bD00m200YG0004000000o0o0m3o0g8o064g8006A00000004000000000000000000o0o004i600WI000000000000000000000000000000o0o002k4000000000000000000000000000000i6m300k400000000000000000000000000k46300000000000000000000000000i6020000000000000000000000eA63000000000000000000aE0200000000000000JF0000000000000A000000000A00000C","sb-vs-co":"o0o0o0o0k4o0UBdB00WI00IG0022000600g800ZF0001000000o0o0f9o0A2dC00SE000000000003000000000000000000o0m200aE0002000000000000000000000000000000l4k400m2000000000000000000000000000000g8eA000000000000000000000000000000eA0200000000000000000000000000aF010000000000000000000000RK03000000000000000000KH02000000000000004A020000000000070000000007000009","sb-vs-mp":"o0o0o0o0cCQO00VJ00SM000B0032004800YG00eA00C6000000o0o0GCi600YG0045000000000000000000000000000000o0l400ZG0000000000000000000000000000000000h8fA0080000000000000000000000000000000ZGQA000000000000000000000000000000SM0600000000000000000000000000MS220000000000000000000000DK45000000000000000000GK06000000000000002A39000000000008000000000900000E","sb-vs-utg":"o0o0m2o0SMNR00YG006F00080000000000ZG00WE0003000000o0o046aE00UK0002000000000002000000000000000000k4g800WI0000000000000000000000000000000000cCYG0000000000000000000000000000000000PP9A000000000000000000000000000000LU0500000000000000000000000000KU2400000000000000000000009K690000000000000000008K68000000000000002BED000000000008000000000A00000H","utg-open":"o0o0o0o0o0o0o0o0o0o000o000o000o000o000o000o000F000o0o0o0o0k0o0G0o000o000O000o000C000000000000000o0o0A0o000o0000000000000000000000000000000o0o000o0000000000000000000000000000000o0o000C000000000000000000000000000o0G000000000000000000000000000o0E00000000000000000000000o0I0000000000000000000o0G000000000000000O0L00000000000E000000000C00000G0","utg-vs-bb-3bet":"o0UKDc0o200o000o00GB00A000600040002m00CS00S5009000MS0o00Ae007600A00000000000400000000000000000000o0Y000V00000000000000000000000000000000000o0L00000000000000000000000000000000002g0Y0000000000000000000000000000000S02000000000000000000000000000S0E00000000000000000000000L0I0000000000000000000Q0G000000000000000C0L00000000000E000000000C00000G","utg-vs-btn-3bet":"o0o0KE0oQ7KU004k000I00800000000000SM00GI00B0000000o0OQ00YG00OQ00B0000000000080000000000000000000QK0Q000K0000000000000000000000000000000000IW0S00000000000000000000000000000000004k0M0000000000000000000000000000003f01000000000000000000000000001Y0E00000000000000000000000Q0I0000000000000000000W0G000000000000000M0L00000000000E000000000C00000G","utg-vs-co-3bet":"o0o0KD0oQ0VK002m000000000030000000UK00CD0040000000o0VJ00QO00UK00400000002000A0000000000000000000SI0K00060000000000000000000000000000000000HX0M00000000000000000000000000000000006j0I0000000000000000000000000000004U04000000000000000000000000000Q0E00000000000000000000000K2G0000000000000000000R0G000000000000000H0L00000000000E000000000C00000G","utg-vs-mp-3bet":"o0o0FC0oO0QO000Q000000000020000000WI00C60040000000o0WI00RO00UC0000000000000080000000000000000000QI0800060000000000000000000000000000000000GY0I00000000000000000000000000000000006c0L0000000000000000000000000000006K03000000000000000000000000000L0E00000000000000000000000I3F0000000000000000000N0G000000000000000E0L00000000000E000000000C00000G","utg-vs-sb-3bet":"o0d92d0oA06j004k006000400080004000Db00A800G0003000VJ0o008g00IG00B00000000000900000000000000000000o0M000600000000000000000000000000000000004k0O00000000000000000000000000000000000o0O0000000000000000000000000000002Q00000000000000000000000000000M0E00000000000000000000000E0I0000000000000000000G0G00000000000000030L000000000007000000000C00000G"};
+const GTO_A='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmno';
+// hand order used by GTO_RAW: AA, AKs, AKo, AQs ... 22, as pfKey values
+const GTO_IDX=(()=>{const m={};let i=0;for(let hi=12;hi>=0;hi--) for(let lo=hi;lo>=0;lo--){if(hi===lo) m[hi*26+lo*2]=i++;else{m[hi*26+lo*2+1]=i++;m[hi*26+lo*2]=i++;}}return m;})();
+const GTO_POS={UTG:'utg',HJ:'mp',CO:'co',BTN:'btn',SB:'sb',BB:'bb'};
+const GTO_UP=k=>k==='mp'?'HJ':k.toUpperCase();
+/* The chart that covers this preflop spot for player p, or null (heads-up, limped pots, cold calls, 5-bet+).
+   A 3-handed table is the same spot as a 6-max table folded round to the button, so it uses the same charts. */
+function gtoSpot(h,p){
+  const n=N();if(n===2||h.street!==0||h.limpers.length) return null;
+  const pre=h.path.filter(a=>a.st===0);
+  if(pre.some(a=>a.k==='call')) return null;
+  const rs=pre.filter(a=>a.k==='raise').map(a=>a.p),P=i=>GTO_POS[posName(i)];
+  let key,type;
+  if(!rs.length){key=P(p)+'-open';type='open';}
+  else if(rs.length===1&&rs[0]!==p){key=`${P(p)}-vs-${P(rs[0])}`;type='vsOpen';}
+  else if(rs.length===2&&rs[0]===p){key=`${P(p)}-vs-${P(rs[1])}-3bet`;type='vs3bet';}
+  else if(rs.length===3&&rs[1]===p&&rs[2]===rs[0]){key=`${P(p)}-vs-${P(rs[0])}-4bet`;type='vs4bet';}
+  else return null;
+  const raw=GTO_RAW[key];if(!raw) return null;
+  const i=GTO_IDX[pfKey(h.holes[p][0],h.holes[p][1])];let r=GTO_A.indexOf(raw[2*i])*2,c=GTO_A.indexOf(raw[2*i+1])*2;
+  if(r+c>100){const k=100/(r+c);r=Math.round(r*k);c=100-r;} // a few source entries add up past 100%
+  const ks=key.split('-');
+  const label=type==='open'?`${GTO_UP(ks[0])} 开池`:type==='vsOpen'?`${GTO_UP(ks[0])} 面对 ${GTO_UP(ks[2])} 开池`
+    :type==='vs3bet'?`${GTO_UP(ks[0])} 开池后面对 ${GTO_UP(ks[2])} 的 3-bet`:`${GTO_UP(ks[0])} 3-bet 后面对 ${GTO_UP(ks[2])} 的 4-bet`;
+  return {key,type,label,r,c,f:Math.max(0,100-r-c)};
+}
+// raise-to sizes the charts assume: open 2.5bb (SB 3bb), 3-bet 3x in position / 4x out of position, 4-bet ~2.3x, 5-bet all-in
+function gtoSize(h,p,g){
+  const c=curBet(),max=h.bet[p]+S.P[p].stack,pos=posName(p);
+  const oop=pos==='SB'||(pos==='BB'&&g.key!=='bb-vs-sb');
+  const v=g.type==='open'?(pos==='SB'?3*BB:2.5*BB):g.type==='vsOpen'?c*(oop?4:3):g.type==='vs3bet'?c*2.3:max;
+  return Math.min(max,r10(v));
+}
+/* What a player's preflop actions so far say about their hand, from the charts: a weight per 169-class
+   (product of the chart frequencies of each action they took). Null where the charts don't describe the line. */
+function gtoRangeOf(h,q){
+  const n=N();if(n===2) return null;
+  const P=i=>GTO_POS[posName(i)],raisers=[];let keys=[];
+  for(const a of h.path){
+    if(a.st!==0) break;
+    if(a.p===q&&(a.k==='raise'||a.k==='call')){
+      const k=raisers.length,kind=a.k==='raise'?0:1;let key=null;
+      if(k===0&&kind===0) key=P(q)+'-open';
+      else if(k===1&&raisers[0]!==q) key=`${P(q)}-vs-${P(raisers[0])}`;
+      else if(k===2&&raisers[0]===q) key=`${P(q)}-vs-${P(raisers[1])}-3bet`;
+      else if(k===3&&raisers[1]===q&&raisers[2]===raisers[0]) key=`${P(q)}-vs-${P(raisers[0])}-4bet`;
+      if(!key||!GTO_RAW[key]) return null;
+      keys.push([key,kind]);
+    }
+    if(a.k==='raise') raisers.push(a.p);
+  }
+  if(!keys.length) return null;
+  return hk=>{const i=GTO_IDX[hk];let w=1;for(const [key,kind] of keys){const raw=GTO_RAW[key];w*=Math.min(100,GTO_A.indexOf(raw[2*i+kind])*2)/100;}return .015+w;};
+}
+const gtoBest=g=>g.r>=g.c&&g.r>=g.f?'raise':g.c>=g.f?'call':'fold';
+const gtoFreqTxt=g=>`加注 ${g.r}% · 跟注 ${g.c}% · 弃牌 ${g.f}%`;
 
 /* ---------- hand evaluation ---------- */
 function straightHi(m){
@@ -461,7 +546,7 @@ function multiEquity(hole,board,opps,n){
       const h2=[deck[2*q],deck[2*q+1]],f=evalHand(h2.concat(run));
       if(f>best){beaten=true;best=f;}else if(f===best&&!beaten) ties++;
       let draw=0;if(board.length&&board.length<5){const d=drawInfo(h2,board);if(d) draw=d.outs>=8?.62:.42;}
-      o.push({str:board.length?evalHand(h2.concat(board)):0,pf:board.length?0:pfPct(h2),draw});
+      o.push({str:board.length?evalHand(h2.concat(board)):0,pf:board.length?0:pfPct(h2),hk:pfKey(h2[0],h2[1]),draw});
     }
     sm.push({res:beaten?0:1/ties,o});
   }
@@ -472,7 +557,7 @@ function multiEquity(hole,board,opps,n){
     }else sm.forEach(s=>s.o[q].p=s.o[q].pf);
   }
   let sw=0,sr=0;
-  for(const s of sm){let w=1;for(let q=0;q<k;q++) w*=opps[q].eps+Math.pow(s.o[q].p,1.25*opps[q].L);sw+=w;sr+=w*s.res;}
+  for(const s of sm){let w=1;for(let q=0;q<k;q++) w*=opps[q].w?opps[q].w(s.o[q].hk):opps[q].eps+Math.pow(s.o[q].p,1.25*opps[q].L);sw+=w;sr+=w*s.res;}
   return sw?sr/sw:0;
 }
 /* what the bots have learned about you across hands */
@@ -494,7 +579,8 @@ const N=()=>S.mode;
 const posName=(i,btn)=>MODES[S.mode].pos[(i-(btn??S.button)+S.mode)%S.mode];
 const nameOf=i=>i===0?'你':S.P[i].name;
 function save(){try{localStorage.setItem('holdem-v2',JSON.stringify(S.base));}catch(e){}}
-function snapBase(){S.base={mode:S.mode,stacks:S.P.map(p=>p.stack),hand:S.hand,button:S.button,coach:S.coach,bought:S.bought};}
+function snapBase(){S.base={mode:S.mode,stacks:S.P.map(p=>p.stack),hand:S.hand,button:S.button,coach:S.coach,bought:S.bought,sess:S.sess};}
+const newSess=()=>({t:Date.now(),hands:0,g:{},m:{}});
 // styles are dealt out at random every time the page loads or the table changes, so a name never tells you how someone plays
 function makePlayers(mode,stacks){
   const styles=shuffle(Object.keys(STYLE).slice());
@@ -504,13 +590,13 @@ function start(data){
   let saved=null;try{saved=JSON.parse(localStorage.getItem('holdem-v2')||'null');}catch(e){}
   const base=(data&&data.mode)?data:(saved&&saved.mode)?saved:{mode:6,hand:0,button:0,coach:true,bought:BUYIN};
   S={mode:base.mode,P:makePlayers(base.mode,base.stacks),hand:base.hand||0,button:base.button??0,coach:base.coach!==false,
-     bought:base.bought||BUYIN,h:null,base:null,hist:[]};
+     bought:base.bought||BUYIN,h:null,base:null,hist:[],sess:base.sess||newSess()};
   try{S.hist=JSON.parse(localStorage.getItem('hu-holdem-hist-v1')||'[]')||[];}catch(e){S.hist=[];}
   try{S.prof=JSON.parse(localStorage.getItem('hu-holdem-prof-v1')||'null')||{};}catch(e){S.prof={};}
   bindUI();buildSeats();renderHist();newHand();
 }
 function setMode(mode){
-  S.mode=mode;S.P=makePlayers(mode);S.hand=0;S.button=0;S.bought=BUYIN;S.h=null;
+  S.mode=mode;S.P=makePlayers(mode);S.hand=0;S.button=0;S.bought=BUYIN;S.h=null;S.sess=newSess();S.settled=false;closeSettle();
   buildSeats();newHand();
 }
 function saveHist(){try{localStorage.setItem('hu-holdem-hist-v1',JSON.stringify(S.hist));}catch(e){}}
@@ -536,6 +622,8 @@ function post(i,amt){amt=Math.min(amt,S.P[i].stack);S.P[i].stack-=amt;S.h.bet[i]
 function nextActor(from){for(let k=1;k<=N();k++){const i=(from+k)%N();if(canAct(i)) return i;}return -1;}
 
 function newHand(){
+  // keep last hand's action line and graded decisions to show under the hand history
+  if(S.h&&S.h.over) S.prev={path:pathHTML(),ds:(S.h.decisions||[]).map((d,i)=>decisionCard(d,true,i)).join('')};
   snapBase();save();
   if(S.P[0].stack<=0){S.h=null;render();return;}
   for(let i=1;i<N();i++) if(S.P[i].stack<=0){S.P[i].stack=BUYIN;S.P[i].rebuy=true;}
@@ -613,7 +701,10 @@ function doAction(p,type,raiseTo){
   if(type==='call'&&toCall<=0) type='check';
   if(type==='raise'){raiseTo=Math.min(Math.max(raiseTo,c+1),h.bet[p]+S.P[p].stack);if(raiseTo<=c) type=toCall>0?'call':'check';}
   const A=actionName(p,type,raiseTo),txt=fmtAction(A),pb=potTotal();
-  let ev=null;if(adv){ev=evaluate(adv,type,raiseTo);(h.decisions=h.decisions||[]).push({st:h.street,txt,adv,ev});}
+  let ev=null;if(adv){ev=evaluate(adv,type,raiseTo);(h.decisions=h.decisions||[]).push({st:h.street,txt,adv,ev});
+    const ss=S.sess;ss.g[ev.g]=(ss.g[ev.g]||0)+1;
+    if(ev.g==='bad'||ev.g==='warn'){const key=(h.street?'翻牌后':'翻牌前')+' · '+ev.label.replace(/（.*?）/g,'').replace(/[：:].*$/,'');
+      const m=ss.m[key]=ss.m[key]||{n:0,ex:''};m.n++;m.ex=`第 ${S.hand} 手 ${h.holes[0].map(lbl).join('')}，${STREET[h.street]} ${txt}，建议 ${adv.tip.replace(/。$/,'')}`;}}
   h.line[p].push({st:h.street,type,n:type==='raise'?h.raises:0,limp:A.name==='Limp',isRaise:type==='raise'&&c>0,faced:toCall>0,
     stab:type==='raise'&&c===0&&h.street>0&&h.checked.some((x,i)=>x&&i!==p),frac:type==='raise'?(raiseTo-c)/Math.max(pb+toCall,1):0});
   h.act[p]={t:txt,k:A.k,st:h.street};
@@ -655,7 +746,7 @@ function learnFromHand(h){
   saveProf();
 }
 function finish(){
-  const h=S.h;h.over=true;learnFromHand(h);snapBase();save();
+  const h=S.h;h.over=true;S.sess.hands++;learnFromHand(h);snapBase();save();
   for(let i=1;i<N();i++){
     const st=S.P[i].st,pre=h.line[i].filter(a=>a.st===0);st.hands++;
     if(pre.some(a=>a.type==='raise'||(a.type==='call'&&!(i===h.bbI&&!a.faced)))) st.vpip++;
@@ -707,18 +798,9 @@ function botAct(h){
   if(S.h!==h||h.over||h.toAct<=0||h.runningOut) return;
   const me=h.toAct,[t,v]=botDecide(h,me);doAction(me,t,v);
 }
-function botDecide(h,me){
-  const st=STYLE[S.P[me].style||'tag'],n=N(),c=curBet(),toCall=c-h.bet[me],stack=S.P[me].stack,pt=potTotal();
-  const maxTo=h.bet[me]+stack,minTo=Math.min(maxTo,c===0?BB:c+h.lastRaise);
-  const opp=live().filter(i=>i!==me),nOpp=opp.length;
-  const canRaise=stack>toCall&&opp.some(i=>S.P[i].stack>0);
-  const r=Math.random(),hole=h.holes[me],board=h.board;
-  const vsYou=opp.includes(0),R=profRates(),bscale=vsYou?Math.min(1.6,Math.max(.4,R.fold/.4)):1;
-  const to=x=>Math.max(minTo,Math.min(maxTo,r10(x)));
-  const RAISE=x=>{if(!canRaise) return toCall>0?['call']:['check'];let v=to(x);if(v>=maxTo*.6) v=maxTo;return ['raise',v];};
-  const CALL=['call'],CHECK=['check'],FOLD=toCall>0?['fold']:['check'];
-  const eqNow=nn=>multiEquity(hole,board,opp.map(q=>readOpp(h,q)),nn);
-  if(h.street===0){
+/* Preflop rules of thumb for spots the GTO charts don't cover (heads-up, limped pots, cold calls, 5-bets) */
+function botPreflop(h,me,st,o){
+  const {n,c,toCall,pt,maxTo,r,hole,opp,nOpp,RAISE,CALL,CHECK,FOLD,eqNow}=o;
     const pf=pfPct(hole),pos=posName(me),share=Math.min(.95,(RFI[n][pos]??.3)*st.loose),thr=1-share;
     const lim=h.limpers.filter(i=>!h.folded[i]).length;
     if(h.raises===1){
@@ -742,6 +824,29 @@ function botDecide(h,me){
     const m=.02+st.call+bb+(lvl>=3?.08:0)+(pf<.5?.03:0)+(nOpp>1?.02*(nOpp-1):0);
     return eq>=need+m?CALL:FOLD;
   }
+function botDecide(h,me){
+  const st=STYLE[S.P[me].style||'tag'],n=N(),c=curBet(),toCall=c-h.bet[me],stack=S.P[me].stack,pt=potTotal();
+  const maxTo=h.bet[me]+stack,minTo=Math.min(maxTo,c===0?BB:c+h.lastRaise);
+  const opp=live().filter(i=>i!==me),nOpp=opp.length;
+  const canRaise=stack>toCall&&opp.some(i=>S.P[i].stack>0);
+  const r=Math.random(),hole=h.holes[me],board=h.board;
+  const vsYou=opp.includes(0),R=profRates(),bscale=vsYou?Math.min(1.6,Math.max(.4,R.fold/.4)):1;
+  const to=x=>Math.max(minTo,Math.min(maxTo,r10(x)));
+  const RAISE=x=>{if(!canRaise) return toCall>0?['call']:['check'];let v=to(x);if(v>=maxTo*.6) v=maxTo;return ['raise',v];};
+  const CALL=['call'],CHECK=['check'],FOLD=toCall>0?['fold']:['check'];
+  const eqNow=nn=>multiEquity(hole,board,opp.map(q=>{const w=h.street===0&&q!==0?gtoRangeOf(h,q):null;return w?{w}:readOpp(h,q);}),nn);
+  if(h.street===0){
+    const g=gtoSpot(h,me),heur=botPreflop(h,me,st,{n,c,toCall,pt,maxTo,r,hole,opp,nOpp,RAISE,CALL,CHECK,FOLD,eqNow});
+    if(!g) return heur;
+    const u=Math.random()*100,pick=u<g.r?'raise':u<g.r+g.c?'call':'fold';
+    let a=pick;
+    if(st.loose>1&&a==='fold'&&heur[0]!=='fold'&&r<.75) return heur;          // loose styles play extra hands
+    if(st.loose<1&&a!=='fold'&&heur[0]==='fold'&&r<.75) a='fold';              // nits drop the thin ones
+    if(st.agg<.6&&a==='raise'&&toCall>0&&r<.5) a='call';                       // stations flat instead of raising
+    return a==='raise'?RAISE(gtoSize(h,me,g)):a==='call'?CALL:FOLD;
+  }
+  return botPostflop();
+  function botPostflop(){
   const eq=eqNow(),dr=drawInfo(hole,board);
   const strongT=[0,.70,.58,.50,.45,.42][Math.min(nOpp,5)],thinT=strongT-.13;
   if(toCall>0){
@@ -763,6 +868,7 @@ function botDecide(h,me){
     if(r<b*st.bluff*bscale) return RAISE(pt*(h.street===3?.66:.5));
   }
   return CHECK;
+  }
 }
 
 /* ---------- coach ---------- */
@@ -794,11 +900,24 @@ function advise(){
   const k=coachKey();if(advCache.k===k) return advCache.v;
   const opp=live().filter(i=>i!==0),nOpp=opp.length,pos=posName(0);
   const vsLine=toCall>0||board.length>0;
-  const eq=vsLine?multiEquity(hole,board,opp.map(q=>({L:lineLevel(h,q),eps:.02})),800):equity(hole,board,800);
+  const rng=h.street===0?opp.map(q=>gtoRangeOf(h,q)):[],chartEq=rng.length>0&&rng.some(Boolean);
+  const eq=vsLine?multiEquity(hole,board,opp.map((q,i)=>rng[i]?{w:rng[i]}:{L:lineLevel(h,q),eps:.02}),chartEq?4000:800):equity(hole,board,800);
   const need=toCall>0?toCall/(pt+toCall):0,dr=drawInfo(hole,board);
   const R=(a,lo,hi,x)=>Object.assign({a,lo:lo!=null?r10(lo):null,hi:hi!=null?r10(hi):null},x||{});
   let tip='',why='',rec;
-  if(h.street===0){
+  const g=h.street===0?gtoSpot(h,0):null;
+  if(g){
+    const best=gtoBest(g),fr={raise:g.r,call:g.c,fold:g.f},to=gtoSize(h,0,g),allin=to>=h.bet[0]+S.P[0].stack;
+    const rname=g.type==='open'?'Open':g.type==='vsOpen'?'3-bet':g.type==='vs3bet'?'4-bet':'5-bet';
+    const say={raise:allin?`${rname} All-in。`:`${rname} to ${to}。`,call:`Call ${Math.min(toCall,S.P[0].stack)}。`,fold:'Fold。'};
+    const second=['raise','call','fold'].filter(x=>x!==best).sort((x,y)=>fr[y]-fr[x])[0];
+    const mixed=fr[second]>=25;
+    tip=mixed?`${say[best].replace(/。$/,'')}（也可以 ${say[second].replace(/。$/,'')}）。`:say[best];
+    why=`GTO 图表 · ${g.label}：这手 ${gtoFreqTxt(g)}。${mixed?'这是混合策略，两种打法长期收益差不多，按频率高的来就行。':best==='fold'&&fr.fold>=95?'这手不在这个位置的范围里。':''}`;
+    if(best==='fold'&&toCall>0&&eq>=need) why+=`胜率 ${pct(eq)} 看着够付价钱（需要 ${pct(need)}），但那是一路免费看到摊牌的胜率。${pos==='BB'||pos==='SB'?'你没位置，翻牌后每条街先说话，':''}没中的时候对手一下注你就得扔，中了小牌又常被更大的踢脚压着，实际兑现的远不到这个数，所以求解器还是弃。`;
+    const lo=best==='raise'?(allin?to:Math.max(to*.85,curBet()+h.lastRaise)):null,hi=best==='raise'?(allin?to:to*1.2):null;
+    rec=R(best,lo,hi,mixed?{alt:second,marg:true,altLo:second==='raise'?to*.85:null,altHi:second==='raise'?to*1.2:null}:{});
+  }else if(h.street===0){
     const pf=pfPct(hole),share=RFI[n][pos]??.3,thr=1-share,lim=h.limpers.filter(i=>!h.folded[i]).length;
     const behind=[...Array(n).keys()].filter(i=>i!==0&&!h.folded[i]&&!h.acted[i]).length;
     const openTo=n>2&&pos==='SB'?60:50;
@@ -838,7 +957,7 @@ function advise(){
     else if(h.street===3){tip='River 没 outs 了：要么 Check 认输，要么 Bluff，别下中等注。';why='River 之后牌力不会再变，下注只为 Bluff 或拿价值。';rec=R('check',null,null,{alt:'raise',marg:true});}
     else{tip='Check，看对手怎么做。';why='没中，先别往里投钱。';rec=R('check');}
   }
-  const v={tip,why,rec,eq,need,pos,nOpp,dr,pt,toCall,vsLine,hand:handDesc(hole,board),street:h.street};
+  const v={tip,why,rec,eq,need,pos,nOpp,dr,pt,toCall,vsLine,gto:g,chartEq,hand:handDesc(hole,board),street:h.street};
   advCache={k,v};return v;
 }
 function coachAdvice(){
@@ -848,13 +967,29 @@ function coachAdvice(){
     <p class="hand">${a.hand}</p>
     ${a.dr?`<p class="draw">${a.dr.text}，约 ${a.dr.outs} 张 outs（下一张中的概率约 ${a.dr.outs*2}%）</p>`:''}
     <div class="meter"><div class="fill" style="width:${Math.round(a.eq*100)}%"></div>${needMark}</div>
-    <div class="mlbl"><span>估算胜率（Equity）${pct(a.eq)}${a.nOpp>1?` · 对 ${a.nOpp} 人`:''}</span>${a.toCall>0?`<span>Call ${a.toCall} 争 ${a.pt+a.toCall}</span>`:''}</div>
+    <div class="mlbl"><span>估算胜率（Equity）${pct(a.eq)}${a.nOpp>1?` · 对 ${a.nOpp} 人`:''}${a.chartEq?' · 按对手 GTO 范围':''}</span>${a.toCall>0?`<span>Call ${a.toCall} 争 ${a.pt+a.toCall}</span>`:''}</div>
+    ${a.gto?`<div class="gbar" aria-label="GTO 频率"><i class="gr" style="width:${a.gto.r}%"></i><i class="gc" style="width:${a.gto.c}%"></i><i class="gf" style="width:${a.gto.f}%"></i></div>
+    <div class="mlbl"><span>GTO：${gtoFreqTxt(a.gto)}</span></div>`:''}
     <p class="tip"><b>建议：</b>${a.tip}</p>
-    <p class="why">${a.why}${a.vsLine?' 胜率按每个对手这手的行动线估计他们的牌力范围：下注越多越大，范围越强。':''}</p>`;
+    <p class="why">${a.why}${a.gto?'':a.street===0?' 这个局面（Limp、有人跟注或单挑）没有现成的 GTO 图表，按经验规则估算。':a.vsLine?' 翻牌后按胜率估算，不是求解器结果：胜率按每个对手的行动线估计他们的牌力范围，下注越多范围越强。':' 翻牌后按胜率估算，不是求解器结果。'}</p>`;
 }
 /* Grade what you actually did against the best play. */
 const GRADE={good:'正确',ok:'可以',warn:'偏差',bad:'错误'};
 function evaluate(a,type,to){
+  if(a.gto){
+    const g=a.gto,f=type==='raise'?g.r:type==='call'?g.c:g.f,r=a.rec;
+    const out=(gr,label,more)=>({g:gr,label,text:[more,`GTO 图表（${g.label}）：${gtoFreqTxt(g)}。`].filter(Boolean).join(' ')});
+    const best=`最佳是：${a.tip}`;
+    if(type==='raise'&&f>=25&&r.lo&&r.a==='raise'&&r.hi>r.lo){
+      if(to<r.lo*.8) return out('warn','方向对，加得偏小',`加注尺度建议 ${r10(r.lo)}～${r10(r.hi)}。`);
+      if(to>r.hi*1.5) return out('warn','方向对，加得偏大',`加注尺度建议 ${r10(r.lo)}～${r10(r.hi)}。`);
+    }
+    if(type===r.a||f>=50) return out('good',`和 GTO 一致（这手 ${f}% 这样打）`,'');
+    if(f>=25) return out('ok',`混合策略，GTO 也有 ${f}% 这样打`,best);
+    if(type==='call'&&g.type==='open') return out('bad','别 Limp：GTO 开池只加注不跛入',best);
+    if(f>=5) return out('warn',`偏离 GTO：只有 ${f}% 这样打`,best);
+    return out('bad',type==='fold'?'弃掉了 GTO 会玩的牌':'GTO 基本不这样打',best);
+  }
   const r=a.rec,ua=type,num=a.toCall>0?`你的胜率约 ${pct(a.eq)}，跟注需要 ${pct(a.need)}。`:`你的胜率约 ${pct(a.eq)}。`;
   const out=(g,label,more)=>({g,label,text:[more,num].filter(Boolean).join(' ')});
   const sizeTxt=(lo,hi)=>lo?`（建议加到 ${lo}～${hi}）`:'';
@@ -915,8 +1050,9 @@ function reviewHTML(){
 }
 
 /* ---------- render ---------- */
+const blueHand=()=>S.hand%2===0;
 function cardHTML(c,cls=''){
-  if(c==null) return `<div class="card back ${cls}"></div>`;
+  if(c==null) return `<div class="card back ${blueHand()?'blue':''} ${cls}"></div>`;
   const s=c&3;return `<div class="card ${s===1||s===2?'red':''} ${cls}" aria-label="${lbl(c)}"><span class="cr">${RL(c>>2)}</span><span class="cs">${SUITS[s]}</span><span class="cb">${SUITS[s]}</span></div>`;
 }
 function pileHTML(amount,cap=7){
@@ -946,7 +1082,8 @@ function buildSeats(){
     const [x,y,mx,my]=L[i],cx=50,cy=44,f=i===0?0:x===50?.58:.42;
     // phone: side seats put their chips beside them toward the middle, so the chips never sit on a card or the board
     const side=mx!==50;
-    const bx=i===0?50:x+(cx-x)*f,by=i===0?68:y+(cy-y)*f,bmx=i===0?50:side?mx+(cx-mx)*.62:mx,bmy=i===0?70:side?my-2:my+(cy-my)*f;
+    // phone, top seat: chips go to the right of its cards instead of down toward the board, where they landed on the board slots
+    const bx=i===0?50:x+(cx-x)*f,by=i===0?68:y+(cy-y)*f,bmx=i===0?50:side?mx+(cx-mx)*.62:mx+19,bmy=i===0?70:side?my-2:my+4.5;
     html+=`<div class="seat ${i===0?'me':'bot'}" id="seat${i}" style="--x:${x}%;--y:${y}%;--mx:${mx}%;--my:${my}%">
       ${i===0?`<div class="hole" id="hole0"><div class="cslot"></div><div class="cslot"></div></div><div class="info" id="info0"></div>`
         :`<div class="info" id="info${i}"></div><div class="hole" id="hole${i}"><div class="cslot"></div><div class="cslot"></div></div><div class="actb" id="act${i}"></div>`}
@@ -962,6 +1099,7 @@ function infoHTML(i){
 function render(){
   $('#handno').textContent=`第 ${S.hand} 手`;
   $('#netpill').textContent=`本场 ${fmtNet()}`;
+  const pv=$('#prevhand'),pvh=prevHTML();if(pv._h!==pvh){pv.innerHTML=pvh;pv._h=pvh;}
   const cb=$('#coachbtn');cb.setAttribute('aria-pressed',S.coach);cb.textContent=`教练：${S.coach?'开':'关'}`;
   const h=S.h;
   for(let i=0;i<N();i++){
@@ -991,6 +1129,14 @@ function needsDeal(){
 }
 function afterAnim(){
   const h=S.h;
+  if(!h&&S.settled){
+    setHTML('#resultbox',`<div class="result"><div class="big">本场已结算</div><div class="sub">筹码已回到 2000</div></div>`);
+    $('#status').textContent='';
+    $('#actions').innerHTML=`<button class="btn next" id="newsess">开新一场 →</button>`;
+    $('#newsess').onclick=startNewSession;
+    setHTML('#coach',`<h2>教练提示</h2><p class="why">去忙正事吧，想玩了点「开新一场」。</p>`);
+    $('#log').innerHTML='';return;
+  }
   if(!h){
     setHTML('#resultbox',`<div class="result"><div class="big">你的筹码输光了</div><div class="sub">本场 ${fmtNet()}</div></div>`);
     $('#status').textContent='';
@@ -1016,6 +1162,10 @@ function afterAnim(){
   else if(h.decisions&&h.decisions.length) setHTML('#coach',`<h2>上一步 · 你在 ${posName(0)}</h2>${decisionCard(h.decisions[h.decisions.length-1],h.evalOpen===h.decisions.length-1,h.decisions.length-1)}<p class="why">${h.folded[0]?'你已 Fold，看看别人怎么打。':'轮到你时会给新的建议。'}</p>`);
   else setHTML('#coach',`<h2>教练提示 · 你在 ${posName(0)}</h2><p class="hand">${h.folded[0]?'你已 Fold，看看别人怎么打。':handDesc(h.holes[0],h.board)}</p><p class="why">轮到你时给建议。</p>`);
   const lg=$('#log'),ph=pathHTML();if(lg._h!==ph){lg.innerHTML=ph;lg._h=ph;lg.scrollTop=lg.scrollHeight;}
+}
+function prevHTML(){
+  const p=S.prev;if(!p) return '';
+  return `<h2 class="h2b">上一手回顾</h2><div class="log">${p.path}</div>${p.ds||'<p class="why">上一手你没有需要决策的地方。</p>'}`;
 }
 function pathHTML(){
   const h=S.h,n=N();
@@ -1059,16 +1209,17 @@ async function flip(el,card){
     {duration:200,easing:'cubic-bezier(.2,.9,.3,1.15)'});
 }
 async function dealTo(el,card,face,dur){
-  const tb=$('#table'),deck=$('#deck');
+  const tb=$('#table'),deck=$(blueHand()?'#deckB':'#deckR');
   if(el.animate&&!reduceMotion()&&deck){
     const tr=tb.getBoundingClientRect(),dr=deck.getBoundingClientRect(),sr=el.getBoundingClientRect();
-    const fly=document.createElement('div');fly.className='card back fly';
+    const fly=document.createElement('div');fly.className='card back fly'+(blueHand()?' blue':'');
     const ox=tr.left+tb.clientLeft,oy=tr.top+tb.clientTop;
-    Object.assign(fly.style,{left:(dr.left-ox)+'px',top:(dr.top-oy)+'px',width:dr.width+'px',height:dr.height+'px'});
+    const s0=dr.width/sr.width;
+    Object.assign(fly.style,{left:(dr.left-ox)+'px',top:(dr.top-oy)+'px',width:sr.width+'px',height:sr.height+'px'});
     tb.appendChild(fly);
-    const dx=sr.left-dr.left,dy=sr.top-dr.top,sc=sr.width/dr.width,lift=-Math.min(36,12+Math.abs(dx)*.05);
+    const dx=sr.left-dr.left,dy=sr.top-dr.top,sc=1,lift=-Math.min(36,12+Math.abs(dx)*.05);
     await play(fly,[
-      {offset:0,transform:'translate(0,0) rotate(-14deg) scale(1)',boxShadow:'0 2px 4px rgba(0,0,0,.35)',easing:'cubic-bezier(.15,.55,.35,1)'},
+      {offset:0,transform:`translate(0,0) rotate(-14deg) scale(${s0})`,boxShadow:'0 2px 4px rgba(0,0,0,.35)',easing:'cubic-bezier(.15,.55,.35,1)'},
       {offset:.72,transform:`translate(${dx*.95}px,${dy*.95+lift}px) rotate(4deg) scale(${sc*1.07})`,boxShadow:'0 18px 26px rgba(0,0,0,.45)',easing:'cubic-bezier(.3,0,.2,1)'},
       {offset:1,transform:`translate(${dx}px,${dy}px) rotate(0deg) scale(${sc})`,boxShadow:'0 2px 6px rgba(0,0,0,.35)'}
     ],{duration:dur||480,fill:'forwards'});
@@ -1080,6 +1231,7 @@ async function dealTo(el,card,face,dur){
 async function syncCards(){
   const h=S.h,n=N(),board=$('#board').children,holes=[...Array(n).keys()].map(i=>$('#hole'+i).children);
   const all=[...holes.flatMap(x=>[...x]),...board];
+  const dR=$('#deckR'),dB=$('#deckB');if(dR&&dB){dR.classList.toggle('idle',blueHand());dB.classList.toggle('idle',!blueHand());}
   if(!h){all.forEach(clearSlot);return;}
   all.forEach(el=>{if(el.dataset.card&&!el.dataset.card.startsWith(S.hand+':')) clearSlot(el);});
   for(let i=h.board.length;i<5;i++) clearSlot(board[i]);
@@ -1090,9 +1242,20 @@ async function syncCards(){
     if(el.dataset.card!==`${S.hand}:${card}`) jobs.push(wait(k++*110).then(()=>dealTo(el,card,face,380)));
   }
   await Promise.all(jobs);
-  for(let i=0;i<n;i++) for(let r=0;r<2;r++){const el=holes[i][r],face=i===0||h.over;if(el.dataset.face!==String(face)) await flip(el,h.holes[i][r]);}
-  for(let i=0;i<h.board.length;i++) if(board[i].dataset.card!==`${S.hand}:${h.board[i]}`) await dealTo(board[i],h.board[i],true);
+  const bj=[];let bk=0;
+  for(let i=0;i<h.board.length;i++) if(board[i].dataset.card!==`${S.hand}:${h.board[i]}`) bj.push(wait(bk++*110).then(()=>dealTo(board[i],h.board[i],true,380)));
+  await Promise.all(bj);
+  // showdown: every hand still face down turns over at the same moment
+  const todo=[];
+  for(let i=0;i<n;i++) for(let r=0;r<2;r++){const el=holes[i][r],face=i===0||h.over;if(el.dataset.face!==String(face)) todo.push([el,h.holes[i][r]]);}
+  if(todo.length>2) await wait(200);
+  await Promise.all(todo.map(([el,c])=>flip(el,c)));
 }
+let knots=[0,1];
+// curved scale: small sizes get more of the track
+const RZ_K=.45;
+function toPos(v){const a=knots[0],b=knots[knots.length-1];return b>a?Math.round(1000*Math.pow(Math.max(0,v-a)/(b-a),RZ_K)):1000;}
+function fromPos(p){const a=knots[0],b=knots[knots.length-1];return a+(b-a)*Math.pow(p/1000,1/RZ_K);}
 function renderActions(){
   const h=S.h,el=$('#actions'),st=$('#status');
   if(h.over){st.innerHTML=`你 <b>${S.P[0].stack}</b> · 本场 <b>${fmtNet()}</b>`;
@@ -1115,19 +1278,21 @@ function renderActions(){
   if(canRaise){
     const clamp=x=>Math.max(minTo,Math.min(maxTo,r10(x))),lim=h.limpers.filter(i=>!h.folded[i]).length;
     let q=[];
-    if(h.street===0&&h.raises===1) q=lim?[['3BB+'+lim,60+20*lim],['4BB+'+lim,80+20*lim]]:[['2.5BB',50],['3BB',60],['4BB',80]];
+    if(h.street===0&&h.raises===1) q=[['3BB',60],['5BB',100],['10BB',200]];
     else if(h.street===0) q=[['3x',c*3+c*h.callsSinceRaise],['4x',c*4]];
     else {const base=pt+toCall;q=[['1/3 pot',c+base/3],['1/2 pot',c+base/2],['2/3 pot',c+base*2/3],['Pot',c+base]];}
     q=q.map(([nm,v])=>[nm,clamp(v)]);q.push(['All-in',maxTo]);
     const def=q[0][1];
+    const tk=q.filter(x=>x[0]!=='All-in'&&x[1]>minTo&&x[1]<maxTo).filter((x,i,a)=>!i||x[1]>a[i-1][1]);
+    knots=[minTo,...tk.map(x=>x[1]),maxTo];
     html+=`<div class="raisebox"><div class="quick">${q.map(([nm,v])=>`<button class="q" data-v="${v}">${nm} · ${v}</button>`).join('')}</div>
-      <div class="rrow"><input type="range" id="rz" min="${minTo}" max="${maxTo}" step="10" value="${def}" aria-label="下注大小">
+      <div class="rrow"><div class="rzwrap"><input type="range" id="rz" min="0" max="1000" step="1" value="${toPos(def)}" aria-label="下注大小"></div>
       <button class="btn raise" data-a="raise" id="rbtn">${fmtAction(actionName(0,'raise',def))}</button></div></div>`;
   }
   el.innerHTML=html;
   const rz=$('#rz'),rb=$('#rbtn');
-  const setR=v=>{v=Math.max(minTo,Math.min(maxTo,+v));rz.value=v;rb.dataset.v=v;rb.textContent=fmtAction(actionName(0,'raise',v));};
-  if(rz){setR(rz.value);rz.oninput=()=>setR(rz.value);el.querySelectorAll('.q').forEach(b=>b.onclick=()=>setR(b.dataset.v));}
+  const setR=v=>{v=+v;v=v>=maxTo?maxTo:Math.max(minTo,Math.min(maxTo,r10(v)));if(rz) rz.value=toPos(v);rb.dataset.v=v;rb.textContent=fmtAction(actionName(0,'raise',v));};
+  if(rz){setR(fromPos(+rz.value));rz.oninput=()=>setR(fromPos(+rz.value));el.querySelectorAll('.q').forEach(b=>b.onclick=()=>setR(b.dataset.v));}
   el.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{el.querySelectorAll('button').forEach(x=>x.disabled=true);
     const a=b.dataset.a;doAction(0,a,a==='raise'?+rb.dataset.v:0);});
 }
@@ -1142,13 +1307,59 @@ function fastForward(){
   }
   maybeBot=saveDelay;render();
 }
+/* ---------- settle: end the session in one click ---------- */
+function settle(){
+  const h=S.h;let cut=false;
+  if(h&&!h.over){ // abandon the hand in progress: stop bot and run-out timers, give everyone their chips back
+    h.botTok=(h.botTok||0)+1;h.roTok=(h.roTok||0)+1;h.over=true;cut=true;
+    if(S.base&&S.base.stacks) S.P.forEach((p,i)=>{p.stack=S.base.stacks[i]??p.stack;});
+  }
+  const ss=S.sess,net=S.P[0].stack-S.bought,n=ss.hands,g=ss.g,tot=['good','ok','warn','bad'].reduce((a,k)=>a+(g[k]||0),0);
+  const mins=Math.max(1,Math.round((Date.now()-ss.t)/60000)),bb100=n?(net/BB/n*100):0,buys=Math.round(S.bought/BUYIN);
+  const top=Object.entries(ss.m).sort((a,b)=>b[1].n-a[1].n).slice(0,3);
+  const sign=x=>(x>=0?'+':'')+x;
+  const gl=['good','ok','warn','bad'].map(k=>`${GRADE[k]} ${g[k]||0}`).join(' · ');
+  const okRate=tot?Math.round(((g.good||0)+(g.ok||0))/tot*100):0;
+  const lines=[`德州扑克 · 本场结算（${MODES[S.mode].label}，盲注 10/20）`,
+    `打了 ${n} 手，用时约 ${mins} 分钟，买入 ${buys} 次`,
+    `净 ${sign(net)}${n?`，折合每百手 ${sign(+bb100.toFixed(1))} 个大盲`:''}`,
+    tot?`决策 ${tot} 次：${gl}（正确或可以 ${okRate}%）`:'这场没有记到决策',
+    ...(top.length?['最常犯的错：',...top.map(([k,v],i)=>`${i+1}\\ ${k} ×${v.n}（例：${v.ex}）`)]:[]),
+    ...(cut?['最后一手没打完，按那手开始前的筹码算。']:[])];
+  S._settleText=lines.join('\n');
+  // reset the table but don't deal until you come back
+  S.P=makePlayers(S.mode);S.hand=0;S.button=0;S.bought=BUYIN;S.h=null;S.sess=newSess();S.settled=true;S.prev=null;
+  snapBase();save();buildSeats();render();
+  closeSettle();
+  const dlg=document.createElement('div');dlg.id='settle';dlg.className='settle';
+  dlg.innerHTML=`<div class="sbox" role="dialog" aria-label="本场结算">
+    <h2>本场结算</h2>
+    <div class="snet ${net>=0?'up':'down'}">${sign(net)}</div>
+    <p class="ssub">${n} 手 · 约 ${mins} 分钟 · 买入 ${buys} 次${n?` · 每百手 ${sign(+bb100.toFixed(1))} bb`:''}</p>
+    ${tot?`<p class="sline">决策 ${tot} 次：${gl}<br>正确或可以 <b>${okRate}%</b></p>`:''}
+    ${top.length?`<h3>最常犯的错</h3>${top.map(([k,v])=>`<div class="smiss"><b>${k}</b> ×${v.n}<small>${v.ex}</small></div>`).join('')}`:''}
+    ${cut?'<p class="ssub">最后一手没打完，按那手开始前的筹码算。</p>':''}
+    <div class="sbtns"><button class="btn ghostbtn" id="settlecopy">复制结算</button><button class="btn next" id="settleclose">好，去忙正事</button></div>
+  </div>`;
+  document.body.appendChild(dlg);
+  $('#settleclose').onclick=closeSettle;
+  dlg.onclick=e=>{if(e.target===dlg) closeSettle();};
+  $('#settlecopy').onclick=()=>{try{navigator.clipboard.writeText(S._settleText).then(()=>{$('#settlecopy').textContent='已复制';},()=>{});}catch(e){}};
+  $('#settleclose').focus({preventScroll:true});
+}
+function closeSettle(){const d=document.getElementById('settle');if(d&&d.remove) d.remove();}
+function startNewSession(){closeSettle();S.settled=false;S.sess=newSess();newHand();}
 function bindUI(){
+  const rail=$('#rail');try{const t=localStorage.getItem('holdem-tab');if(t) rail.dataset.tab=t;}catch(e){}
+  rail.querySelectorAll('.tab').forEach(b=>{b.setAttribute('aria-selected',b.dataset.t===rail.dataset.tab);b.onclick=()=>{rail.dataset.tab=b.dataset.t;
+    rail.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',x===b));try{localStorage.setItem('holdem-tab',b.dataset.t);}catch(e){}};});
   chipDefs();
   $('#coachbtn').onclick=()=>{S.coach=!S.coach;snapBase();save();render();};
   const armBtn=(btn,label,armedLabel,go)=>{let armed=false,t=null;btn.onclick=()=>{
     if(!armed){armed=true;btn.textContent=armedLabel;btn.classList.add('danger');t=setTimeout(()=>{armed=false;btn.textContent=label;btn.classList.remove('danger');},3500);return;}
     clearTimeout(t);armed=false;btn.textContent=label;btn.classList.remove('danger');go();};};
   armBtn($('#resetbtn'),'重新开始','确定重来？筹码全回到 2000',()=>setMode(S.mode));
+  $('#settlebtn').onclick=()=>{if(!S.settled) settle();};
   document.querySelectorAll('#modeseg button').forEach(b=>{
     const m=+b.dataset.mode;
     armBtn(b,MODES[m].label,'切换并重开？',()=>{if(m!==S.mode) setMode(m);});
