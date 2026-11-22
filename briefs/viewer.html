@@ -5,12 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>今天在涨什么 · BarryYJJ AI 简报</title>
 <meta name="description" content="今天在涨什么：每日 AI 卖方研报简报归档，早间 / 午间 / 晚间 / 深夜四档，可按日期回看。">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#1B34E8">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20fill='%231B34E8'/%3E%3Crect%20x='16'%20y='16'%20width='32'%20height='32'%20fill='none'%20stroke='%23fff'%20stroke-width='4'/%3E%3Crect%20x='28'%20y='28'%20width='8'%20height='8'%20fill='%23fff'/%3E%3C/svg%3E">
 <link rel="canonical" href="https://barryai.cn/briefs/viewer.html">
-<link rel="stylesheet" href="/briefs/css/main.css?v=202608311905-selection-20261108">
-<link rel="stylesheet" href="/briefs/css/viewer-notion.css?v=202608311905">
+<link rel="stylesheet" href="/briefs/css/main.css?v=202608311905-dark-20261122">
+<link rel="stylesheet" href="/briefs/css/viewer-notion.css?v=20261122-dark">
+<script src="/theme/barry-theme.js"></script>
 </head>
 <body class="briefs-viewer-page">
 <a class="vw-skip" href="#main">跳到简报内容</a>
@@ -20,6 +21,7 @@
   <div class="vw-wrap vw-topbar-in">
     <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
     <p class="vw-brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</p>
+    <span class="theme-slot" data-theme-slot></span>
   </div>
 </header>
 
@@ -87,5 +89,34 @@
 <script src="/briefs/js/cb-v2.js"></script>
 <script src="/briefs/js/barry-access.js?v=202609101200"></script>
 <script src="/briefs/js/viewer.js?v=202609101200"></script>
+<script>
+/* 黑白切换同步到简报 iframe：同源，直接给简报文档写 data-theme 并注入黑色样式（历史简报不用逐篇改） */
+(function () {
+  var f = document.getElementById("brief-frame"), css = null, pending = false;
+  if (!f) return;
+  function inject() {
+    try {
+      var d = f.contentDocument;
+      if (!d || !d.documentElement) return;
+      d.documentElement.setAttribute("data-theme", document.documentElement.getAttribute("data-theme") || "light");
+      if (css && !d.getElementById("brief-dark-css")) {
+        var s = d.createElement("style");
+        s.id = "brief-dark-css";
+        s.textContent = css;
+        (d.head || d.documentElement).appendChild(s);
+      }
+    } catch (e) {}
+  }
+  function apply() {
+    if (css !== null || pending) { inject(); return; }
+    pending = true;
+    fetch("/briefs/css/brief-dark.css?v=20261122").then(function (r) { return r.ok ? r.text() : ""; })
+      .catch(function () { return ""; }).then(function (t) { css = t; pending = false; inject(); });
+  }
+  f.addEventListener("load", apply);
+  window.addEventListener("barry-theme", inject);
+  apply();
+})();
+</script>
 </body>
 </html>
