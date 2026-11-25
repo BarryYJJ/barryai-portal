@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="scroll-behavior: smooth;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026-11-26 深夜 AI 简报</title>
+<style>
+::selection { background: #d97757; color: #fff; }
+  /* Montserrat（拉丁变量字重 100–900，自托管，仅 latin 子集）；中文自然回落 PingFang SC */
+  @font-face {
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../assets/fonts/montserrat-latin-variable.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+                   U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+                   U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Montserrat", "PingFang SC", -apple-system, BlinkMacSystemFont,
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 40px 28px;
+    color: #1f2933; line-height: 1.7; background: #f7f8fa;
+    position: relative;
+  }
+  .corner-meta {
+    position: absolute;
+    top: 28px; right: 28px;
+    text-align: right;
+    font-size: 10.5px;
+    color: #9aa5b1;
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+  }
+  .corner-meta .brand {
+    font-weight: 600;
+    color: #5e6b78;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 640px) {
+    .corner-meta { top: 14px; right: 12px; font-size: 9px; }
+    .corner-meta .brand { font-size: 9.5px; }
+  }
+  header {
+    border-bottom: 3px solid #1f6feb;
+    padding-bottom: 20px; margin-bottom: 28px;
+  }
+  header .kicker {
+    color: #1f6feb;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5e6b78;
+    letter-spacing: 1px;
+  }
+  .meta { color: #5e6b78; font-size: 14px; }
+  .meta strong { color: #1f6feb; font-weight: 600; }
+
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border-left: 4px solid #1f6feb;
+    border-radius: 10px;
+    padding: 20px 26px;
+    margin-bottom: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tldr h2 {
+    margin: 0 0 12px; font-size: 13px;
+    color: #1e40af; text-transform: uppercase;
+    letter-spacing: 0.6px; font-weight: 700;
+  }
+  .tldr ul {
+    margin: 0; padding-left: 20px;
+    font-size: 15px; color: #1f2933;
+    line-height: 1.75;
+  }
+  .tldr li { margin-bottom: 6px; }
+  .tldr li::marker { color: #1f6feb; }
+  .tldr-hint {
+    font-size: 11px; color: #5e6b78;
+    font-weight: 400; text-transform: none;
+    letter-spacing: 0; margin-left: 4px;
+  }
+  .tldr-jump {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px dashed rgba(31, 111, 235, 0.35);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .tldr-jump:hover {
+    color: #1f6feb;
+    border-bottom-color: #1f6feb;
+    border-bottom-style: solid;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #ffffff; border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    margin: 0 0 14px; font-size: 13px; color: #5e6b78;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 14px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .label { color: #5e6b78; }
+  .stat-row .value {
+    font-weight: 600; color: #1a1a1a; font-variant-numeric: tabular-nums;
+  }
+  .stat-row .value.hi { color: #1f6feb; }
+
+  .hot-kw { margin-top: 2px; }
+  .hot-kw-chart {
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .hot-kw-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .hot-kw-row .kw-name {
+    color: #5e6b78; font-weight: 500;
+    text-align: right;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hot-kw-row .bar-track {
+    background: #fef3e2; border-radius: 4px;
+    height: 14px; overflow: hidden; position: relative;
+  }
+  .hot-kw-row .bar-fill {
+    background: linear-gradient(90deg, #fb923c, #ea580c);
+    height: 100%; border-radius: 4px;
+    min-width: 2px;
+  }
+  .hot-kw-row .kw-count {
+    color: #c2410c; font-weight: 700;
+    text-align: left; font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .topics-section h2 {
+    margin: 8px 0 16px; font-size: 18px; color: #1a1a1a;
+    border-left: 3px solid #1f6feb; padding-left: 12px;
+  }
+  .topic {
+    background: white; padding: 22px 24px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 14px;
+    border-left: 4px solid #1f6feb;
+    scroll-margin-top: 20px;
+  }
+  .topic:target {
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.25);
+    animation: t-flash 1.6s ease-out;
+  }
+  @keyframes t-flash {
+    0%   { background: #ebf3ff; }
+    100% { background: white; }
+  }
+  .topic-meta {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; color: #5e6b78; margin-bottom: 10px;
+  }
+  .topic-meta .author { font-weight: 600; color: #1a1a1a; }
+  .topic-meta .source {
+    color: #1f6feb; font-size: 12px;
+    background: #ebf3ff; padding: 2px 8px; border-radius: 4px;
+  }
+  .topic-title {
+    font-size: 17px; font-weight: 600; color: #1a1a1a;
+    margin: 6px 0 12px; line-height: 1.45;
+  }
+  .topic-content {
+    white-space: pre-wrap; word-wrap: break-word;
+    font-size: 15px; color: #2d3748;
+  }
+  .topic-content mark, .topic-title mark {
+    background: linear-gradient(transparent 55%, #fde68a 55%);
+    color: inherit; padding: 0 1px;
+    font-weight: 600;
+  }
+  .topic-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+    display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .kw-tags { flex: 1; min-width: 0; }
+  .kw-tag {
+    display: inline-block; background: #fff4e5; color: #c2410c;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  .origin-link {
+    font-size: 12px; color: #1f6feb; text-decoration: none;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .origin-link:hover { text-decoration: underline; }
+  .empty {
+    background: white; padding: 70px 40px; text-align: center;
+    color: #5e6b78; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .empty .icon { font-size: 42px; margin-bottom: 14px; opacity: 0.35; }
+  footer {
+    margin-top: 50px; padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #9aa5b1; font-size: 12px; text-align: center; line-height: 1.6;
+  }
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    body { padding: 24px 16px; }
+  }
+  @media print {
+    body { background: white; max-width: none; padding: 20px; font-size: 12px; }
+    .topic, .summary-grid .card, .empty { box-shadow: none; border: 1px solid #e5e7eb; }
+    .topic { page-break-inside: avoid; }
+  }
+  /* Barry RS 首页标识：48px 方块，蓝底 + 1px 白色内描边，点击回主站首页 */
+  .barry-rs-home { display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:48px; height:48px; flex:none; background:#1B34E8; color:#fff; text-decoration:none;
+    box-shadow:inset 0 0 0 1px #fff; line-height:1; border-radius:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .barry-rs-home:hover { box-shadow:inset 0 0 0 2px #fff; }
+  .barry-rs-home .brs-top { font-size:8px; font-weight:600; letter-spacing:0.12em; text-indent:0.12em; }
+  .barry-rs-home .brs-bot { font-size:18px; font-weight:800; letter-spacing:0.04em; margin-top:3px; }
+  header .barry-rs-home { margin-bottom:16px; }
+</style>
+</head>
+<body>
+<div class="corner-meta">
+  <div class="brand">from BarryYJJ &nbsp;|&nbsp; 🌋 Token燃烧</div>
+  <div>v4.3 &nbsp;·&nbsp; 2026-11-26 01:30:38</div>
+  <div>仅供研究参考 &nbsp;·&nbsp; 不构成投资建议</div>
+</div>
+<header>
+  <a class="barry-rs-home" href="https://barryai.cn/" aria-label="返回 Barry RS 首页" title="返回 Barry RS 首页"><span class="brs-top" aria-hidden="true">BARRY</span><span class="brs-bot" aria-hidden="true">RS</span></a>
+  <div class="kicker">今天在涨什么</div>
+  <h1>2026-11-26 深夜 AI 简报</h1>
+  <div class="meta">
+    覆盖时段 <strong>2026-11-25 20:30</strong> &nbsp;→&nbsp; <strong>2026-11-26 01:30</strong>
+  </div>
+</header>
+
+<div class="summary-grid">
+  <div class="card">
+    <h3>本期数据</h3>
+    <div class="stat-row"><span class="label">扫描帖数</span><span class="value">24</span></div>
+    <div class="stat-row"><span class="label">AI 命中</span><span class="value hi">11 条</span></div>
+    <div class="stat-row"><span class="label">命中率</span><span class="value">45.8%</span></div>
+    <div class="stat-row"><span class="label">时间窗</span><span class="value">5 小时</span></div>
+
+  </div>
+  <div class="card">
+    <h3>今日热词 Top 8</h3>
+    <div class="hot-kw"><div class="hot-kw-chart"><div class="hot-kw-row"><span class="kw-name">AI</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="kw-count">5</span></div><div class="hot-kw-row"><span class="kw-name">人工智能</span><div class="bar-track"><div class="bar-fill" style="width:60%"></div></div><span class="kw-count">3</span></div><div class="hot-kw-row"><span class="kw-name">苹果</span><div class="bar-track"><div class="bar-fill" style="width:40%"></div></div><span class="kw-count">2</span></div><div class="hot-kw-row"><span class="kw-name">OpenAI</span><div class="bar-track"><div class="bar-fill" style="width:20%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">生成式</span><div class="bar-track"><div class="bar-fill" style="width:20%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">Anthropic</span><div class="bar-track"><div class="bar-fill" style="width:20%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">多模态</span><div class="bar-track"><div class="bar-fill" style="width:20%"></div></div><span class="kw-count">1</span></div><div class="hot-kw-row"><span class="kw-name">海力士</span><div class="bar-track"><div class="bar-fill" style="width:20%"></div></div><span class="kw-count">1</span></div></div></div>
+  </div>
+</div>
+
+<div class="tldr">
+  <h2>今日要点 <span class="tldr-hint">· 点击跳到原帖</span></h2>
+  <ul><li><a class="tldr-jump" href="#t-22258421144812541">AI 扩产卡点蔓延到基板：需求激增撞上制造设备短缺，算力竞赛也得等设备交货</a></li><li><a class="tldr-jump" href="#t-45548251114228158">苹果 Siri 进阶 AI 代理最快2027年底亮相，对手先抢用户习惯，苹果再靠隐私与系统权限追赶</a></li><li><a class="tldr-jump" href="#t-45548251121211528">Snowflake 增长回归稳健档：头部合作方预计2026年相关业务增长18%-20%，AI 热度还没换来增速起飞</a></li><li><a class="tldr-jump" href="#t-55521458841154884">小米开始跑赢存储涨价：Q3手机毛利率回升至9.2%，财通认为2027年盈利有望转机，AI、芯片与机器人仍待兑现</a></li><li><a class="tldr-jump" href="#t-14425148811122542">小鹏 IRON 用76个自由度从“会走”迈向“会做”，人形机器人竞争开始从秀动作转向拼场景落地</a></li><li><a class="tldr-jump" href="#t-45548251122815418">SK 海力士预计2031年量产3D DRAM，技术路线先画远景，眼前供给还指望不上这张牌</a></li></ul>
+</div>
+
+<div class="topics-section">
+  <h2>命中内容（按时间倒序）</h2>
+  <div class="topic" id="t-45548251114228158">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-25 22:57 · 👁 430</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">古尔曼：<mark>苹果</mark>裁减Siri旧架构...</div>
+  <div class="topic-content">古尔曼：<mark>苹果</mark>裁减Siri旧架构人手，进阶<mark>AI</mark>代理最快2027年底始面世
+
+11月25日｜知名科技记者古尔曼(Mark Gurman)近日指出，<mark>苹果</mark>近期针对语音助理Siri团队展开裁员，受影响员工主要负责Siri的旧有底层架构，而负责研发新一代<mark>人工智能</mark>(<mark>AI</mark>)系统的团队则未受波及。短期更新安排方面，报道指Siri预计于今年12月推出在<mark>苹果</mark>自家应用程序内执行多步骤操作的功能，至于支持第三方应用程序的功能，则预定于2027年推出。长远规划方面，<mark>苹果</mark>正研发更先进的<mark>AI</mark>代理，但古尔曼预计最快要到2027年底才会面世。他指出，率先推出<mark>AI</mark>代理的竞争对手，可透过学习及记录用户偏好，加上连结相关账户及服务，从而建立较高的用户转换成本。古尔曼同时提到，<mark>苹果</mark>在私隐保护方面的口碑，以及让Siri深度整合自家作业系统与应用程序的底层权限，仍将成为其竞争优势。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">人工智能</span><span class="kw-tag">苹果</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548251114228158" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548251121211528">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-25 22:14 · 👁 563</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">📄 Snowflake｜与头部...</div>
+  <div class="topic-content">📄 Snowflake｜与头部 Snowflake 合作伙伴交流要点：需求趋势与竞争格局
+
+📞 我们近期和一家头部 Snowflake 合作方的数据与 <mark>AI</mark> 业务首席 <mark>AI</mark> 架构师开展电话交流，探讨了该合作方 Snowflake 业务线的需求趋势、<mark>AI</mark> 工作负载带来的收入贡献、成本优化方向，以及 Snowflake 对比 Databricks 和各大超大规模云厂商的竞争格局。本次交流核心要点如下：
+💡 业务增长情况：过去 18 个月，Snowflake 相关业务增速稳定在约 20%。从梯队定位来看，Snowflake 处于全球系统集成商的第二梯队合作伙伴行列，同梯队还有 Databricks、ServiceNow 以及 Salesforce（第一梯队为各大超大规模云厂商以及 <mark>OpenAI</mark> 这类前沿头部模型厂商）；该合作方来自 Snowflake 相关业务的收入规模达数亿美元，平台培训从业者人数约 5 万人。合作方预计 2026 年 Snowflake 业务增速维持在 18%-20%，并回顾这条增长曲线：几年前增速约 30%-32%，之后回落至 10%-12%。增速下滑主要有两点原因：一是这段时期业务没有新增客户；二是市场当时仅把 Snowflake 视作数据仓库，其早期<mark>生成式</mark> <mark>AI</mark> 方案只是外购组件拼凑而成。过去 18 个月增速重新企稳至 20%，合作方认为得益于 Cortex 和 CoCo 产品，让 Snowflake 转型为集成度更高的 <mark>AI</mark> 平台。不过该受访人也提到，Snowflake 仍然处于追赶阶段：全球系统集成商旗下云厂商相关业务增速约 35%，Databricks 增速处于 20% 中段区间。
+
+#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">OpenAI</span><span class="kw-tag">生成式</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548251121211528" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548251122155148">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-25 21:30 · 👁 782</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">据 Axios 报道，一些顶级...</div>
+  <div class="topic-content">据 Axios 报道，一些顶级<mark>人工智能</mark>高管正日益反对 <mark>Anthropic</mark> 内部的一种普遍观点：即人类应该将一些决策权让渡给超级智能<mark>人工智能</mark>系统。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">Anthropic</span><span class="kw-tag">人工智能</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548251122155148" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425148811122542">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-25 21:16 · 👁 760</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">🟪【长城机械 陈雨君】从小鹏人...</div>
+  <div class="topic-content">🟪【长城机械 陈雨君】从小鹏人形机器人看中国整机厂商进展
+
+#整机厂商加速突破
+小鹏IRON采用高度拟人化设计，身高170cm、体重62kg，全身拥有76个自由度，单手具备21个自由度，并配备<mark>多模态</mark>感知系统。从历次发布会表现来看，IRON一年左右便实现从“会走”到“会说、会做”的能力跃迁，体现出国内整机厂商在运动控制、环境感知及任务执行等方面的快速进步，产品逐步迈向工程化、产业化。
+
+#应用场景各有侧重
+当前整机厂商正围绕目标场景形成差异化产品路线。以小鹏IRON为例，其注重人机交互体验及安全性，针对人机接触、碰撞及自身跌倒保护进行设计；优必选瞄准的工业场景则更加关注负载、精度与作业稳定性；智元瞄准的家庭场景更重视交互能力与环境适应性。不同场景需求决定了整机厂商在本体设计及技术路线上的差异。
+
+#模型与本体协同打造差异化竞争力
+整机厂商的差异化不仅体现在本体设计和应用场景，更体现在模型能力及技术路线的选择上。模型决定机器人能够理解和执行什么任务，本体决定其完成任务的物理能力，而数据则决定模型能否持续迭代进化。因此，行业未必最终收敛于单一通用模型路线，整机厂商的核心竞争力不只是接入领先模型，更在于能否打通模型、数据、本体与应用场景之间的迭代闭环，形成持续进化的软硬件一体化能力。#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">多模态</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425148811122542" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548251122815418">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-25 21:04 · 👁 802</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">SK <mark>海力士</mark>表示，预计将于 2...</div>
+  <div class="topic-content">SK <mark>海力士</mark>表示，预计将于 2031 年开始量产 3D DRAM。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">海力士</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548251122815418" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258421144812541">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-25 21:04 · 👁 800</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">随着<mark>人工智能</mark> (<mark>AI</mark>) 的普及...</div>
+  <div class="topic-content">随着<mark>人工智能</mark> (<mark>AI</mark>) 的普及，对基板的需求与半导体的需求一样激增，导致该行业面临制造设备短缺的问题。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">人工智能</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258421144812541" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-22258421144818411">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-25 21:04 · 👁 800</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">据报道，<mark>三星</mark>已向<mark>苹果</mark>公司前 m...</div>
+  <div class="topic-content">据报道，<mark>三星</mark>已向<mark>苹果</mark>公司前 microLED 合作伙伴 ams OSRAM 投资 2.1 亿欧元，成为该公司的最大股东。</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">苹果</span><span class="kw-tag">三星</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/22258421144818411" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-14425148815512152">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-25 20:38 · 👁 870</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">[礼物]亿嘉和：“杨”时代开启...</div>
+  <div class="topic-content">[礼物]亿嘉和：“杨”时代开启，打响具身智能出海新征程。
+
+#11月25日选举杨友桂先生为公司董事长。杨友桂先生曾任<mark>华为</mark>数字能源全球营销服体系总裁兼<mark>数据中心</mark>能源军团长、后担任<mark>华为</mark>云全球营销服体系总裁。＃杨总不是一个人奋斗，已有多名“<mark>华为</mark>系”重磅人物履职亿嘉和。
+
+#电力、能源赛道机器人出海第一股。杨友桂杨友桂拥有多年海外区域管理、数字能源与云业务全球营销服务操盘经验，可称之为营销行业第一人。＃杨总多年扎根中东地区，拥有全球化市场开拓、大客户体系搭建能力，有望助力亿嘉和加速海外市场拓展，强化能源智能化业务布局，为公司全球化战略落地、业务边界拓宽注入新的思路，助推公司在工业智能机器人赛道持续竞争。
+
+[太阳]＃请领导们务必重视50亿的亿嘉和。
+
+#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">数据中心</span><span class="kw-tag">华为</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/14425148815512152" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521458841154884">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-25 20:37 · 👁 861</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">财通海外：小米集团观点更新20...</div>
+  <div class="topic-content">财通海外：小米集团观点更新20261125
+
+结论：小米集团当前市值约6300亿人民币，26Q3财报后，我们认为经营最差的时候大概率已经过去：存储压力见顶，27年有望迎来转机；汽车27年迎来新品大年和出海元年；<mark>AI</mark>、芯片、机器人的投入尚未体现在市值里。26/27年经调整净利润预计227亿/281亿，当前对应27年22倍，推荐。
+
+1.怎么看Q3？收入利润符合预期，方向更重要。收入1072亿（-5%），经调整净利润48.8亿，略好于彭博一致预期的47.5亿。关键是毛利率出现拐点：手机8.5%→9.2%，IoT 20.1%→21.7%，集团19.8%→20.2%，提价开始跑赢存储涨价。我们判断Q3大概率是单季利润低点！
+
+2.存储：压力预计见顶、不再恶化，这是我们最想强调的一点（公司判断高位维持到明年上半年），三个证据：
+①价格。公司口径DRAM已经持平或微涨、NAND还在涨；按我们跟踪的存储供需表，DRAM单价环比涨幅从Q1的接近翻倍收窄到Q4的+11%，27年逐季走平；均价今年同比涨了3倍，明年预计涨幅收窄到三成左右。
+②存货给予信心！Q3存货1083亿，比年初多273亿，增量全在原材料（240亿→589亿），备货从年初不到1个月的用量加到约2个月。按公司业绩会的说法，同行的战略库存Q3基本耗尽，小米反而在加，明年上半年的成本和供给已经大部分锁住。代价是Q3经营现金流-230亿，但公司现金储备1969亿，拿现金换确定性。
+③传导。今年“控量保价”，出货-27%、ASP+25%，我们判断手机毛利率Q2的8.5%就是底；明年ASP还会再提，公司原话是“确定性的事情”。
+我们27年手机毛利率预计9.3%，没放存储降价的弹性（真降价的话，小米要先消化备货，受益会晚一两个季度，但方向同样是增量）。存储涨价最陡的一段已经过去。
+
+3.汽车：27年是新品大年+出海元年。今年新老交替加大盘偏弱，全年预计完成45万辆目标（10月单月超5万、四款车同时过万），澎程首月锁单7万+。明年节奏更密：包括YU7改款、预计20万以内的N70平价版、SU7 L、YU7 L、年底新车，再加欧洲首站德国（已签8家头部经销商）。我们给27年65万辆（+44%），汽车收入1443亿（+41%），测算汽车业务利润从36亿到61亿。
+
+4.<mark>AI</mark>、芯片、机器人的投入，还没有体现在市值里。按税后口径看27年的利润结构：主业（手机+IoT+互联网）约231亿+汽车约50亿=281亿，正好等于集团经调净利润；创新业务（<mark>AI</mark>、机器人等）一年税后亏约135亿，基本被财务收益、政府补助、股权激励加回等非经营项对冲。即当前22倍买到的只是主业和汽车，<mark>AI</mark>、芯片、机器人等硬核科技是“送的”；把创新亏损加回去只有约15倍。而投入正在出东西：MiMo V2.6发布、新版本很快迭代，<mark>AI</mark>占研发从去年25%升到30%以上，自研旗舰SoC已装进小米18 Pro，机器人灵巧手亮相。港股现在只认EPS、不给<mark>AI</mark>估值，那这部分就是免费期权。
+
+5.主业也在变好：IoT同比降幅从Q1的-24%收窄到Q3的-1%，Q4低基数下转正；互联网MAU 7.72亿、国内1.99亿都创新高，一年220亿左右的利润很稳；主业控费持续，研发全年花不到400亿。27年我们给收入+13%、利润+24%。
+
+6.后面看什么？存储合约价走平到回落、明年新车订单、欧洲首批交付、MiMo新版本。小米和存储链今年是跷跷板，存储见顶对小米是业绩和估值的双击；公司今年已回购超131亿港币，位置和节奏都到了可以积极一点的时候。
+
+#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521458841154884" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-55521458841154254">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-25 20:36 · 👁 860</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title">【中信证券互联网&amp;社服】BOS...</div>
+  <div class="topic-content">【中信证券互联网&amp;社服】BOSS直聘（BZ.O，2076.HK）2026Q3业绩速览
+
+ 业绩情况：收入基本符合预期，Non-GAAP净利润超预期。2026Q3，公司实现营业收入24.16亿元，yoy+11.7%（彭博一致预期24.21亿元，miss-0.2%）；现金收入23.14亿元，yoy+12.1%，qoq-3.0%（彭博一致预期23.08亿元，beat+0.3%）；Non-GAAP净利润10.65亿元，yoy+12.3%（彭博一致预期9.89亿元，beat+7.7%），对应净利率44.1%（彭博一致预期40.9%，beat+3.2pps）。本季GAAP净亏损2.49亿元，上年同期净利润7.75亿元。主因是被投公司股权公允价值下降，本季确认税前投资损失14.44亿元，扣除相关递延所得税收益3.61亿元后，税后损失10.83亿元，已在Non-GAAP口径中剔除。
+
+ 经营情况：本季GAAP经营利润8.45亿元，yoy+23.0%，经营利润率35.0%、同比+3.2pps；Non-GAAP经营利润10.76亿元，yoy+19.1%，对应利润率44.5%、同比+2.8pps。费用端，广告营销投入增加带动销售费用同比+48.6%至5.85亿元；上年同期确认无形资产减值，管理费用同比-34.2%至2.41亿元；研发费用同比+4.1%至4.25亿元，主要受云服务费增加影响。
+
+ 蓝领、中小企业及低线城市用户带动MAU增长，现金ARPU环比提升。 平台MAU达7,300万，yoy+14.4%（26Q2为+10.4%；彭博一致预期7,110万，beat+2.7%）；付费企业客户数（LTM）为720万，环比持平，yoy+5.9%（彭博一致预期740万，miss-2.7%）；现金ARPU（LTM）为1,279元，yoy+6.8%（26Q2为+2.5%；彭博一致预期1,243元，beat+2.9%）。管理层表示，<mark>AI</mark>在算法和产品中的应用已改善人岗匹配准确度及求职者与招聘者的沟通效率。
+
+ 指引：公司预计26Q4收入为21.90–22.30亿元，yoy+5.3% ~ +7.3%；中值22.10亿元，对应yoy+6.3%，与彭博一致预期22.09亿元基本持平。
+
+ 股东回报：新增5亿美元回购授权。董事会批准新一期股份回购计划，自2026年11月25日起12个月内可回购最多5亿美元公司股份（含ADS）。2026年初至今，公司通过回购及分红向股东回报合计超过5.3亿美元，已超过2025年全年调整后净利润。
+
+📅 时间：2026年11月25日（今晚）20:00
+💻 直播链接：&lt;e type=&quot;web&quot; href=&quot;https%3A%2F%2Fedge.media-server.com%2Fmmc%2Fp%2Fv5vph7b2%2F&quot; title=&quot;https%3A%2F%2Fedge.media-server.com%2Fmmc%2Fp%2Fv5vph7b2%2F&quot; /&gt;
+
+欢迎联系中信证券互联网团队 廖原/徐航/丁晓月/李康威/张苡铭/韩启琛
+
+#文字观点</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/55521458841154254" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div><div class="topic" id="t-45548251128854458">
+  <div class="topic-meta">
+    <span class="author">@基业长青 · 11-25 20:34 · 👁 807</span>
+    <span class="source">研究资料整理</span>
+  </div>
+  <div class="topic-title"><mark>英伟达</mark>的强大实力正在扭曲美国的...</div>
+  <div class="topic-content"><mark>英伟达</mark>的强大实力正在扭曲美国的 <mark>AI</mark> 战略</div>
+  <div class="topic-foot">
+    <div class="kw-tags"><span class="kw-tag">英伟达</span><span class="kw-tag">AI</span></div>
+    <a class="origin-link" href="https://wx.zsxq.com/dweb2/index/topic_detail/45548251128854458" target="_blank" rel="noopener">查看原帖 ↗</a>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
